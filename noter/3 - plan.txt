@@ -1,0 +1,17 @@
+
+
+refactor intro traditional parser:
+    tokenize
+    scan (i.e. linear parsing)
+        track bracket_depth
+        handle subselects by recursively calling parse_select 
+        build up the sql as you go along
+
+        skip over commands for which there are no special sapi features
+
+    sapi commands:
+        select, insert, update, delete -- evt. do insert, update, delete in python
+        create, alter, drop Tree (if exists) -- evt. do this in python
+        grant, revoke on Tree -- evt. do this in python
+
+

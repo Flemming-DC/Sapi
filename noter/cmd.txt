@@ -1,0 +1,10 @@
+
+git add . && git commit -m "m" && git push
+sapi_env\Scripts\activate
+
+
+--------
+
+python -m venv env
+pip list
+

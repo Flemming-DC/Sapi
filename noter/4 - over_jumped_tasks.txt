@@ -1,0 +1,8 @@
+
+1) Handle ambiguity in column names. via prefixes.
+2) Let auto-joins be a part of a greater from clause, rather than the entire from clause
+3) The Type of Token
+
+
+nb: so far it seems to be a single tree parser.
+

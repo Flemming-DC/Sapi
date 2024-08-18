@@ -1,0 +1,45 @@
+
+issues:
+    if 'from' does not occur in query, then the from_clause location is not found
+        set that location to after select_clause, but before any of the other clauses
+
+done: 
+    make_path given tables
+    find select statements (including those in sub-select, cte, insert, create table)
+
+missing in engine:
+    find variables and from their tables in statments
+        filter explicitly given tabs
+        filter selects that already have an explicit from clause
+    join trees together
+
+    tool to define tree-table contents (database, schemas, tables)
+    given tree-table contents find all relevant metadata
+    columns in pydantic model
+    inhirit from cursor (backwards compatible)
+    insert tree / dict (including subtrees)
+    delete tree / dict (including subtrees) based of where clause
+    resolve circles / embed one tree into another
+
+    sqlib nicities:
+        pydantic cursor
+        static reader.read function
+        writer/executor/transaction (with stamements, single_execute, execute, log)
+        NiceList ()
+        NiceRow / pydanticRow (supports both row.var and row['var'] and row[index])
+        config
+        search_for_references
+
+missing in editor:
+    syntax highlighting
+    autocompletion
+    background connection and cursor
+    execute query
+    execute file
+    save to sqlapi
+    save to python
+
+
+
+
+
