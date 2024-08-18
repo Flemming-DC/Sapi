@@ -1,5 +1,5 @@
-from hardcodedTrees import table_by_var, table_trees
-from tokenizer import Token, TokenTree, TokenType
+from engine.hardcodedTrees import table_by_var, table_trees
+from engine.tokenizer import Token, TokenTree, TokenType
 
 
 def get_tables(tokens: list[Token|TokenTree]) -> list[str]:

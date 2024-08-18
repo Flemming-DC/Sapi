@@ -1,12 +1,8 @@
 from __future__ import annotations
-from typing import Iterator
-from pprint import pprint
-import sqlglot
-from sqlglot.expressions import Expression, Select, Insert, Update, Delete, Column, Table, Create, Drop, With # many kinds of alter 
-from sqlglot.optimizer.scope import build_scope, Scope
-from sqlglot import Dialect
-from sqlglot.tokens import Token, Tokenizer, TokenType
 from dataclasses import dataclass, field
+from sqlglot import Dialect
+from sqlglot.tokens import Token, TokenType
+# from sqlglot.expressions import Expression, Select, Insert, Update, Delete, Column, Table, Create, Drop, With # many kinds of alter 
 
 
 _dialect = Dialect.get_or_raise("postgres") # dialect gribes fra et config object

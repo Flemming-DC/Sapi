@@ -1,5 +1,5 @@
 import sys, os
-paths = ['.', './engine', './engine_old']
+paths = ['.', './engine']
 for path in paths:
     sys.path.append(os.path.abspath(path))
 

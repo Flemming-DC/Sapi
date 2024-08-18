@@ -1,5 +1,6 @@
-import tokenizer, select_parser
-from tokenizer import TokenTree, ParserError, TokenType
+from . import tokenizer
+from .select import select_parser
+from .tokenizer import TokenTree, ParserError, TokenType
 
 def parse(sapi_code: str) -> list[TokenTree]: # output str or tokenTrees or Tokens? 
     token_trees = tokenizer.tokenize(sapi_code)
@@ -13,9 +14,8 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
     "Parse sapi TokenTree to sql TokenTree."
     # parse sub_trees
     for i, tok in enumerate(token_tree.tokens):
-        if not isinstance(tok, TokenTree):
-            continue
-        token_tree.tokens[i] = _parse_token_tree(tok)
+        if isinstance(tok, TokenTree):
+            token_tree.tokens[i] = _parse_token_tree(tok)
 
     # parse leaves
     # stmt_type = token_tree.first_leaf().token_type # first leaf or first statement-starter?

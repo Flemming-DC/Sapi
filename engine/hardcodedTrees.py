@@ -1,5 +1,4 @@
 from anytree import Node
-from pydantic import BaseModel
 
 # dublicate names must be resolved. either here or later
 table_by_var = {

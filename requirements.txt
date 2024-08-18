@@ -1,0 +1,6 @@
+# Python==3.10.6
+# pip==24.2
+anytree==2.12.1
+psycopg==3.2.1
+pydantic==2.8.2
+sqlglot==25.10.0

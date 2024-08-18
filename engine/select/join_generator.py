@@ -1,6 +1,4 @@
-from anytree import Node
-from path_finder import PathInfo
-# from select_finder import Select
+from .path_finder import PathInfo
 
 
 def make_from_clause(pathInfo: PathInfo) -> list[str]: # returns tokes or str ?

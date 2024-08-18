@@ -1,5 +1,6 @@
-import hardcodedTrees, table_finder, path_finder, join_generator
-from tokenizer import TokenTree
+from . import table_finder, path_finder, join_generator
+from engine import hardcodedTrees
+from engine.tokenizer import TokenTree
 
 def parse_select(token_tree: TokenTree) -> TokenTree:
     print(f'sapi_token_tree: {token_tree}')
