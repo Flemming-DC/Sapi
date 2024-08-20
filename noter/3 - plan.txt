@@ -1,17 +1,16 @@
 
 
-refactor intro traditional parser:
-    tokenize
-    scan (i.e. linear parsing)
-        track bracket_depth
-        handle subselects by recursively calling parse_select 
-        build up the sql as you go along
+table_finder: 
+    find tables and trees in from clause in addition to required tables
+        -> list[tree, previous, index] 
+    try sort unprefixed columns (and thus also tables) by tree (else report a user-error)
+    evt. insert the table prefix
+        -> list[tree, previous, index, tables, evt. columns] 
+loop over trees:
+    run path_finder starting at previous (or have tables preordered to begin at previous)
+        -> list[tree, previous, index, tables, evt. columns, path]
+run join_generator:
+    go directly to index (no loop) and auto generate using the associated data.
 
-        skip over commands for which there are no special sapi features
-
-    sapi commands:
-        select, insert, update, delete -- evt. do insert, update, delete in python
-        create, alter, drop Tree (if exists) -- evt. do this in python
-        grant, revoke on Tree -- evt. do this in python
 
 

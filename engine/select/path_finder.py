@@ -49,7 +49,7 @@ if __name__ == '__main__':
     
     path = join_path(nodes)
     print('path:')
-    for from_, to_ in path:
+    for from_, to_ in path.path:
         print(f"    {from_.name}, {to_.name}")
 
     assert expected_answer == path, "unexpected answer"

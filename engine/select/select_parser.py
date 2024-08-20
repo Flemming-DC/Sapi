@@ -6,7 +6,7 @@ def parse_select(token_tree: TokenTree) -> TokenTree:
     print(f'sapi_token_tree: {token_tree}')
 
     table_names = table_finder.get_tables(token_tree.tokens)
-    print(f'tables {table_names}')
+    # print(f'tables: {table_names}')
     
     table_nodes = [hardcodedTrees.node_by_table[tab] for tab in table_names
                    if tab in hardcodedTrees.node_by_table.keys()]
@@ -15,15 +15,11 @@ def parse_select(token_tree: TokenTree) -> TokenTree:
     for from_, to_ in pathInfo.path:
         print(f"    {from_.name}, {to_.name}")
     
-    from_clause = join_generator.make_from_clause(pathInfo)
-    print(f'from_clause: {from_clause}')
+    token_tree.tokens = join_generator.make_from_clause(token_tree.tokens, pathInfo)
+    print(f'sql_token_tree: {token_tree}')
 
-    # overwrite from clause
-    # print(f'sql_token_tree: {token_tree}')
 
-    print()
-
-    print('--- done parsing select ---')
+    print('--- done parsing select ---\n')
     return token_tree
 
 
