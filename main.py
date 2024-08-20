@@ -12,10 +12,10 @@ if __name__ == '__main__':
         cte.a00_2,
         a10_2,
         (SELECT sum(a20_2) FROM A)
-    --FROM A
-    --join cte ON A.a_1 = cte.a0_1
-    FROM cte 
-    join A ON A.a_1 = cte.a0_1
+    FROM A
+    join cte ON A.a_1 = cte.a0_1
+    --FROM cte 
+    --join A ON A.a_1 = cte.a0_1
     """
     # tab_in_cte: a00, a0
     # outer_tab: a, a1, a10
