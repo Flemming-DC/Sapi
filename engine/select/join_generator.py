@@ -1,28 +1,26 @@
 from .path_finder import PathInfo
 from engine.tokenizer import TokenType, Token, ParserError
-from engine.hardcodedTrees import table_trees, table_by_var
+from engine.hardcodedTrees import table_tree_names, table_by_var
+from .join_data import JoinData
 
 
 
 def make_from_clause(tokens: list[Token], pathInfo: PathInfo) -> list[Token]: 
     i = 0
     count = len(tokens)
-    previous: Token = None # previous table / view / tree in from clause
     while i < count:
         if tokens[i].token_type in [TokenType.FROM, TokenType.JOIN]:
             i += 1
             if tokens[i].token_type not in [TokenType.VAR, TokenType.IDENTIFIER]:
                 raise ParserError("expected identifier or variable after from / join.")
-            obj_too_join = tokens[i]
-            if tokens[i].text in table_trees:
-                tokens, i = _make_join_clause(tokens, i, pathInfo, previous)
+            if tokens[i].text in table_tree_names:
+                tokens, i = _make_join_clause(tokens, i, pathInfo)
                 count = len(tokens)
-            previous = obj_too_join
         i += 1
     return tokens
 
 
-def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo, previous: Token) -> tuple[list[Token], int]:
+def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[list[Token], int]:
     tables = pathInfo.nodes
     path = pathInfo.path
     table_tree = tokens[i] # this is the table_tree for wich we are autogenerating the from clause
@@ -50,10 +48,13 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo, previous:
         if on_clause_done:
             break
         else:
-            if tok.text in table_trees:
+            if tok.text in table_tree_names:
                 next_ = tokens[i + 2] # we skip past the dot
                 # we assume that tree in an on clause must be on the form tree.var. 
                 # It cannot be a free floating tree, nor tree.table.var, nor tree.meta.colname
+
+                # table_by_var[next_.text] assumes that there is only one table that contains var. 
+                # Use tokens[i - 2] or some joinData info instead. 
                 tokens[i] = _make_table_token(table_by_var[next_.text], table_tree)  # tree.var is replaced with tab.var
             on_clause.append(tokens[i]) # tok is now invalid, so we use tokens[i]
             i += 1

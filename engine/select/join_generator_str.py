@@ -1,6 +1,6 @@
 from .path_finder import PathInfo
 from engine.tokenizer import TokenTree, TokenType, Token, flat_tokenize, TOKENTYPE_AUTO_JOIN
-from engine.hardcodedTrees import table_trees
+from engine.hardcodedTrees import table_tree_names
 
 # skip joins that don't mention any trees 
 # if joining tree, generate join-clauses for tree.
@@ -12,7 +12,7 @@ def make_from_clause(token_tree: TokenTree, pathInfo: PathInfo) -> list[str]: # 
     for i, token in enumerate(token_tree.tokens):
 
         if token.token_type in [TokenType.VAR, TokenType.IDENTIFIER]:
-            if token.text in table_trees:
+            if token.text in table_tree_names:
                 _make_join_clause(token, pathInfo)
 
         # # loop until hitting from clause

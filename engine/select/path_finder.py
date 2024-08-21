@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from anytree import RenderTree, walker, Node
 from engine.hardcodedTrees import A
+from .join_data import JoinData
 
 pathType = list[tuple[Node, Node]]
 @dataclass

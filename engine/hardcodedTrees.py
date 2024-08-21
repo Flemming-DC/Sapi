@@ -88,4 +88,21 @@ node_by_table = {
 }
 # node_by_table = {k.lower(): v for k, v in node_by_table}
 
-table_trees = ['A', 'B']
+table_tree_names = ['A', 'B']
+
+# this persumes a table->tree map. Thus you can't have multiple trees containing the same table
+tree_by_table = {
+    'a':   'A',
+    'a0':  'A',
+    'a1':  'A',
+    'a2':  'A',
+    'a00': 'A',
+    'a01': 'A',
+    'a10': 'A',
+    'a20': 'A',
+    'a21': 'A',
+    'b':   'B',
+    'b0':  'B',
+    'b1':  'B',
+}
+
