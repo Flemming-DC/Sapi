@@ -12,5 +12,40 @@ loop over trees:
 run join_generator:
     go directly to index (no loop) and auto generate using the associated data.
 
+----------------
+
+loop over tree-joins:
+    run path_finder: 
+        start at previous or at an on_clause table (which?)
+    run join_generator:
+        go directly to index (no loop) and auto generate using the associated data.
+
+
+------ later ------
+cleanup
+write Scanner class
+tests
+hardcoded colored text.
+dst presentation
+
+
+demand:
+    each tree-on-clause may reference at most one new table. 
+
+    this makes it possible to put the referenced table (if any) up front
+    and also put the on clause up front, without having the on clause refer 
+    to tables further down. 
+
+    prior_tables = [from joinData get join_obj if not tree else get tables referenced by join_obj]
+    # what if the reference to prior tree is from the on clause on the present tree? is that detected?
+    new_tables = tables_in_on_clause except prior_tables
+    demand(len(new_tables) <= 1)
+
+usage of demand:
+    set first_table = new_tables[0] if new_tables else None
+    find_path based of first_table
+    ? leave join_generator unchanged (initially)
+    clenup join_generator and go directly to index (no loop) and auto generate using the associated data.
+
 
 

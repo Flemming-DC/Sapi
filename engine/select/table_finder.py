@@ -1,17 +1,17 @@
+from textwrap import dedent
 from engine.hardcodedTrees import table_by_var, table_tree_names, tree_by_table
 from engine.tokenizer import Token, TokenTree, TokenType, ParserError
 from .join_data import JoinData
-
-_dummy = []
+from engine.has_passed import has_passed
 
 def get_tables(tokens: list[Token|TokenTree]) -> list[JoinData]:
-    _dummy.append(1)
     joinData: list[JoinData] = []
     tables: list[str] = [] # evt. a list of Nodes
     count = len(tokens)
     i = -1 # start at -1 to undo the effect of the initial increment.
     while i < count - 1:
         i += 1
+        print(i, count, tokens[i].text)
         if isinstance(tokens[i], TokenTree):
             continue
         i = _make_join_data(tokens, i, joinData, count)
@@ -82,6 +82,7 @@ def _make_join_data(tokens: list[Token], i: int, joinData: list[JoinData], count
         if on_clause_done: # done at end of on clause, not after passing it.
             break
         i += 1
+        
         if tokens[i].text in table_tree_names:
             _set_prefix_to_table(tokens, i + 2, tokens[i]) # i + 2 is index of variable
         if tokens[i].text in tree_by_table.keys(): # is table
@@ -116,6 +117,7 @@ def _insert_table_prefix(tokens: list[Token], i: int, count: int) -> tuple[int, 
     i += 2
     return i, count + 2
 
+
 def _plug_tables_into_joinData(tables: list[str], joinData: list[JoinData]):
     for tab_name in tables:
         if tab_name not in tree_by_table.keys():
@@ -125,5 +127,17 @@ def _plug_tables_into_joinData(tables: list[str], joinData: list[JoinData]):
             if j.join_obj.text == tree_name:
                 j.tables.append(tab_name)
                 break
+    prior_tables = []
     for j in joinData:
+        new_tables = [t for t in j.on_clause_tables if t not in prior_tables]
+        if len(new_tables) >= 2:
+            raise SyntaxError(dedent(f"""
+                Each tree-on-clause may reference at most one new table. 
+                The on-clause of {j.join_obj} references {new_tables}.
+                """))
+        j.first_table = new_tables[0] if new_tables else None
+
         j.tables += [t for t in j.on_clause_tables if t not in j.tables]
+        prior_tables += j.tables
+        
+

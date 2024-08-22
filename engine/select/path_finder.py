@@ -11,14 +11,20 @@ class PathInfo: # eva. make this a basemodel. If so then replace Node with Pydan
     nodes: list[Node] = field(default_factory=list) # = []
     eldest: Node|None = None
 
+_ = []
 
-def join_path(table_names: list[str], previous: str|None) -> PathInfo:
-    # if previous is None, then this code is already fine
-    table_nodes = [node_by_table[t] for t in table_names if t in node_by_table.keys()]
+def join_path(table_names: list[str], first_table: str|None) -> PathInfo:
+    _.append(0)
+
+
+    table_nodes = [node_by_table[first_table]] if first_table else []
+    table_nodes += [node_by_table[t] for t in table_names if t in node_by_table.keys() and t != first_table]
+
     pathInfo = PathInfo()
     for tab_node in table_nodes:
         _increment_join_path(pathInfo, tab_node)
     assert not pathInfo.nodes or len(pathInfo.nodes) == len(pathInfo.path) + 1, "Expected final table count to be 0 or 1 + path length"
+
     return pathInfo
 
 def _increment_join_path(pathInfo: PathInfo, next_node: Node) -> None:
