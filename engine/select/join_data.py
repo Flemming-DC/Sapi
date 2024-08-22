@@ -3,13 +3,15 @@ from engine.tokenizer import Token
 
 
 @dataclass
-class JoinData:
+class JoinData: # data for a single join. evt. restrict this to a tree-join
     join_obj: Token
     is_tree: bool # evt. replace with enum { table | view | cte | tree }
+    on_clause_end_index: int
+    on_clause_tables: list[str] = field(default_factory=list)
     # index if treeToken is changed into a str, then we store the index seperately
-    tables: list[str] = field(default_factory=list) # = []
-    # columns: list[Token] = field(default_factory=list) # = []
-    path: list[tuple[str, str]] = field(default_factory=list) # = []
+    tables: list[str] = field(default_factory=list) # referenced tables. aka. thoses tables that must be autojoined.
+    # columns: list[Token] = field(default_factory=list)
+    path: list[tuple[str, str]] = field(default_factory=list)
 
 
 

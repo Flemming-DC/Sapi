@@ -48,6 +48,7 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[
         if on_clause_done:
             break
         else:
+            # not possible, since tree prefixes have been resolved.
             if tok.text in table_tree_names:
                 next_ = tokens[i + 2] # we skip past the dot
                 # we assume that tree in an on clause must be on the form tree.var. 

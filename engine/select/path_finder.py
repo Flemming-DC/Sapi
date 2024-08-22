@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from anytree import RenderTree, walker, Node
 from engine.hardcodedTrees import A
 from .join_data import JoinData
+from engine.hardcodedTrees import node_by_table
 
 pathType = list[tuple[Node, Node]]
 @dataclass
@@ -11,10 +12,12 @@ class PathInfo: # eva. make this a basemodel. If so then replace Node with Pydan
     eldest: Node|None = None
 
 
-def join_path(table_nodes: list[Node]) -> PathInfo:
+def join_path(table_names: list[str], previous: str|None) -> PathInfo:
+    # if previous is None, then this code is already fine
+    table_nodes = [node_by_table[t] for t in table_names if t in node_by_table.keys()]
     pathInfo = PathInfo()
-    for node in table_nodes:
-        _increment_join_path(pathInfo, node)
+    for tab_node in table_nodes:
+        _increment_join_path(pathInfo, tab_node)
     assert not pathInfo.nodes or len(pathInfo.nodes) == len(pathInfo.path) + 1, "Expected final table count to be 0 or 1 + path length"
     return pathInfo
 
@@ -37,8 +40,11 @@ def _increment_join_path(pathInfo: PathInfo, next_node: Node) -> None:
             pathInfo.path.append((previous, n))
         previous = n
 
+
+
+
 if __name__ == '__main__':
-    nodes = [A.n00, A.n0, A.n1, A.n20]
+    nodes = [A.n00.name, A.n0.name, A.n1.name, A.n20.name]
     expected_answer = [
         (A.n00, A.n0),
         (A.n0, A.n),
@@ -48,10 +54,10 @@ if __name__ == '__main__':
         ]
     print(RenderTree(A.n))
     
-    path = join_path(nodes)
+    pathInfo = join_path(nodes, None)
     print('path:')
-    for from_, to_ in path.path:
+    for from_, to_ in pathInfo.path:
         print(f"    {from_.name}, {to_.name}")
 
-    assert expected_answer == path, "unexpected answer"
+    assert expected_answer == pathInfo, "unexpected answer"
 
