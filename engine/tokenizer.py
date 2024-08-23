@@ -13,9 +13,13 @@ TOKENTYPE_AUTO_JOIN = TokenType.AUTO_JOIN
 
 _dialect = Dialect.get_or_raise("postgres") # dialect gribes fra et config object
 # dette skiller tokenizing og parsing ad
-class SyntaxError(Exception): ...
+# class SyntaxError(Exception): ... # there is already a builtin with this name
 class ParserError(Exception): ...
 
+class AutoToken(Token):...
+
+_common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
+    TokenType.OUTER, TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
 
 @dataclass
 class TokenTree:
@@ -25,7 +29,7 @@ class TokenTree:
     # make TokenTree compatible with Token
     token_type: TokenType = _TOKENTYPE_TOKEN_TREE
     @property 
-    def text(self): return "[SubTree]" # str(self)
+    def text(self): return "[TokenTree]" # str(self)
     @property 
     def line(self): return self.tokens[0].line if self.tokens else None
     @property 
@@ -38,30 +42,38 @@ class TokenTree:
     def comments(self): return None
 
 
+
     def __repr__(self) -> str: 
-        clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, 
-                    TokenType.RIGHT, TokenType.OUTER, TokenType.WHERE, 
-                    TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
         s = '['
         for tok in self.tokens:
             if isinstance(tok, TokenTree):
-                # s += indent(repr(tok), '    ').lstrip()
-                s += tok.text + ' '
-            elif tok.token_type in clauses:
-                s += '\n' + tok.text + ' '
-            elif tok.text == '.':
-                s = s.rstrip(' ')
-                s += tok.text
-            elif tok.text in ['(', '[', '{']:
-                s += tok.text
-            elif tok.text in [',', ')', ']', '}']:
-                s = s.rstrip(' ')
-                s += tok.text + ' '
+                s += indent(repr(tok), '    ').lstrip()
+                # s += tok.text + ' '
             else:
-                s += tok.text + ' '
-        s = s.rstrip(' ')
-        s += ']'
-        return s
+                s = TokenTree.add_token_str(s, tok)
+        return s.rstrip(' ') + ']'
+
+    @staticmethod
+    def add_token_str(so_far: str, tok: Token) -> str:
+        if tok.token_type in _common_select_clauses:
+            return so_far + '\n' + tok.text + ' '
+        elif tok.text == '.':
+            return so_far.rstrip(' ') + tok.text
+        elif tok.text in ['(', '[', '{']:
+            return so_far + tok.text
+        elif tok.text in [',', ')', ']', '}']:
+            return so_far.rstrip(' ') + tok.text + ' '
+        else:
+            return so_far + tok.text + ' '
+        
+    def flatten(self) -> list[Token]:
+        all_tokens: list[Token] = []
+        for tok in self.tokens:
+            if isinstance(tok, TokenTree):
+                all_tokens += tok.flatten()
+            else:
+                all_tokens.append(tok)
+        return all_tokens
 
     # def first_leaf(self):
     #     for token in self.tokens:
@@ -156,53 +168,4 @@ def _raise_syntax_error(tokens: list[Token], i: int, msg: str) -> str:
 
 def flat_tokenize(code: str) -> list[Token]: # probably going to become dead code
     return _dialect.tokenize(code)
-
-
-if __name__ == '__main__':
-    q = """
-        with cte as (SELECT a2.* from g)
-        SELECT 1, a1.*, a2_2
-        from g
-        /*
-        comment
-        comment
-        */
-        join cte using (k)
-        where a2_2 != 0 -- comment
-        ;
-        /*
-        comment
-        comment
-        */
-        SELECT 1
-        """
-    # trees = tokenize(q)
-
-    q = "SELECT $few$This isn't a date$few$"
-    # trees = tokenize(q)
-
-    q = """
-    WITH cte AS (
-      SELECT i, sh FROM tab_in_cte
-    ) -- comment
-    -- comment
-    /* comments
-    comments */
-    /* comments
-    comments */
-    -- comment
-    SELECT 
-        sh,
-        o,
-        (SELECT su FROM sub)
-    FROM cte 
-    join outer_tab using (k)
-    ;
-
-    select 1"""
-    trees = tokenize(q)
-
-    for tr in trees:
-        print("--- tree ---")
-        print(tr)
 

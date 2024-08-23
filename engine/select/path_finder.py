@@ -48,22 +48,3 @@ def _increment_join_path(pathInfo: PathInfo, next_node: Node) -> None:
 
 
 
-
-if __name__ == '__main__':
-    nodes = [A.n00.name, A.n0.name, A.n1.name, A.n20.name]
-    expected_answer = [
-        (A.n00, A.n0),
-        (A.n0, A.n),
-        (A.n, A.n1),
-        (A.n, A.n2),
-        (A.n2, A.n20),
-        ]
-    print(RenderTree(A.n))
-    
-    pathInfo = join_path(nodes, None)
-    print('path:')
-    for from_, to_ in pathInfo.path:
-        print(f"    {from_.name}, {to_.name}")
-
-    assert expected_answer == pathInfo, "unexpected answer"
-

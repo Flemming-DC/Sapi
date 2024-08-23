@@ -1,5 +1,5 @@
 from .path_finder import PathInfo
-from engine.tokenizer import TokenTree, TokenType, Token, flat_tokenize, TOKENTYPE_AUTO_JOIN
+from engine.tokenizer import TokenTree, TokenType, Token, flat_tokenize, TOKENTYPE_AUTO_JOIN, AutoToken
 from engine.hardcodedTrees import table_tree_names
 
 # skip joins that don't mention any trees 
@@ -70,7 +70,7 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo):
     
     # perhaps tree_on_clause should be moved into joins?
     auto_join_str = table_at_tree_location + tree_on_clause + joins
-    tokens[i] = Token(
+    tokens[i] = AutoToken(
         token_type = TOKENTYPE_AUTO_JOIN,
         text       = auto_join_str, 
         line       = table_tree.line,
@@ -85,7 +85,7 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo):
 def _make_join(table_tree: Token, table_name: str):
     def _token(type: TokenType, text: str = None) -> Token:
         text = text if text else type.name
-        return Token(type, text, table_tree.line, table_tree.col, table_tree.start, table_tree.end)
+        return AutoToken(type, text, table_tree.line, table_tree.col, table_tree.start, table_tree.end)
     return [
         _token(TokenType.JOIN), 
         _token(TokenType.VAR, table_name), 
@@ -98,7 +98,7 @@ def _make_join(table_tree: Token, table_name: str):
 
 
 def _make_table_token(table_name: str, table_tree: Token) -> Token:
-    return Token(
+    return AutoToken(
         token_type = TokenType.VAR, # TokenType.VAR or TokenType.IDENTIFIER
         text       = table_name, 
         line       = table_tree.line,

@@ -1,6 +1,6 @@
 from textwrap import dedent
 from engine.hardcodedTrees import table_by_var, table_tree_names, tree_by_table
-from engine.tokenizer import Token, TokenTree, TokenType, ParserError
+from engine.tokenizer import Token, TokenTree, TokenType, ParserError, AutoToken
 from .join_data import JoinData
 from engine.has_passed import has_passed
 
@@ -11,7 +11,6 @@ def get_tables(tokens: list[Token|TokenTree]) -> list[JoinData]:
     i = -1 # start at -1 to undo the effect of the initial increment.
     while i < count - 1:
         i += 1
-        print(i, count, tokens[i].text)
         if isinstance(tokens[i], TokenTree):
             continue
         i = _make_join_data(tokens, i, joinData, count)
@@ -95,7 +94,7 @@ def _make_join_data(tokens: list[Token], i: int, joinData: list[JoinData], count
 def _set_prefix_to_table(tokens: list[Token], i: int, prefixed_tree: Token):
     if tokens[i - 2] != prefixed_tree:
         raise ParserError(f"expected table_tree token as in tree.var, but found {tokens[i - 2]}")
-    tokens[i - 2] = Token(
+    tokens[i - 2] = AutoToken(
         token_type = TokenType.VAR, # TokenType.VAR or TokenType.IDENTIFIER
         text       = table_by_var[tokens[i].text], 
         line       = prefixed_tree.line,
@@ -109,9 +108,9 @@ def _insert_table_prefix(tokens: list[Token], i: int, count: int) -> tuple[int, 
         raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
     token = tokens[i]
     # TokenType.VAR or TokenType.IDENTIFIER
-    table = Token(TokenType.VAR, table_by_var[token.text],
+    table = AutoToken(TokenType.VAR, table_by_var[token.text],
                   token.line, token.col, token.start, token.end)
-    dot = Token(TokenType.DOT, '.',
+    dot = AutoToken(TokenType.DOT, '.',
                   token.line, token.col, token.start, token.end)
     tokens[i:i] = [table, dot]
     i += 2

@@ -1,5 +1,5 @@
 from engine import parser
-
+from engine.tokenizer import TokenTree
 
 
 
@@ -38,12 +38,28 @@ if __name__ == '__main__':
     # evt. bug: graps a0_2 from a0 instead of cte
     # should we auto_join the missing tables or all the tables?
     # suggested answer: all, unless prefix says otherwise
-    trees = parser.parse(q)
-
+    trees = parser.parse(q, list[TokenTree])
     for tr in trees:
-        print("--- tree ---")
+        print("--- sql-token-tree ---")
         print(tr)
 
+    sql = parser.parse(q)
+    print("--- sql-str ---")
+    print(sql)
+
+    expected = """[WITH cte AS ([
+    SELECT a0.a0_1, a0.a0_2, a00.a00_2 
+    FROM a0 
+    JOIN a00 USING (a0_id)]) 
+SELECT cte.a00_2, a10.a10_2, ([
+    SELECT sum (a20.a20_2) 
+    FROM a20]) 
+FROM cte 
+join a ON a.a_1 = cte.a0_1 
+JOIN a1 USING (a_id) 
+JOIN a10 USING (a1_id)]""".strip('\n')
+
+    print('OK = ', sql.strip('\n') == expected.strip('\n'))
 
 
 

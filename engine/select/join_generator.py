@@ -1,5 +1,5 @@
 from .path_finder import PathInfo
-from engine.tokenizer import TokenType, Token, ParserError
+from engine.tokenizer import TokenType, Token, ParserError, AutoToken
 from engine.hardcodedTrees import table_tree_names, table_by_var
 from .join_data import JoinData
 
@@ -72,11 +72,6 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[
         # tokens = flat_tokenize(f'join {next_tab.name} using ({referenced_table.name}_id)\n')
         join_tokens = _make_join(next_tab.name, referenced_table.name, table_tree)
 
-        if first_table.text == 'a10':
-            # print(' '.join([t.text for t in tokens[18:]]))
-            ...
-
-        # print(f"inserting {[t.text for t in join_tokens]} at {tokens[i].text if i in range(len(tokens)) else 'end'}")
         tokens[i:i] += join_tokens
         i += len(join_tokens)
         # joins += f'join {next_tab.name} using ({referenced_table.name}_id)\n'
@@ -88,7 +83,7 @@ def _make_join(next_tab: str, referenced_table: str, table_tree: Token):
     'join {next_tab} using ({referenced_table}_id)\n'
     def _token(type: TokenType, text: str = None) -> Token:
         text = text if text else type.name
-        return Token(type, text, table_tree.line, table_tree.col, table_tree.start, table_tree.end)
+        return AutoToken(type, text, table_tree.line, table_tree.col, table_tree.start, table_tree.end)
     return [
         _token(TokenType.JOIN), 
         _token(TokenType.VAR, next_tab), 
@@ -100,7 +95,7 @@ def _make_join(next_tab: str, referenced_table: str, table_tree: Token):
 
 
 def _make_table_token(table_name: str, table_tree: Token) -> Token:
-    return Token(
+    return AutoToken(
         token_type = TokenType.VAR, # TokenType.VAR or TokenType.IDENTIFIER
         text       = table_name, 
         line       = table_tree.line,

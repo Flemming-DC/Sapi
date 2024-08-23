@@ -18,13 +18,13 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal"
         },
-        // {
-        //     "name": "test_auto_join",
-        //     "type": "debugpy",
-        //     "request": "launch",
-        //     "program": "${workspaceFolder}/test/engine/test_auto_join.py",
-        //     "console": "integratedTerminal"
-        // }
+        {
+            "name": "Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/engine/test_select.py",
+            "console": "integratedTerminal"
+        },
 
     ]
 }

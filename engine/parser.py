@@ -1,14 +1,22 @@
-from . import tokenizer
+from typing import TypeVar, Type
+from . import tokenizer, stringifier
 from .select import select_parser
 from .tokenizer import TokenTree, ParserError, TokenType
 
-def parse(sapi_code: str) -> list[TokenTree]: # output str or tokenTrees or Tokens? 
+T = TypeVar('T')
+def parse(sapi_code: str, return_type: Type[T] = str) -> T:
     token_trees = tokenizer.tokenize(sapi_code)
     
     for i, root_tree in enumerate(token_trees):
         token_trees[i] = _parse_token_tree(root_tree)
 
-    return token_trees
+    if return_type == list[TokenTree]:
+        return token_trees
+    elif return_type == str:
+        return '\n;\n'.join(repr(t) for t in token_trees) # stringifier.to_sql_str(token_trees, sapi_code)
+    else:
+        # evt. allow out = abstrakt syntax tree
+        raise TypeError("Unrecognized out_type")
 
 def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
     "Parse sapi TokenTree to sql TokenTree."
@@ -34,58 +42,5 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
             break
 
     return token_tree
-
-
-
-
-# if __name__ == '__main__':
-#     q = """
-#     WITH cte AS (
-#         SELECT a0_1, a0_2, a00_2 FROM A
-#     )
-#     SELECT 
-#         cte.a00_2,
-#         a10_2,
-#         (SELECT sum(a20_2) FROM A)
-#     FROM A 
-#     join cte ON A.a_1 = cte.a0_1
-
-#     """
-#     # -- FROM cte 
-#     # -- join A ON A.a_1 = cte.a0_1
-#     # tab_in_cte: a00, a0
-#     # outer_tab: a, a1, a10
-#     # sub: a20
-#     res = """
-#     WITH cte AS (
-#         SELECT a0_1, a0_2, a00_2 
-#         FROM a00
-#         JOIN a0 ON a0.a0_1 = a00.a0_1
-#     )
-#     SELECT 
-#         cte.a00_2,
-#         a10_2,
-#         (SELECT sum(a20_2) FROM a20)
-#     FROM cte 
-#     JOIN a   ON a.a_1 = cte.a0_1
-#     JOIN a1  ON a1.a_1 = a.a_1
-#     JOIN a10 ON a10.a1_1 = a1.a1_1
-#     """
-#     # --- bug ---
-#     # FROM cte 
-#     # join a10 ON A.a_1 = 
-#     # JOIN a1 USING (a1_id) 
-#     # JOIN a USING (a_id) cte.a0_1
-#     # 
-
-
-#     # evt. bug: graps a0_2 from a0 instead of cte
-#     # should we auto_join the missing tables or all the tables?
-#     # suggested answer: all, unless prefix says otherwise
-#     trees = parse(q)
-
-#     # for tr in trees:
-#     #     print("--- tree ---")
-#     #     print(tr)
 
 
