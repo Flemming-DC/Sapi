@@ -11,10 +11,8 @@ class PathInfo: # eva. make this a basemodel. If so then replace Node with Pydan
     nodes: list[Node] = field(default_factory=list) # = []
     eldest: Node|None = None
 
-_ = []
 
 def join_path(table_names: list[str], first_table: str|None) -> PathInfo:
-    _.append(0)
 
 
     table_nodes = [node_by_table[first_table]] if first_table else []

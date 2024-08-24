@@ -1,5 +1,5 @@
-from engine.tokenizer import flat_tokenize, Token
-
+from engine.tokenizer import flat_tokenize
+from engine.token_tree import Token
 
 def has_passed(tokens: list[Token], i: int, code_snippet: str) -> bool:
     prior_tokens_str = ' '.join([t.text for t in tokens[:i]])

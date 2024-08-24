@@ -1,10 +1,11 @@
 from textwrap import dedent
 from engine.hardcodedTrees import table_by_var, table_tree_names, tree_by_table
-from engine.tokenizer import Token, TokenTree, TokenType, ParserError, AutoToken
+from engine.token_tree import Token, TokenTree, TokenType, ParserError, AutoToken
 from .join_data import JoinData
 from engine.has_passed import has_passed
+from engine.dyn_loop import DynLoop
 
-def get_tables(tokens: list[Token|TokenTree]) -> list[JoinData]:
+def get_tables(tokens: list[Token|TokenTree], dyn_loop: DynLoop) -> list[JoinData]:
     joinData: list[JoinData] = []
     tables: list[str] = [] # evt. a list of Nodes
     count = len(tokens)

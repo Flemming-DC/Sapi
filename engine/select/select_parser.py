@@ -1,11 +1,11 @@
 from . import table_finder, path_finder, join_generator
-from engine.tokenizer import TokenTree
+from engine.token_tree import TokenTree
 
 
 def parse_select(token_tree: TokenTree) -> TokenTree:
     # print(f'sapi_token_tree: {token_tree}')
-
-    joinData = table_finder.get_tables(token_tree.tokens)
+    
+    joinData = table_finder.get_tables(token_tree.tokens, token_tree.dyn_loop)
     # print(f'tables: {table_names}')
     
     for joinDatum in joinData:

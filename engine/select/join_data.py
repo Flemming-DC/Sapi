@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from engine.tokenizer import Token
+from engine.token_tree import Token
 
 
 @dataclass

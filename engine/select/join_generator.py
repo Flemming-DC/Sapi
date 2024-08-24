@@ -1,5 +1,5 @@
 from .path_finder import PathInfo
-from engine.tokenizer import TokenType, Token, ParserError, AutoToken
+from engine.token_tree import TokenType, Token, ParserError, AutoToken
 from engine.hardcodedTrees import table_tree_names, table_by_var
 from .join_data import JoinData
 
