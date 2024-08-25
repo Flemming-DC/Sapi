@@ -1,52 +1,26 @@
 from .path_finder import PathInfo
 from engine.token_tree import TokenType, Token, ParserError, AutoToken
-from engine.hardcodedTrees import table_tree_names, table_by_var
 from .join_data import JoinData
 from engine.dyn_loop import DynLoop
 
 
 def make_from_clause(tokens: list[Token], pathInfo: PathInfo, loop: DynLoop, tree_join: JoinData) -> list[Token]: 
     print(tree_join)
-    # cleanup join_generator and go directly to index (no loop) and auto generate using the associated data.
+
     join_obj_index = [i for i, tok in enumerate(tokens) if tok == tree_join.join_obj]
     if len(join_obj_index) != 1:
-        Exception("bib")
+        ParserError("Expected presicely one join_obj_index")
     join_obj_index = join_obj_index[0]
-    tokens, i = _make_join_clause(tokens, join_obj_index, pathInfo)
 
-    # i = 0
-    # count = len(tokens)
-    # while i < count:
-    #     if tokens[i].token_type in [TokenType.FROM, TokenType.JOIN]:
-    #         i += 1
-    #         if tokens[i].token_type not in [TokenType.VAR, TokenType.IDENTIFIER]:
-    #             raise ParserError("expected identifier or variable after from / join.")
-    #         if tokens[i].text in table_tree_names:
-    #             print(tree_join.join_obj.text, join_obj_index, i)
-    #             tokens, i = _make_join_clause(tokens, i, pathInfo)
-    #             count = len(tokens)
-    #     i += 1
-    return tokens
+    tokens = _make_join_clause(tokens, join_obj_index, pathInfo, tree_join)
 
-def make_from_clause_old(tokens: list[Token], pathInfo: PathInfo) -> list[Token]: 
-    i = 0
-    count = len(tokens)
-    while i < count:
-        if tokens[i].token_type in [TokenType.FROM, TokenType.JOIN]:
-            i += 1
-            if tokens[i].token_type not in [TokenType.VAR, TokenType.IDENTIFIER]:
-                raise ParserError("expected identifier or variable after from / join.")
-            if tokens[i].text in table_tree_names:
-                tokens, i = _make_join_clause(tokens, i, pathInfo)
-                count = len(tokens)
-        i += 1
     return tokens
 
 
-def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[list[Token], int]:
+def _make_join_clause(tokens: list[Token], join_obj_index: int, pathInfo: PathInfo, tree_join: JoinData) -> list[Token]:
     tables = pathInfo.nodes
     path = pathInfo.path
-    table_tree = tokens[i] # this is the table_tree for wich we are autogenerating the from clause
+    table_tree = tokens[join_obj_index] # this is the table_tree for which we are autogenerating the from clause
     # convert back to str instead of using node?
     assert not tables or len(tables) == len(path) + 1, "Expected table count to be 0 or 1 + path length"
     
@@ -55,34 +29,10 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[
 
     # can the first table in path be assumed to fit the on clause of the tree as a whole?
     first_table = _make_table_token(tables[0].name, table_tree)
-    tokens[i] = first_table
-    i += 1
+    tokens[join_obj_index] = first_table
 
     # pass through ON clause i.e. until hitting join or end of from
-    # on_clause_start_index = i
-    on_clause: list[Token] = []
-    for tok in tokens[i:]:
-        on_clause_done = tok.token_type in [ # join or clause-after-from
-            TokenType.JOIN, TokenType.INNER, TokenType.LEFT, TokenType.RIGHT, TokenType.OUTER, 
-            TokenType.FULL, TokenType.SEMI, TokenType.ANTI, TokenType.LATERAL, TokenType.CROSS, 
-            TokenType.CROSS, TokenType.NATURAL,
-            TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.WINDOW, TokenType.UNION, 
-            TokenType.ORDER_BY, TokenType.LIMIT, TokenType.OFFSET, TokenType.FETCH, TokenType.FOR]
-        if on_clause_done:
-            break
-        else:
-            # not possible, since tree prefixes have been resolved.
-            if tok.text in table_tree_names:
-                next_ = tokens[i + 2] # we skip past the dot
-                # we assume that tree in an on clause must be on the form tree.var. 
-                # It cannot be a free floating tree, nor tree.table.var, nor tree.meta.colname
-
-                # table_by_var[next_.text] assumes that there is only one table that contains var. 
-                # Use tokens[i - 2] or some joinData info instead. 
-                tokens[i] = _make_table_token(table_by_var[next_.text], table_tree)  # tree.var is replaced with tab.var
-            on_clause.append(tokens[i]) # tok is now invalid, so we use tokens[i]
-            i += 1
-
+    i = tree_join.on_clause_end_index + 1
 
     # autogenerate the remaining joins in join_path
     going_up_the_tree = True
@@ -92,14 +42,12 @@ def _make_join_clause(tokens: list[Token], i: int, pathInfo: PathInfo) -> tuple[
         # check for alternative join clauses in the tree
         # this code assumes that foreign key and primary keys follow your naming convention.
         referenced_table = next_tab if going_up_the_tree else tab
-        # tokens = flat_tokenize(f'join {next_tab.name} using ({referenced_table.name}_id)\n')
         join_tokens = _make_join(next_tab.name, referenced_table.name, table_tree)
 
-        tokens[i:i] += join_tokens
+        tokens[i:i] = join_tokens
         i += len(join_tokens)
-        # joins += f'join {next_tab.name} using ({referenced_table.name}_id)\n'
     
-    return tokens, i
+    return tokens
 
 
 def _make_join(next_tab: str, referenced_table: str, table_tree: Token):
