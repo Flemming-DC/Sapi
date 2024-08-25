@@ -5,39 +5,85 @@ from .join_data import JoinData
 from engine.has_passed import has_passed
 from engine.dyn_loop import DynLoop
 
-def get_tables(tokens: list[Token|TokenTree], dyn_loop: DynLoop) -> list[JoinData]:
+def get_tables(tokens: list[Token|TokenTree], loop: DynLoop) -> list[JoinData]:
     joinData: list[JoinData] = []
     tables: list[str] = [] # evt. a list of Nodes
-    count = len(tokens)
-    i = -1 # start at -1 to undo the effect of the initial increment.
-    while i < count - 1:
-        i += 1
-        if isinstance(tokens[i], TokenTree):
+    while loop.next():
+        if isinstance(loop.tok(), TokenTree):
             continue
-        i = _make_join_data(tokens, i, joinData, count)
-        if i >= count or tokens[i].token_type not in [TokenType.IDENTIFIER, TokenType.VAR]:
+        _make_join_data(joinData, loop)
+        if not loop.found([TokenType.IDENTIFIER, TokenType.VAR], 0):
             continue
-        if _table_from_prefix(tokens, i, tables):
+        if _table_from_prefix(tables, loop):
             continue
-        if _table_from_variable(tokens[i], tables):
-            i, count = _insert_table_prefix(tokens, i, count)
+        if _table_from_variable(loop.tok(), tables):
+            _insert_table_prefix(loop)
 
     _plug_tables_into_joinData(tables, joinData)
-    
     return joinData
 
 
-def _table_from_prefix(tokens: list[Token], i: int, tables: list[str]) -> bool:
+
+def _make_join_data(joinData: list[JoinData], loop: DynLoop):
+    if not loop.found([TokenType.FROM, TokenType.JOIN], 0):
+        return
+    loop.next()
+    if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 0):
+        raise ParserError("expected identifier or variable after from / join.")
+    
+    # pass through join_obj prefix
+    while loop.found(TokenType.DOT, 1):
+        loop.next()
+        loop.next()
+
+    if loop.at_end():
+        raise ParserError("Encountered end of query while passing through prefix. Expected join_obj instead.")
+
+    join_obj = loop.tok() # join_obj at end of join_obj prefixes
+    if any(j.join_obj == join_obj for j in joinData):
+        return # don't dublicate join_data
+    is_tree = join_obj.text in table_tree_names
+
+    # we loop until on_clause_done
+    # until then, we step and resolve tree prefixes and record table prefixes
+    def _on_clause_done(): 
+        return loop.at_end(1) or loop.found([ # join or clause-after-from
+            TokenType.JOIN, TokenType.INNER, TokenType.LEFT, TokenType.RIGHT, TokenType.OUTER, 
+            TokenType.FULL, TokenType.SEMI, TokenType.ANTI, TokenType.LATERAL, TokenType.CROSS, 
+            TokenType.CROSS, TokenType.NATURAL,
+            TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.WINDOW, TokenType.UNION, 
+            TokenType.ORDER_BY, TokenType.LIMIT, TokenType.OFFSET, TokenType.FETCH, TokenType.FOR], after_steps=1)
+
+    on_clause_tables: list[str] = []
+    while not _on_clause_done():
+        loop.next()
+        
+        if loop.tok().text in table_tree_names: # is tree
+            if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
+                raise ParserError("Expected column after tree, as in tree.column") # why not table?
+            tab_of_var = table_by_var[loop.peek(2).text] 
+            loop.replace([(TokenType.VAR, tab_of_var)]) # replace tree prefix with table prefix
+        if loop.tok().text in tree_by_table.keys(): # is table
+            on_clause_tables.append(loop.tok().text) # register table in on clause
+
+
+    joinData.append(JoinData(
+        join_obj=join_obj, is_tree=is_tree, on_clause_end_index=loop.index(), on_clause_tables=on_clause_tables))
+    return
+
+
+def _table_from_prefix(tables: list[str], loop: DynLoop) -> bool:
     """
     Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     Each call to _table_from_prefix will update the prefix and 
     If tree.var is encountered, then the tree is resolved into a variable.
     """
-    if i - 1 < 0 or tokens[i - 1].token_type != TokenType.DOT:
+    if not loop.found(TokenType.DOT, -1):
         return False
-    tab_or_tree: Token = tokens[i - 2] # This includes views and cte's as tables. Is that okay?
+    tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
     if tab_or_tree.text in table_tree_names:
-        _set_prefix_to_table(tokens, i, tab_or_tree) # i is index of variable
+        text = table_by_var[loop.tok().text]
+        loop.insert([(TokenType.VAR, text)], distance = -2)
     tables.append(tab_or_tree.text) 
     return True
         
@@ -51,71 +97,13 @@ def _table_from_variable(token: Token, tables: list[str]) -> bool:
         tables.append(tab)
     return True
 
-
-
-def _make_join_data(tokens: list[Token], i: int, joinData: list[JoinData], count: int) -> int:
-    if tokens[i].token_type not in [TokenType.FROM, TokenType.JOIN]:
-        return i
-    i += 1 # goto join_obj (or its prefix)
-    if tokens[i].token_type not in [TokenType.VAR, TokenType.IDENTIFIER]:
-        raise ParserError("expected identifier or variable after from / join.")
-    
-    # pass through join_obj prefix
-    while i + 1 < len(tokens) and tokens[i + 1].token_type == TokenType.DOT:
-        i += 2 # for A.B.C, we hit A, see the dot, goto B, see the . and goto C
-    if i >= count:
-        raise ParserError("Encountered end of query while passing through prefix. Expection join_obj instead.")
-
-    join_obj = tokens[i] # join_obj at end of join_obj prefixes
-    if any(j.join_obj == join_obj for j in joinData):
-        return i
-    is_tree = join_obj.text in table_tree_names
-
-    on_clause_tables: list[str] = []
-    for _ in tokens[i:]:
-        on_clause_done = i + 1 >= count or tokens[i + 1].token_type in [ # join or clause-after-from
-            TokenType.JOIN, TokenType.INNER, TokenType.LEFT, TokenType.RIGHT, TokenType.OUTER, 
-            TokenType.FULL, TokenType.SEMI, TokenType.ANTI, TokenType.LATERAL, TokenType.CROSS, 
-            TokenType.CROSS, TokenType.NATURAL,
-            TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.WINDOW, TokenType.UNION, 
-            TokenType.ORDER_BY, TokenType.LIMIT, TokenType.OFFSET, TokenType.FETCH, TokenType.FOR]
-        if on_clause_done: # done at end of on clause, not after passing it.
-            break
-        i += 1
-        
-        if tokens[i].text in table_tree_names:
-            _set_prefix_to_table(tokens, i + 2, tokens[i]) # i + 2 is index of variable
-        if tokens[i].text in tree_by_table.keys(): # is table
-            on_clause_tables.append(tokens[i].text)
-    
-
-    joinData.append(JoinData(join_obj=join_obj, is_tree=is_tree, on_clause_end_index=i, on_clause_tables=on_clause_tables))
-    return i
-
-def _set_prefix_to_table(tokens: list[Token], i: int, prefixed_tree: Token):
-    if tokens[i - 2] != prefixed_tree:
-        raise ParserError(f"expected table_tree token as in tree.var, but found {tokens[i - 2]}")
-    tokens[i - 2] = AutoToken(
-        token_type = TokenType.VAR, # TokenType.VAR or TokenType.IDENTIFIER
-        text       = table_by_var[tokens[i].text], 
-        line       = prefixed_tree.line,
-        col        = prefixed_tree.col,
-        start      = prefixed_tree.start,
-        end        = prefixed_tree.end,
-        )
-
-def _insert_table_prefix(tokens: list[Token], i: int, count: int) -> tuple[int, int]:
-    if tokens[i - 1].token_type == TokenType.DOT:
+def _insert_table_prefix(loop: DynLoop):
+    if loop.found(TokenType.DOT, -1):
         raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
-    token = tokens[i]
-    # TokenType.VAR or TokenType.IDENTIFIER
-    table = AutoToken(TokenType.VAR, table_by_var[token.text],
-                  token.line, token.col, token.start, token.end)
-    dot = AutoToken(TokenType.DOT, '.',
-                  token.line, token.col, token.start, token.end)
-    tokens[i:i] = [table, dot]
-    i += 2
-    return i, count + 2
+    loop.insert([
+        (TokenType.VAR, table_by_var[loop.tok().text]), 
+        (TokenType.DOT, '.')])
+    
 
 
 def _plug_tables_into_joinData(tables: list[str], joinData: list[JoinData]):

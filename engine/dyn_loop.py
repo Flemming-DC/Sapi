@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Callable
 from collections import namedtuple
 from dataclasses import dataclass
@@ -6,16 +7,9 @@ from sqlglot.tokens import Token, TokenType
 
 class ParserError(Exception): ...
 _Replacement = namedtuple('_Replacement', ['from_', 'to', 'new'])
-# _TokenInput = namedtuple('_TokenInput', ['text', 'TokenType'])
-# @dataclass
-# class _Replacement:
-#     from_: int
-#     to: int
-#     new: int
-# @dataclass
-# class _TokenInput:
-#     TokenType: str
-#     text: str
+
+
+
 
 class DynLoop:
     def __init__(_, tokens: list[Token], sapi_str: str, start: int = 0):
@@ -26,14 +20,6 @@ class DynLoop:
         _._replacements: list[_Replacement] = []
         _._breakpoint_index: int|None = None
 
-    def __iter__(_): return _
-    def __next__(_):
-        _._i += 1
-        if _._i >= _._count:
-            raise StopIteration
-        if _._i >= _._breakpoint_index:
-            breakpoint()
-        return _._tokens[_._i]
 
     def __str__(_): 
         sql_str = _._sapi_str
@@ -41,7 +27,10 @@ class DynLoop:
             sql_str = sql_str[:rep.from_] + rep.new + sql_str[rep.to:]
         return sql_str
 
-    def _tok(_, distance: int = 0): return _._tokens[_._i + distance]
+    def tok(_): 
+        # if _._i < 0 or _._i >= _._count:
+        #     raise Exception("index out of range")
+        return _._tokens[_._i]
 
     def _replace(_, from_: int, to: int, new: list[tuple[TokenType, str]]):
         # evt. eliminate from_ by setting it to _._i
@@ -49,44 +38,86 @@ class DynLoop:
         new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.col, from_tok.start, from_tok.end) for t in new]
         _._tokens[from_:to] = new_tokens
         growth = len(new_tokens) - (to - from_)
-        _._i += growth
+        if _._i <= from_:
+            _._i += growth
         _._count += growth
         new_str = ' '.join(t.text for t in new_tokens) # make a better formmating of new_str akin to add_token_str
         _._replacements = _Replacement(from_, to, new_str)
 
 
-    def insert(_, new: list[tuple[TokenType, str]]):
-        _._replace(_._i, _._i, new)
+    def insert(_, new: list[tuple[TokenType, str]], distance: int = 0):
+        at = _._i + distance
+        _._replace(at, at, new)
 
     def replace(_, new: list[tuple[TokenType, str]]):
         _._replace(_._i, _._i + 1, new)
 
 
-    # def peek(s): return s._tok(1)
-    # def peekBack(self): return self.tokens[self.index - 1] if self.index > 0 else raise error
-    # def peek(self, distance: int): return self.tokens[self.index + distance]
+    def peek(_, distance: int = 1) -> Token|None: 
+        index = _._i + distance
+        if index < 0 or index >= _._count:
+            return None
+        return _._tokens[index]
 
-    # def step(s): return next(s) # evt. step_count
-    # def step_until(s, token: Token):
-    #     while s._i != token:
-    #         s.step()
-    #     return s._tok()
-    # def step_through(s, token: Token):
-    #     while s._i != token:
-    #         s.step()
-    #     return s.step()
-    # step_until(s, condition: Callable[[], bool])
-    # def require(s, token: Token, msg: str):
-    #     if s._tok(1) != token:
-    #         raise ParserError(msg) # parser or user error ?
+    def next(_) -> bool:
+        "Step to next element and return True, if a next element was found"
+        # if len(_.get_tokens()) != _._count: assert False, ""
+        _._i += 1
+        if _._i >= _._count:
+            return False
+        if _._breakpoint_index is not None and _._i >= _._breakpoint_index:
+            breakpoint()
+            _._breakpoint_index = None
+        # print(_._tokens[_._i].text + ' ', 
+        #       end = '\n' if _._tokens[_._i].token_type in _common_select_clauses else '') # toggle on or off
+        return True
+    
+    # def step(_) -> DynLoop:
+    #     # if len(_.get_tokens()) != _._count: assert False, ""
+    #     _._i += 1
+    #     if _._i >= _._count:
+    #         return _
+    #     if _._breakpoint_index is not None and _._i >= _._breakpoint_index:
+    #         breakpoint()
+    #         _._breakpoint_index = None
+    #     # print(_._tokens[_._i].text + ' ', 
+    #     #       end = '\n' if _._tokens[_._i].token_type in _common_select_clauses else '') # toggle on or off
+    #     return _
+        
+    
+    # def step_until(_, condition: Callable[[], bool]):
+    #     while not condition():
+    #         _.next()
+    #         # if _.step() is None:
+    #         #     break
+
+    def found(_, tokenType: TokenType|list[TokenType], after_steps: int) -> bool:
+        "Checks for tokenType after presicely the specified number of steps."
+        index = _._i + after_steps
+        if index < 0 or index >= _._count:
+            return False
+        tokenTypes = tokenType if isinstance(tokenType, list) else [tokenType]
+        return _._tokens[index].token_type in tokenTypes
+    
+    def index(_): return _._i # hopefully temp
+    # def set_tokens_and_reset_index(_, tokens: list[Token]):
+    #     _._tokens = tokens
+    #     _._i = 0
+    def get_tokens_(_): return _._tokens # temp
+    def reset_(_): _._i = 0
+    def manual_inc_(_, i: int, count: int):  # temp
+        _._i = i
+        _._count = count
+    def set_tokens_(_, tokens: list[Token]):
+        _._tokens = tokens
 
     def break_on(_, stopping_obj: TokenType|str):
         # find first example of stopping_obj in remaining code to be parsed and store its index
         if isinstance(stopping_obj, str):
-            remaining_str = _._sapi_str[_._tok().start:]
+            remaining_str = _._sapi_str[_.tok().start:]
             _._breakpoint_index = remaining_str.find(stopping_obj)
             if _._breakpoint_index == -1:
-                raise ParserError(f"Cannot break on {stopping_obj}, since it is not in the sapi_str")
+                _._breakpoint_index = None
         elif isinstance(stopping_obj, TokenType):
             remaining_tokens = _._tokens[_._i:]
             _._breakpoint_index = None
@@ -94,18 +125,14 @@ class DynLoop:
                 if tok.token_type == stopping_obj:
                     _._breakpoint_index = i
                     break
-            if _._breakpoint_index == None:
-                raise ParserError(f"Cannot break on {stopping_obj}, since it is not in the sapi_str")
         else:
             raise ParserError(f"Cannot break on {stopping_obj}, since it is an unrecognized type")
             
+    def has_passed(_, stopping_obj: str) -> bool:
+        location = _._sapi_str.find(stopping_obj)
+        return _._i >= location and location != -1
 
-    # def step_if(s, tok: Token): ...
-    # def step_until(s, tok: Token): ...
-    # def step_through(s, tok: Token): ...
-    # def step_while(s, condition: Callable): ...
-
-
-
-
+    def at_end(_, distance: int = 0): return _._i + distance >= _._count
+    # def before_start(_): return _._i < 0
+    # def out_of_bounds(_): return _._i < 0 or _._i >= _._count
 

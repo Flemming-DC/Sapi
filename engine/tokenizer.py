@@ -10,14 +10,17 @@ _dialect = Dialect.get_or_raise("postgres") # dialekt bør gribes fra et config 
 
 def tokenize(sapi_str: str) -> list[TokenTree]:
     tokens: list[Token] = _dialect.tokenize(sapi_str)
+    statements: list[str] = sapi_str.split(';')
 
     i = 0
     trees: list[TokenTree] = []
     while i < len(tokens) - 1:
-        token_tree, i = _parse_token_tree(tokens, i, sapi_str)
+        token_tree, i = _parse_token_tree(tokens, i, statements[i])
         trees.append(token_tree)
         i += 1
-    
+    if len(statements) != len(trees):
+        raise ParserError("number of statements and number of root level token trees should match.")
+
     return trees
 
     

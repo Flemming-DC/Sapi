@@ -14,6 +14,15 @@ class JoinData: # data for a single join. evt. restrict this to a tree-join
     # columns: list[Token] = field(default_factory=list)
     path: list[tuple[str, str]] = field(default_factory=list)
 
+    def __str__(_):
+        return 'JoinData(' + ', '.join([
+        'join_obj: ' + str(_.join_obj.text), 
+        'is_tree: ' + str(_.is_tree), 
+        'on_clause_end_index: ' + str(_.on_clause_end_index), 
+        'on_clause_tables: ' + str(_.on_clause_tables), 
+        'first_table: ' + str(_.first_table), 
+        'tables: ' + str(_.tables), 
+        'path: ' + str(_.path)]) + ')'
 
 
 """

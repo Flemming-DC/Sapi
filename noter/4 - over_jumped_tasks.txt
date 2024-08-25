@@ -3,6 +3,8 @@
 2) Let auto-joins be a part of a greater from clause, rather than the entire from clause
 3) The Type of Token
 4) TokenType.VAR vs TokenType.IDENTIFIER
+5) ParseerError: split into user error(s) vs internal sapi error
+6) In table_finder._make_join_data: raise ParserError("Expected column after tree, as in tree.column") # why not table?
+7) test multi tree
 
-nb: so far it seems to be a single tree parser.
 

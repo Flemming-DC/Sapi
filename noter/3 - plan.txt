@@ -45,7 +45,7 @@ usage of demand:
     set first_table = new_tables[0] if new_tables else None
     find_path based of first_table
     ? leave join_generator unchanged (initially)
-    clenup join_generator and go directly to index (no loop) and auto generate using the associated data.
+    cleanup join_generator and go directly to index (no loop) and auto generate using the associated data.
 
 
 

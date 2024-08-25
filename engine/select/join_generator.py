@@ -2,10 +2,33 @@ from .path_finder import PathInfo
 from engine.token_tree import TokenType, Token, ParserError, AutoToken
 from engine.hardcodedTrees import table_tree_names, table_by_var
 from .join_data import JoinData
+from engine.dyn_loop import DynLoop
 
 
+def make_from_clause(tokens: list[Token], pathInfo: PathInfo, loop: DynLoop, tree_join: JoinData) -> list[Token]: 
+    print(tree_join)
+    # cleanup join_generator and go directly to index (no loop) and auto generate using the associated data.
+    join_obj_index = [i for i, tok in enumerate(tokens) if tok == tree_join.join_obj]
+    if len(join_obj_index) != 1:
+        Exception("bib")
+    join_obj_index = join_obj_index[0]
+    tokens, i = _make_join_clause(tokens, join_obj_index, pathInfo)
 
-def make_from_clause(tokens: list[Token], pathInfo: PathInfo) -> list[Token]: 
+    # i = 0
+    # count = len(tokens)
+    # while i < count:
+    #     if tokens[i].token_type in [TokenType.FROM, TokenType.JOIN]:
+    #         i += 1
+    #         if tokens[i].token_type not in [TokenType.VAR, TokenType.IDENTIFIER]:
+    #             raise ParserError("expected identifier or variable after from / join.")
+    #         if tokens[i].text in table_tree_names:
+    #             print(tree_join.join_obj.text, join_obj_index, i)
+    #             tokens, i = _make_join_clause(tokens, i, pathInfo)
+    #             count = len(tokens)
+    #     i += 1
+    return tokens
+
+def make_from_clause_old(tokens: list[Token], pathInfo: PathInfo) -> list[Token]: 
     i = 0
     count = len(tokens)
     while i < count:
@@ -104,38 +127,6 @@ def _make_table_token(table_name: str, table_tree: Token) -> Token:
         end        = table_tree.end,
         )
 
-
-
-def make_from_clause_old(pathInfo: PathInfo) -> list[str]: # returns tokes or str ?
-    tables = pathInfo.nodes
-    path = pathInfo.path
-    # convert back to str instead of using node?
-    assert not tables or len(tables) == len(path) + 1, "Expected table count to be 0 or 1 + path length"
-    if path == [] and len(tables) == 0:
-        return '' # nothing to join
-    if path == [] and len(tables) == 1:
-        return f'\nfrom {tables[0].name}\n'
-
-    from_clause = f'\nfrom {tables[0].name}\n' # what if there is already a hard_coded table before the tree?
-    going_up_the_tree = True
-    for tab, next_tab in path:
-        if tab == pathInfo.eldest:
-            going_up_the_tree = False
-        # check for alternative join clauses in the tree
-        # this code assumes that foreign key and primary keys follow your naming convention.
-        referenced_table = next_tab if going_up_the_tree else tab
-        from_clause += f'join {next_tab.name} using ({referenced_table.name}_id)\n'
-        
-    return from_clause
-
-
-# def make_sql_str(select: Select, from_clause: list[str]) -> str:
-#     # what if we have to preserve some pre-existing pieces of a from clause?
-#     before = select.tokens[0: select.from_clause_start]
-#     after = select.tokens[select.from_clause_end: -1]
-#     # select.tokens = before + from_clause_tokens + after
-#     sql_str = ' '.join(before) + from_clause + ' '.join(after)
-#     return sql_str
 
 
 
