@@ -3,7 +3,7 @@ from engine import parser
 from textwrap import dedent
 from collections import namedtuple
 from engine.token_tree import Token, TokenType, TokenTree
-from engine.select.join_data import JoinData
+from engine.select.tree_join import TreeJoin
 from engine.select import table_finder #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
 
@@ -74,17 +74,17 @@ def test_get_expected_table_trees():
     ]
     dyn_loop3 = DynLoop(tokens3, "irrelevant sapi_str") # we aren't test the updates to sapi_str
 
-    expected_1 = JoinData(join_obj = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
-        is_tree=True, on_clause_end_index=13, on_clause_tables=[], first_table=None, tables=['a0', 'a0', 'a00'], path=[])
-    expected_2 = JoinData(join_obj = Token(TokenType.VAR, 'A', 8, 26, 143, 143,),
-        is_tree=True, on_clause_end_index=8, on_clause_tables=[], first_table=None, tables=['a20'], path=[])
-    expected_3_1 = JoinData(join_obj = Token(TokenType.VAR, 'cte', 11, 9, 203, 205,), 
-        is_tree=False, on_clause_end_index=19, on_clause_tables=[], first_table=None, tables=[], path=[])
-    expected_3_2 = JoinData(join_obj = Token(TokenType.VAR, 'A', 12, 7, 217, 217,), 
-        is_tree=True, on_clause_end_index=29, on_clause_tables=['a'], first_table='a', tables=['a10', 'a'], path=[])
+    expected_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
+        on_clause_end_index=13, on_clause_tables=[], first_table=None, tables=['a0', 'a0', 'a00'])
+    expected_2 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 8, 26, 143, 143,),
+        on_clause_end_index=8, on_clause_tables=[], first_table=None, tables=['a20'])
+    # expected_3_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'cte', 11, 9, 203, 205,), 
+    #     on_clause_end_index=19, on_clause_tables=[], first_table=None, tables=[], path=[])
+    expected_3 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 12, 7, 217, 217,), 
+        on_clause_end_index=29, on_clause_tables=['a'], first_table='a', tables=['a10', 'a'])
     expected_1 = [expected_1]
     expected_2 = [expected_2]
-    expected_3 = [expected_3_1, expected_3_2]
+    expected_3 = [expected_3]
     # expected_join_data = [j1, j2, j3, j4]
 
     cases = [
@@ -93,22 +93,22 @@ def test_get_expected_table_trees():
         (tokens3, expected_3, dyn_loop3),
         ]
 
-    for tokens, expected, dyn_loop in cases:
-        actual: list[JoinData] = table_finder.get_tables(tokens, dyn_loop)
+    for _, expected, dyn_loop in cases:
+        actual: list[TreeJoin] = table_finder.get_tables(dyn_loop)
         for a, e in zip(actual, expected):
             assert _equal_join_data(a, e), "table_finder.get_tables(tokens1) gave incorrect join_data."
 
 
 
-def _equal_join_data(j1: JoinData, j2: JoinData):
+def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
     # evt. put the comparison into the join data class
     jo1 = j1.join_obj
     jot1 = (jo1.token_type, jo1.token_type, jo1.text, jo1.line, jo1.col, jo1.start, jo1.end, jo1.comments)
-    j1_comparable = (jot1, j1.is_tree, j1.on_clause_end_index, j1.on_clause_tables, j1.first_table, j1.tables, j1.path)
+    j1_comparable = (jot1, j1.on_clause_end_index, j1.on_clause_tables, j1.first_table, j1.tables)
 
     jo2 = j2.join_obj
     jot2 = (jo2.token_type, jo2.token_type, jo2.text, jo2.line, jo2.col, jo2.start, jo2.end, jo2.comments)
-    j2_comparable = (jot2, j2.is_tree, j2.on_clause_end_index, j2.on_clause_tables, j2.first_table, j2.tables, j2.path)
+    j2_comparable = (jot2, j2.on_clause_end_index, j2.on_clause_tables, j2.first_table, j2.tables)
     if j1_comparable != j2_comparable:
         ...
     return j1_comparable == j2_comparable
@@ -158,7 +158,7 @@ JOIN a10 USING (a1_id)]""")
         """)
 
 if __name__ == '__main__':
-    # test_get_expected_table_trees()
+    test_get_expected_table_trees()
     test_get_expected_sql()
     print("Passed")
 

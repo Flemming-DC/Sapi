@@ -72,18 +72,5 @@ class TokenTree:
                 all_tokens.append(tok)
         return all_tokens
 
-    # def first_leaf(self):
-    #     for token in self.tokens:
-    #         if not isinstance(token, TokenTree):
-    #             return token
-    #     raise ParserError(f"TokenTree contains no leaf tokens. This is unexpected: \n {self}")
 
-    # def leaves(self) -> Iterator[Token]:
-    #     for tok in self.tokens:
-    #         if not isinstance(tok, TokenTree):
-    #             yield tok
 
-    # def sub_trees(self) -> Iterator[TokenTree]:
-    #     for tok in self.tokens:
-    #         if isinstance(tok, TokenTree):
-    #             yield tok

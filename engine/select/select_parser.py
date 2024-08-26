@@ -5,8 +5,8 @@ from engine.token_tree import TokenTree
 def parse_select(token_tree: TokenTree) -> TokenTree:
     print('---')
     # print(f'sapi_token_tree: {token_tree}')
-    sapi_joins = table_finder.get_tables(token_tree.tokens, token_tree.dyn_loop)
-    tree_joins = [j for j in sapi_joins if j.is_tree]
+    tree_joins = table_finder.get_tables(token_tree.dyn_loop)
+    # tree_joins = [j for j in sapi_joins if j.is_tree]
 
     # print(f'tables: {table_names}')
     # token_tree.tokens = token_tree.dyn_loop.get_tokens()
@@ -21,8 +21,8 @@ def parse_select(token_tree: TokenTree) -> TokenTree:
         # for from_, to_ in pathInfo.path:
         #     print(f"    {from_.name}, {to_.name}")
         
-        token_tree.tokens = join_generator.make_from_clause(
-            token_tree.tokens, pathInfo, token_tree.dyn_loop, tree_join)
+        join_generator.make_from_clause(token_tree.tokens, pathInfo, token_tree.dyn_loop, tree_join)
+        token_tree.tokens = token_tree.dyn_loop._tokens # dirty
         # print(f'sql_token_tree: {token_tree}')
 
 

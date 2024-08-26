@@ -1,12 +1,11 @@
 from textwrap import dedent
 from engine.hardcodedTrees import table_by_var, table_tree_names, tree_by_table
 from engine.token_tree import Token, TokenTree, TokenType, ParserError, AutoToken
-from .join_data import JoinData
-from engine.has_passed import has_passed
+from .tree_join import TreeJoin
 from engine.dyn_loop import DynLoop
 
-def get_tables(tokens: list[Token|TokenTree], loop: DynLoop) -> list[JoinData]:
-    joinData: list[JoinData] = []
+def get_tables(loop: DynLoop) -> list[TreeJoin]:
+    joinData: list[TreeJoin] = []
     tables: list[str] = [] # evt. a list of Nodes
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
@@ -24,7 +23,7 @@ def get_tables(tokens: list[Token|TokenTree], loop: DynLoop) -> list[JoinData]:
 
 
 
-def _make_join_data(joinData: list[JoinData], loop: DynLoop):
+def _make_join_data(joinData: list[TreeJoin], loop: DynLoop):
     if not loop.found([TokenType.FROM, TokenType.JOIN], 0):
         return
     loop.next()
@@ -44,8 +43,6 @@ def _make_join_data(joinData: list[JoinData], loop: DynLoop):
         return # don't dublicate join_data
     is_tree = join_obj.text in table_tree_names
 
-    # we loop until on_clause_done
-    # until then, we step and resolve tree prefixes and record table prefixes
     def _on_clause_done(): 
         return loop.at_end(1) or loop.found([ # join or clause-after-from
             TokenType.JOIN, TokenType.INNER, TokenType.LEFT, TokenType.RIGHT, TokenType.OUTER, 
@@ -54,6 +51,7 @@ def _make_join_data(joinData: list[JoinData], loop: DynLoop):
             TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.WINDOW, TokenType.UNION, 
             TokenType.ORDER_BY, TokenType.LIMIT, TokenType.OFFSET, TokenType.FETCH, TokenType.FOR], after_steps=1)
 
+    # resolve tree prefixes and record table prefixes in on clause
     on_clause_tables: list[str] = []
     while not _on_clause_done():
         loop.next()
@@ -66,11 +64,10 @@ def _make_join_data(joinData: list[JoinData], loop: DynLoop):
         if loop.tok().text in tree_by_table.keys(): # is table
             on_clause_tables.append(loop.tok().text) # register table in on clause
 
-
-    joinData.append(JoinData(
-        join_obj=join_obj, is_tree=is_tree, on_clause_end_index=loop.index(), on_clause_tables=on_clause_tables))
-    return
-
+    if is_tree:
+        joinData.append(TreeJoin(
+            join_obj=join_obj, on_clause_end_index=loop.index(), on_clause_tables=on_clause_tables))
+    
 
 def _table_from_prefix(tables: list[str], loop: DynLoop) -> bool:
     """
@@ -106,7 +103,7 @@ def _insert_table_prefix(loop: DynLoop):
     
 
 
-def _plug_tables_into_joinData(tables: list[str], joinData: list[JoinData]):
+def _plug_tables_into_joinData(tables: list[str], joinData: list[TreeJoin]):
     for tab_name in tables:
         if tab_name not in tree_by_table.keys():
             continue # this happens for cte's and probably views.

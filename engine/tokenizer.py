@@ -13,9 +13,10 @@ def tokenize(sapi_str: str) -> list[TokenTree]:
     statements: list[str] = sapi_str.split(';')
 
     i = 0
+    count = len(tokens)
     trees: list[TokenTree] = []
-    while i < len(tokens) - 1:
-        token_tree, i = _parse_token_tree(tokens, i, statements[i])
+    while i < count - 1:
+        token_tree, i = _parse_token_tree(tokens, i, statements[i]) # tokens is not modified, only i
         trees.append(token_tree)
         i += 1
     if len(statements) != len(trees):
@@ -56,9 +57,4 @@ def _parse_token_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tuple[T
     token_tree = TokenTree(tokens_at_this_level, dyn_loop)
     return token_tree, i
 
-
-
-
-def flat_tokenize(code: str) -> list[Token]: # probably going to become dead code
-    return _dialect.tokenize(code)
 

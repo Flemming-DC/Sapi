@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field
-from anytree import RenderTree, walker, Node
-from engine.hardcodedTrees import A
-from .join_data import JoinData
+from anytree import walker, Node
+from .tree_join import TreeJoin
 from engine.hardcodedTrees import node_by_table
 
 pathType = list[tuple[Node, Node]]
 @dataclass
-class PathInfo: # eva. make this a basemodel. If so then replace Node with PydanticNode
+class PathInfo:
     path: pathType = field(default_factory=list) # = []
     nodes: list[Node] = field(default_factory=list) # = []
     eldest: Node|None = None
