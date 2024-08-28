@@ -1,36 +1,25 @@
 from __future__ import annotations
-from collections import namedtuple
 from dataclasses import dataclass
 from sqlglot.tokens import Token, TokenType
 
 class ParserError(Exception): ...
-# _Replacement = namedtuple('_Replacement', ['from_', 'to', 'new'])
 
 @dataclass
-class _Replacement:
+class _StrReplacement:
     from_: int
     to: int
-    new_str: str
+    new: str
 
-# could evt. make a similar replace function
-# def insert(tokens: list[Token], at: int, new: list[tuple[TokenType, str]]):
-#     # evt. eliminate from_ by setting it to _._i
-#     from_tok = tokens[at]
-#     new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.col, from_tok.start, from_tok.end) for t in new]
-#     tokens[from_:to] = new_tokens
-#     growth = len(new_tokens) - (to - from_)
-#     if _._i <= from_:
-#         _._i += growth
-#     _._count += growth
-#     new_str = ' '.join(t.text for t in new_tokens) # make a better formmating of new_str akin to add_token_str
-#     _._replacements.append(_Replacement(at, at, new_str))
 
 
 class DynLoop:
-    def __init__(_, tokens: list[Token], sapi_str: str, start: int = 0):
+    def __init__(_, tokens: list[Token], sapi_str: str, 
+                 previous_token: Token, next_token: Token, start: int = 0):
         _._sapi_str = sapi_str # const
         _._tokens = tokens
-        _._replacements: list[_Replacement] = []
+        _._previous_token: Token|None = previous_token
+        _._next_token: Token|None = next_token
+        _._str_replacements: list[_StrReplacement] = []
 
         _._i = start - 1 # index = token_index, not sapi_str index
         _._count = len(tokens)
@@ -38,13 +27,13 @@ class DynLoop:
 
 
     def __str__(_): 
-        sql_str = _._sapi_str
-        for rep in _._replacements:
-            str_from = _._tokens[rep.from_].start
-            str_to = _._tokens[rep.to].start # start or end ?
-
-            sql_str = sql_str[:str_from] + rep.new_str + sql_str[str_to:]
-            print(sql_str)
+        sql_str = ""
+        _._str_replacements.sort(key = lambda r: r.from_)
+        for i, rep in enumerate(_._str_replacements):
+            last_rep_to = _._str_replacements[i - 1].to if i > 0 else 0
+            sql_str += _._sapi_str[last_rep_to:rep.from_ - 1] + ' ' + rep.new + ' '
+        last_rep_to = _._str_replacements[-1].to
+        sql_str += _._sapi_str[last_rep_to:]
         return sql_str
 
     def tok(_): 
@@ -53,27 +42,49 @@ class DynLoop:
         return _._tokens[_._i]
 
     def _replace(_, from_: int, to: int, new: list[tuple[TokenType, str]]):
-        # evt. eliminate from_ by setting it to _._i
-        if from_ > 0:
-            from_tok = _._tokens[from_ - 1]
+        if to != from_ and to != from_ + 1:
+            raise ParserError("øv!")
+        if from_ < 0 or to > _._count:
+            raise ParserError("index out of bounds")
+
+        from_tok: Token|None = _._tokens[from_] if from_ < _._count else _._next_token
+
+        if from_tok:
             new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.col, from_tok.start, from_tok.end) for t in new]
         else:
-            new_tokens = [Token(t[0], t[1], 0, 0, 0, 0) for t in new] # is this correct?
+            next = _._next_token # also = from_tok and to_tok
+            new_tokens: list[Token] = []
+            for t in new:
+                prev_start = new_tokens[-1].start if new_tokens else next.start if next else len(_._sapi_str)
+                # prev_end = new_tokens[-1] if new_tokens else last.end
+                new_tokens.append(Token(t[0], t[1], 
+                    next.line if next else _._tokens[-1], 
+                    next.col if next else _._tokens[-1], 
+                    prev_start + len(t[1]), 'invalid data'))
+
+        # save str data
+        str_from = from_tok.start if from_tok else len(_._sapi_str)
+        width = 0 if to == from_ else len(_.tok().text) # if to == from_ + 1 else error
+        str_to = str_from + width # if to_tok else str_from + len(' '.join([t.text for t in _._tokens[from_:to]])) # shitty
+        new_str = ' '.join(t.text for t in new_tokens) # make a better formmating of new_str akin to add_token_str
+        _._str_replacements.append(_StrReplacement(str_from, str_to, new_str))
+
+        # modify tokens, index and count
         _._tokens[from_:to] = new_tokens
         growth = len(new_tokens) - (to - from_)
         if _._i <= from_:
             _._i += growth
         _._count += growth
-        new_str = ' '.join(t.text for t in new_tokens) # make a better formmating of new_str akin to add_token_str
-        _._replacements.append(_Replacement(from_, to, new_str))
 
 
     def insert(_, new: list[tuple[TokenType, str]], distance: int = 0):
         at = _._i + distance
         _._replace(at, at, new)
 
-    def replace(_, new: list[tuple[TokenType, str]]):
-        _._replace(_._i, _._i + 1, new)
+
+
+    def replace(_, new: tuple[TokenType, str]):
+        _._replace(_._i, _._i + 1, [new])
 
 
     def peek(_, distance: int = 1) -> Token|None: 
@@ -107,13 +118,6 @@ class DynLoop:
     def index(_): return _._i # hopefully temp
     def set_index(_, i): _._i = i # hopefully temp
 
-    def get_tokens_(_): return _._tokens # temp
-    def reset_(_): _._i = 0 # temp ???
-    def manual_inc_(_, i: int, count: int):  # temp
-        _._i = i
-        _._count = count
-    def set_tokens_(_, tokens: list[Token]): # temp
-        _._tokens = tokens
 
     def break_on(_, stopping_obj: TokenType|str):
         # find first example of stopping_obj in remaining code to be parsed and store its index
@@ -138,27 +142,4 @@ class DynLoop:
 
     def at_end(_, distance: int = 0): return _._i + distance >= _._count
 
-    # def before_start(_): return _._i < 0
-    # def out_of_bounds(_): return _._i < 0 or _._i >= _._count
 
-    # def set_tokens_and_reset_index(_, tokens: list[Token]):
-    #     _._tokens = tokens
-    #     _._i = 0
-    # def step(_) -> DynLoop:
-    #     # if len(_.get_tokens()) != _._count: assert False, ""
-    #     _._i += 1
-    #     if _._i >= _._count:
-    #         return _
-    #     if _._breakpoint_index is not None and _._i >= _._breakpoint_index:
-    #         breakpoint()
-    #         _._breakpoint_index = None
-    #     # print(_._tokens[_._i].text + ' ', 
-    #     #       end = '\n' if _._tokens[_._i].token_type in _common_select_clauses else '') # toggle on or off
-    #     return _
-        
-    
-    # def step_until(_, condition: Callable[[], bool]):
-    #     while not condition():
-    #         _.next()
-    #         # if _.step() is None:
-    #         #     break

@@ -25,7 +25,9 @@ def test_get_expected_table_trees():
         Token(TokenType.FROM, 'FROM',  3, 30, 52, 55),
         Token(TokenType.VAR,  'A',     3, 32, 57, 57),
     ]
-    dyn_loop1 = DynLoop(tokens1, "irrelevant sapi_str") # we aren't test the updates to sapi_str
+    dyn_loop1 = DynLoop(tokens1, "irrelevant sapi_str",
+                        previous_token=Token(TokenType.L_PAREN, '(', 2, 14, 17, 17), 
+                        next_token=Token(TokenType.R_PAREN, ')', 4, 2, 63, 63)) # we aren't test the updates to sapi_str
 
     # ------- tokens ---------
     tokens2 = [
@@ -37,7 +39,9 @@ def test_get_expected_table_trees():
         Token(TokenType.FROM, 'FROM', 8, 24, 138, 141),
         Token(TokenType.VAR, 'A', 8, 26, 143, 143),
     ]
-    dyn_loop2 = DynLoop(tokens2, "irrelevant sapi_str") # we aren't test the updates to sapi_str
+    dyn_loop2 = DynLoop(tokens2, "irrelevant sapi_str",
+                        previous_token=Token(TokenType.L_PAREN, '(', 8, 2, 119, 119), 
+                        next_token=Token(TokenType.R_PAREN, ')', 8, 27, 144, 144)) # we aren't test the updates to sapi_str
     # ------- tokens ---------
     sub_token_tree1 = TokenTree(tokens1, dyn_loop1)
     sub_token_tree2 = TokenTree(tokens2, dyn_loop2)
@@ -72,7 +76,9 @@ def test_get_expected_table_trees():
         Token(TokenType.DOT, '.', 12, 23, 233, 233),
         Token(TokenType.VAR, 'a0_1', 12, 27, 234, 237),
     ]
-    dyn_loop3 = DynLoop(tokens3, "irrelevant sapi_str") # we aren't test the updates to sapi_str
+    dyn_loop3 = DynLoop(tokens3, "irrelevant sapi_str", 
+                        previous_token=None, 
+                        next_token=None) # we aren't test the updates to sapi_str
 
     expected_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
         on_clause_end_index=13, on_clause_tables=[], first_table=None, tables=['a0', 'a0', 'a00'])
@@ -150,15 +156,18 @@ JOIN a10 USING (a1_id)]""")
 
         actual_sql = dedent(actual_sql).strip('\n').strip(' ')
         expected_sql = dedent(expected_sql).strip('\n').strip(' ')
-        assert actual_sql == expected_sql, dedent(f"""
-        ERROR: 
-        sapi: \n{dedent(sapi)}
-        expected_sql: \n{expected_sql}
-        produced_sql: \n{actual_sql}
-        """)
+        print('--- test ---')
+        print(actual_sql)
+        assert actual_sql == expected_sql, dedent("")
+        # f"""
+        # ERROR: 
+        # sapi: \n{dedent(sapi)}
+        # expected_sql: \n{expected_sql}
+        # produced_sql: \n{actual_sql}
+        # """)
 
 if __name__ == '__main__':
-    test_get_expected_table_trees()
+    # test_get_expected_table_trees()
     test_get_expected_sql()
     print("Passed")
 

@@ -11,7 +11,6 @@ _TOKENTYPE_TOKEN_TREE = TokenType.TOKEN_TREE
 TOKENTYPE_AUTO_JOIN = TokenType.AUTO_JOIN
 
 
-
 class AutoToken(Token):...
 
 _common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
@@ -34,7 +33,8 @@ class TokenTree:
     @property 
     def start(self): return self.tokens[0].start if self.tokens else None
     @property 
-    def end(self): return self.tokens[-1].end if self.tokens else None
+    def end(self): raise ParserError(f"the end property is extremely unreliable. Don't use it!")
+        # return self.tokens[-1].end if self.tokens else None
     @property 
     def comments(self): return None
 
@@ -63,14 +63,14 @@ class TokenTree:
         else:
             return so_far + tok.text + ' '
         
-    def flatten(self) -> list[Token]:
-        all_tokens: list[Token] = []
-        for tok in self.tokens:
-            if isinstance(tok, TokenTree):
-                all_tokens += tok.flatten()
-            else:
-                all_tokens.append(tok)
-        return all_tokens
+    # def flatten(self) -> list[Token]:
+    #     all_tokens: list[Token] = []
+    #     for tok in self.tokens:
+    #         if isinstance(tok, TokenTree):
+    #             all_tokens += tok.flatten()
+    #         else:
+    #             all_tokens.append(tok)
+    #     return all_tokens
 
 
 

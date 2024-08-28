@@ -17,18 +17,20 @@ def make_from_clause(tokens: list[Token], pathInfo: PathInfo, loop: DynLoop, tre
 
     return tokens
 
-
+c = [0]
 def _make_join_clause(tokens: list[Token], join_obj_index: int, pathInfo: PathInfo, on_clause_end_index: int, loop: DynLoop) -> list[Token]:
     path_tables = pathInfo.nodes
     path = pathInfo.path
-    table_tree = tokens[join_obj_index] # this is the table_tree for which we are autogenerating the from clause
+    # table_tree = tokens[join_obj_index] # this is the table_tree for which we are autogenerating the from clause
     # convert back to str instead of using node?
     assert not path_tables or len(path_tables) == len(path) + 1, "Expected table count to be 0 or 1 + path length"
     if path == [] and len(path_tables) == 0:
         return '' # nothing to join
 
+    c[0] += 1
+    print(c[0])
     loop.set_index(join_obj_index) # dirty
-    loop.replace([(TokenType.VAR, path_tables[0].name)])
+    loop.replace((TokenType.VAR, path_tables[0].name))
 
     i = on_clause_end_index + 1
     loop.set_index(i) # dirty

@@ -60,7 +60,7 @@ def _make_join_data(joinData: list[TreeJoin], loop: DynLoop):
             if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
                 raise ParserError("Expected column after tree, as in tree.column") # why not table?
             tab_of_var = table_by_var[loop.peek(2).text] 
-            loop.replace([(TokenType.VAR, tab_of_var)]) # replace tree prefix with table prefix
+            loop.replace((TokenType.VAR, tab_of_var)) # replace tree prefix with table prefix
         if loop.tok().text in tree_by_table.keys(): # is table
             on_clause_tables.append(loop.tok().text) # register table in on clause
 
