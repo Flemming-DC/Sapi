@@ -1,7 +1,6 @@
 from __future__ import annotations
 from sqlglot import Dialect
 from .token_tree import TokenTree, Token, TokenType, ParserError
-from engine.dyn_loop import DynLoop
 
 
 
@@ -30,7 +29,6 @@ def tokenize(sapi_str: str) -> list[TokenTree]:
 def _parse_token_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tuple[TokenTree, int]:
     if all_tokens[i].token_type == TokenType.L_PAREN:
         ParserError("TokenTree should not start with (") 
-    previous_token = all_tokens[i - 1] if i >= 0 else None
     depth = 0 # parenthesis nesting depth
     token_count = len(all_tokens)
     tokens_at_this_level: list[Token] = []
@@ -55,8 +53,7 @@ def _parse_token_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tuple[T
         i += 1
     i -= 1 # dont include finishing parenthesis
     next_token = all_tokens[i + 1] if i + 1 < len(all_tokens) else None
-    dyn_loop = DynLoop(tokens_at_this_level, sapi_str, previous_token=previous_token, next_token=next_token)
-    token_tree = TokenTree(tokens_at_this_level, dyn_loop)
+    token_tree = TokenTree(tokens_at_this_level, sapi_str, next_token)
     return token_tree, i
 
 

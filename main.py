@@ -38,10 +38,11 @@ if __name__ == '__main__':
     # evt. bug: graps a0_2 from a0 instead of cte
     # should we auto_join the missing tables or all the tables?
     # suggested answer: all, unless prefix says otherwise
-    trees = parser.parse(q, list[TokenTree])
-    for tr in trees:
-        print("--- sql-token-tree ---")
-        print(tr)
+
+    # trees = parser.parse(q, list[TokenTree])
+    # for tr in trees:
+    #     print("--- sql-token-tree ---")
+    #     print(tr)
 
     sql = parser.parse(q)
     print("--- sql-str ---")
@@ -59,7 +60,10 @@ join a ON a.a_1 = cte.a0_1
 JOIN a1 USING (a_id) 
 JOIN a10 USING (a1_id)]""".strip('\n')
 
-    print('OK = ', sql.strip('\n') == expected.strip('\n'))
+    # print('OK = ', sql.strip('\n') == expected.strip('\n'))
 
 
+    # sql = parser.parse("select 1 from A")
+    # print("--- sql-str ---")
+    # print(sql)
 

@@ -7,6 +7,7 @@ from engine.select.tree_join import TreeJoin
 from engine.select import table_finder #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
 
+
 def test_get_expected_table_trees():
     # ------- tokens ---------
     tokens1 = [
@@ -25,10 +26,7 @@ def test_get_expected_table_trees():
         Token(TokenType.FROM, 'FROM',  3, 30, 52, 55),
         Token(TokenType.VAR,  'A',     3, 32, 57, 57),
     ]
-    dyn_loop1 = DynLoop(tokens1, "irrelevant sapi_str",
-                        previous_token=Token(TokenType.L_PAREN, '(', 2, 14, 17, 17), 
-                        next_token=Token(TokenType.R_PAREN, ')', 4, 2, 63, 63)) # we aren't test the updates to sapi_str
-
+    
     # ------- tokens ---------
     tokens2 = [
         Token(TokenType.SELECT, 'SELECT', 8, 8, 120, 125),
@@ -39,12 +37,14 @@ def test_get_expected_table_trees():
         Token(TokenType.FROM, 'FROM', 8, 24, 138, 141),
         Token(TokenType.VAR, 'A', 8, 26, 143, 143),
     ]
-    dyn_loop2 = DynLoop(tokens2, "irrelevant sapi_str",
-                        previous_token=Token(TokenType.L_PAREN, '(', 8, 2, 119, 119), 
-                        next_token=Token(TokenType.R_PAREN, ')', 8, 27, 144, 144)) # we aren't test the updates to sapi_str
     # ------- tokens ---------
-    sub_token_tree1 = TokenTree(tokens1, dyn_loop1)
-    sub_token_tree2 = TokenTree(tokens2, dyn_loop2)
+    sub_token_tree1 = TokenTree(tokens1, "irrelevant sapi_str",
+                        Token(TokenType.R_PAREN, ')', 4, 2, 63, 63))
+    sub_token_tree2 = TokenTree(tokens2, "irrelevant sapi_str",
+                        Token(TokenType.R_PAREN, ')', 8, 27, 144, 144))
+
+    dyn_loop1 = DynLoop(sub_token_tree1)
+    dyn_loop2 = DynLoop(sub_token_tree2)
     
     tokens3 = [
         Token(TokenType.WITH, 'WITH', 2, 5, 5, 8),
@@ -76,47 +76,49 @@ def test_get_expected_table_trees():
         Token(TokenType.DOT, '.', 12, 23, 233, 233),
         Token(TokenType.VAR, 'a0_1', 12, 27, 234, 237),
     ]
-    dyn_loop3 = DynLoop(tokens3, "irrelevant sapi_str", 
-                        previous_token=None, 
-                        next_token=None) # we aren't test the updates to sapi_str
+    root_token_tree3 = TokenTree(tokens3, "irrelevant sapi_str",
+                    None)
+    # dyn_loop3 = DynLoop(tokens3, sub_token_tree3) 
+
 
     expected_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
-        on_clause_end_index=13, on_clause_tables=[], first_table=None, tables=['a0', 'a0', 'a00'])
+        join_obj_index=13,
+        on_clause_end_index=13, first_table='a0', referenced_tables=['a0', 'a0', 'a00'])
     expected_2 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 8, 26, 143, 143,),
-        on_clause_end_index=8, on_clause_tables=[], first_table=None, tables=['a20'])
+        join_obj_index=8, on_clause_end_index=8, 
+        first_table='a20', referenced_tables=['a20'])
     # expected_3_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'cte', 11, 9, 203, 205,), 
     #     on_clause_end_index=19, on_clause_tables=[], first_table=None, tables=[], path=[])
     expected_3 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 12, 7, 217, 217,), 
-        on_clause_end_index=29, on_clause_tables=['a'], first_table='a', tables=['a10', 'a'])
+        join_obj_index=21, on_clause_end_index=29, 
+        first_table='a', referenced_tables=['a10', 'a'])
     expected_1 = [expected_1]
     expected_2 = [expected_2]
     expected_3 = [expected_3]
     # expected_join_data = [j1, j2, j3, j4]
 
     cases = [
-        (tokens1, expected_1, dyn_loop1),
-        (tokens2, expected_2, dyn_loop2),
-        (tokens3, expected_3, dyn_loop3),
+        (tokens1, expected_1, sub_token_tree1),
+        (tokens2, expected_2, sub_token_tree2),
+        (tokens3, expected_3, root_token_tree3),
         ]
 
-    for _, expected, dyn_loop in cases:
-        actual: list[TreeJoin] = table_finder.get_tables(dyn_loop)
+    for _, expected, tok_tree in cases:
+        actual: list[TreeJoin] = table_finder.get_tables(DynLoop(tok_tree))
         for a, e in zip(actual, expected):
             assert _equal_join_data(a, e), "table_finder.get_tables(tokens1) gave incorrect join_data."
-
 
 
 def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
     # evt. put the comparison into the join data class
     jo1 = j1.join_obj
     jot1 = (jo1.token_type, jo1.token_type, jo1.text, jo1.line, jo1.col, jo1.start, jo1.end, jo1.comments)
-    j1_comparable = (jot1, j1.on_clause_end_index, j1.on_clause_tables, j1.first_table, j1.tables)
+    j1_comparable = (jot1, j1.on_clause_end_index, j1.first_table, j1.referenced_tables)
 
     jo2 = j2.join_obj
     jot2 = (jo2.token_type, jo2.token_type, jo2.text, jo2.line, jo2.col, jo2.start, jo2.end, jo2.comments)
-    j2_comparable = (jot2, j2.on_clause_end_index, j2.on_clause_tables, j2.first_table, j2.tables)
-    if j1_comparable != j2_comparable:
-        ...
+    j2_comparable = (jot2, j2.on_clause_end_index, j2.first_table, j2.referenced_tables)
+
     return j1_comparable == j2_comparable
 
 
@@ -167,7 +169,7 @@ JOIN a10 USING (a1_id)]""")
         # """)
 
 if __name__ == '__main__':
-    # test_get_expected_table_trees()
+    test_get_expected_table_trees()
     test_get_expected_sql()
     print("Passed")
 

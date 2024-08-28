@@ -2,7 +2,6 @@ from typing import TypeVar, Type
 from . import tokenizer
 from .select import select_parser
 from .token_tree import TokenTree, ParserError, TokenType
-from engine.dyn_loop import DynLoop
 
 T = TypeVar('T')
 def parse(sapi_str: str, return_type: Type[T] = str) -> T:
@@ -15,7 +14,6 @@ def parse(sapi_str: str, return_type: Type[T] = str) -> T:
     if return_type == list[TokenTree]:
         return token_trees
     elif return_type == str:
-        # return '\n;\n'.join(str(t.dyn_loop) for t in token_trees)
         return '\n;\n'.join(repr(t) for t in token_trees) # stringifier.to_sql_str(token_trees, sapi_code)
     else:
         # evt. allow out = abstrakt syntax tree
