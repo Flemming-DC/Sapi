@@ -4,7 +4,6 @@ from engine.dyn_loop import DynLoop
 
 
 def parse_select(token_tree: TokenTree) -> TokenTree:
-    print('---')
 
     tree_joins = table_finder.get_tables(DynLoop(token_tree))
     for tree_join in tree_joins:

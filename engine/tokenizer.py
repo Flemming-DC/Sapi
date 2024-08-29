@@ -8,7 +8,10 @@ _dialect = Dialect.get_or_raise("postgres") # dialekt bør gribes fra et config 
 
 
 def tokenize(sapi_str: str) -> list[TokenTree]:
-    tokens: list[Token] = _dialect.tokenize(sapi_str)
+    tokens: list = _dialect.tokenize(sapi_str) # list of builtins.token, which seems to behave like Token, except for type checks
+    # cast to sqlglot.tokens.Token and drop the unreliable token.end
+    # evt. drop all the unused stuff.
+    tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.col, t.start, None, t.comments) for t in tokens]
     statements: list[str] = sapi_str.split(';')
 
     i = 0

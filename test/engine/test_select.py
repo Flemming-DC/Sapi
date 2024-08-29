@@ -193,7 +193,7 @@ def _remove_space_and_newline(sql: str) -> str:
 
 
 if __name__ == '__main__':
-    test_get_expected_table_trees()
+    # test_get_expected_table_trees()
     test_get_expected_sql()
     print("Passed")
 

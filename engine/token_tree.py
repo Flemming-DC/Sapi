@@ -1,10 +1,10 @@
 from __future__ import annotations
-from textwrap import indent
 from dataclasses import dataclass, field
 from sqlglot.tokens import auto
-from sqlglot.tokens import Token, TokenType
-# from dyn_loop import Token, TokenType, ParserError, DynLoop
+from sqlglot.tokens import TokenType, Token
 # from sqlglot.expressions import Expression, Select, Insert, Update, Delete, Column, Table, Create, Drop, With # many kinds of alter 
+
+
 
 TokenType.TOKEN_TREE = auto()
 _TOKENTYPE_TOKEN_TREE = TokenType.TOKEN_TREE
@@ -13,7 +13,7 @@ _TOKENTYPE_TOKEN_TREE = TokenType.TOKEN_TREE
 
 class ParserError(Exception): ...
 
-@dataclass # go away
+@dataclass 
 class _StrReplacement:
     str_from_: int
     str_to: int
@@ -26,17 +26,12 @@ _common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, Toke
 
 @dataclass
 class TokenTree:
-    # a token was <class 'builtins.Token'>. Get control over their types
-    tokens: list[Token|TokenTree]
-    # dyn_loop: DynLoop # go away
-
+    tokens: list[Token|TokenTree] # variable
     _sapi_str: str # const (evt. only store at the root tree)
-    # _tokens = tokens
-    # _previous_token: Token|None
-    _next_token: Token|None
-    _str_replacements: list[_StrReplacement] = field(default_factory=list)
+    _next_token: Token|None # const
+    _str_replacements: list[_StrReplacement] = field(default_factory=list) # variable
 
-    #region Token Compatibility
+    #region ---------- Token Compatibility ---------- 
     token_type: TokenType = _TOKENTYPE_TOKEN_TREE
     @property 
     def text(self): return "[TokenTree]" # str(self)
@@ -50,76 +45,9 @@ class TokenTree:
     def end(self): raise ParserError(f"the end property is extremely unreliable. Don't use it!")
     @property 
     def comments(self): return None
-    #endregion
+    #endregion -------------------------------------- 
 
-    def __repr__(self) -> str: return self.__repr__2()
-
-    def __repr__1(self) -> str: 
-        s = '['
-        for tok in self.tokens:
-            if isinstance(tok, TokenTree):
-                s += indent(repr(tok), '    ').lstrip()
-                # s += tok.text + ' '
-            else:
-                s = TokenTree.add_token_str1(s, tok)
-        return s.rstrip(' ') + ']'
-
-    @staticmethod
-    def add_token_str1(so_far: str, tok: Token) -> str:
-        if tok.token_type in _common_select_clauses:
-            return so_far + '\n' + tok.text + ' '
-        elif tok.text == '.':
-            return so_far.rstrip(' ') + tok.text
-        elif tok.text in ['(', '[', '{']:
-            return so_far + tok.text
-        elif tok.text in [',', ')', ']', '}']:
-            return so_far.rstrip(' ') + tok.text + ' '
-        else:
-            return so_far + tok.text + ' '
         
-    def __repr__2(_):
-        str_replacements = _._str_replacements
-        for tok in _.tokens:
-            if isinstance(tok, TokenTree):
-                str_replacements += tok._str_replacements
-
-        sql_str = ""
-        str_replacements.sort(key = lambda r: r.str_from_)
-        for i, rep in enumerate(str_replacements):
-            last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0
-            sql_str += _._sapi_str[last_rep_to:rep.str_from_ - 1]
-            for tok in rep.new_tokens:
-                sql_str = TokenTree.add_token_str2(sql_str, tok)
-        last_rep_to = str_replacements[-1].str_to
-        sql_str += _._sapi_str[last_rep_to:]
-        return sql_str
-    
-    @staticmethod
-    def add_token_str2(so_far: str, tok: Token) -> str:
-        no_space_prefix = [')', ']', '}', '.', ',']
-        no_space_suffix = ['(', '[', '{', '.'     ]
-
-        if tok.token_type in _common_select_clauses:
-            so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
-            so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
-            return so_far + tok.text
-        
-        elif so_far != "" and so_far[-1] in no_space_suffix: # previous has have no space suffix
-            return so_far.rstrip(' ') + tok.text
-        elif tok.text in no_space_prefix:
-            return so_far.rstrip(' ') + tok.text
-        else:
-            return so_far + ' ' + tok.text
-        
-    @staticmethod
-    def _last_indention(s: str) -> str:
-        last_line = s.split('\n')[-1]
-        indention_count = 0
-        for char in last_line:
-            if char == ' ': indention_count += 1
-            else: break
-        return indention_count * ' '
-
 
     def replace(_, from_: int, to: int, new: list[tuple[TokenType, str]]):
         # checks
@@ -155,5 +83,89 @@ class TokenTree:
         _.tokens[from_:to] = new_tokens
 
 
+#region -------------- cast to str --------------
 
+    def __str__(_) -> str:
+        # collect replacements in subtrees
+        str_replacements = _._str_replacements
+        for tok in _.tokens:
+            if isinstance(tok, TokenTree):
+                str_replacements += tok._str_replacements
+        # handle the None case
+        if not str_replacements:
+            return _._sapi_str
+
+        # make string
+        # sql_str is on the form: 
+        #   sapi-segment + replacement +
+        #   ...
+        #   sapi-segment + replacement +
+        #   sapi-segment 
+        sql_str = ""
+        str_replacements.sort(key = lambda r: r.str_from_)
+        for i, rep in enumerate(str_replacements):
+            last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
+            sql_str += _._sapi_str[last_rep_to:rep.str_from_ - 1]        # appending a sapi-segment
+            for tok in rep.new_tokens:
+                sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
+        last_rep_to = str_replacements[-1].str_to
+        sql_str += _._sapi_str[last_rep_to:]
+        return sql_str
+    
+    @staticmethod
+    def _add_token_str2(so_far: str, tok: Token) -> str:
+        no_space_prefix = [')', ']', '}', '.', ',']
+        no_space_suffix = ['(', '[', '{', '.'     ]
+
+        if tok.token_type in _common_select_clauses:
+            so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
+            so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
+            return so_far + tok.text
+        
+        elif so_far != "" and so_far[-1] in no_space_suffix: # previous has have no space suffix
+            return so_far.rstrip(' ') + tok.text
+        elif tok.text in no_space_prefix:
+            return so_far.rstrip(' ') + tok.text
+        else:
+            return so_far + ' ' + tok.text
+        
+    @staticmethod
+    def _last_indention(s: str) -> str:
+        last_line = s.split('\n')[-1]
+        indention_count = 0
+        for char in last_line:
+            if char == ' ': indention_count += 1
+            else: break
+        return indention_count * ' '
+
+
+
+    # def _to_str_old(self) -> str: 
+    #     s = '['
+    #     for tok in self.tokens:
+    #         if isinstance(tok, TokenTree):
+    #             s += indent(repr(tok), '    ').lstrip()
+    #             # s += tok.text + ' '
+    #         else:
+    #             s = TokenTree._add_token_str1(s, tok)
+    #     return s.rstrip(' ') + ']'
+
+    # @staticmethod
+    # def _add_token_str_old(so_far: str, tok: Token) -> str:
+    #     no_space_prefix = [')', ']', '}', '.', ',']
+    #     no_space_suffix = ['(', '[', '{', '.'     ]
+
+    #     if tok.token_type in _common_select_clauses:
+    #         return so_far + '\n' + tok.text + ' '
+    #     elif tok.text == '.': # in no_space_prefix and no_space_suffix
+    #         return so_far.rstrip(' ') + tok.text
+    #     elif tok.text in no_space_suffix:
+    #         return so_far + tok.text
+    #     elif tok.text in no_space_prefix: 
+    #         return so_far.rstrip(' ') + tok.text + ' '
+    #     else:
+    #         return so_far + tok.text + ' '
+
+
+#endregion --------------------------------------
 
