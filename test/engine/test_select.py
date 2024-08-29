@@ -139,34 +139,58 @@ def test_get_expected_sql():
     FROM cte 
     join A ON A.a_1 = cte.a0_1
     """,
-    expected_sql = """[WITH cte AS ([
-    SELECT a0.a0_1, a0.a0_2, a00.a00_2 
-    FROM a0 
-    JOIN a00 USING (a0_id)]) 
-SELECT cte.a00_2, a10.a10_2, ([
-    SELECT sum (a20.a20_2) 
-    FROM a20]) 
-FROM cte 
-join a ON a.a_1 = cte.a0_1 
-JOIN a1 USING (a_id) 
-JOIN a10 USING (a1_id)]""")
+    expected_sql = """
+    WITH cte AS (
+        SELECT a0.a0_1, a0.a0_2, a00.a00_2 FROM a0
+        JOIN a00 USING (a0_id))
+    SELECT
+        cte.a00_2,
+        a10.a10_2,
+        (SELECT sum a20.a20_2) FROM a20)
+    --FROM A
+    --join cte ON A.a_1 = cte.a0_1
+    FROM cte
+    join a ON a.a_1 = cte.a0_1
+    JOIN a1 USING (a_id)
+    JOIN a10 USING (a1_id)
+    """)
 
     cases = [case1]
 
     for sapi, expected_sql in cases:
         actual_sql = parser.parse(sapi)
+        
+        # remove insignificant differences
+        sapi = dedent(sapi)
+        actual_sql = _remove_space_and_newline(actual_sql)
+        expected_sql = _remove_space_and_newline(expected_sql)
 
-        actual_sql = dedent(actual_sql).strip('\n').strip(' ')
-        expected_sql = dedent(expected_sql).strip('\n').strip(' ')
-        print('--- test ---')
-        print(actual_sql)
-        assert actual_sql == expected_sql, dedent("")
-        # f"""
-        # ERROR: 
-        # sapi: \n{dedent(sapi)}
-        # expected_sql: \n{expected_sql}
-        # produced_sql: \n{actual_sql}
-        # """)
+        if actual_sql != expected_sql:
+            differing_lines = [(a, e) for a, e in zip(actual_sql.split('\n'), expected_sql.split('\n')) if a != e]
+            differing_lines = '\n' + '\n'.join(f"'{a}'   differs from   '{e}'" for a, e in differing_lines)
+            raise Exception(dedent("""
+                -------------------------- ERROR -------------------------- 
+                
+                --------- sapi --------- {}
+                 
+                --------- expected_sql --------- {}
+                                   
+                --------- produced_sql --------- {}
+                                   
+                --------- differing_lines --------- {}
+                """).format(sapi, expected_sql, actual_sql, differing_lines))
+
+        
+
+def _remove_space_and_newline(sql: str) -> str:
+    sql = dedent(sql).lstrip('\n').rstrip(' \n')
+    sql = '\n'.join(line.rstrip(' \n') for line in sql.split('\n'))
+    return sql
+        
+
+
+       
+
 
 if __name__ == '__main__':
     test_get_expected_table_trees()

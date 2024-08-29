@@ -15,9 +15,9 @@ class ParserError(Exception): ...
 
 @dataclass # go away
 class _StrReplacement:
-    from_: int
-    to: int
-    new: str
+    str_from_: int
+    str_to: int
+    new_tokens: str
 
 class AutoToken(Token):...
 
@@ -52,7 +52,7 @@ class TokenTree:
     def comments(self): return None
     #endregion
 
-    def __repr__(self) -> str: return self.__repr__1()
+    def __repr__(self) -> str: return self.__repr__2()
 
     def __repr__1(self) -> str: 
         s = '['
@@ -61,11 +61,11 @@ class TokenTree:
                 s += indent(repr(tok), '    ').lstrip()
                 # s += tok.text + ' '
             else:
-                s = TokenTree.add_token_str(s, tok)
+                s = TokenTree.add_token_str1(s, tok)
         return s.rstrip(' ') + ']'
 
     @staticmethod
-    def add_token_str(so_far: str, tok: Token) -> str:
+    def add_token_str1(so_far: str, tok: Token) -> str:
         if tok.token_type in _common_select_clauses:
             return so_far + '\n' + tok.text + ' '
         elif tok.text == '.':
@@ -77,16 +77,49 @@ class TokenTree:
         else:
             return so_far + tok.text + ' '
         
+    def __repr__2(_):
+        str_replacements = _._str_replacements
+        for tok in _.tokens:
+            if isinstance(tok, TokenTree):
+                str_replacements += tok._str_replacements
 
-    def __repr__2(_): 
         sql_str = ""
-        _._str_replacements.sort(key = lambda r: r.from_)
-        for i, rep in enumerate(_._str_replacements):
-            last_rep_to = _._str_replacements[i - 1].to if i > 0 else 0
-            sql_str += _._sapi_str[last_rep_to:rep.from_ - 1] + ' ' + rep.new + ' '
-        last_rep_to = _._str_replacements[-1].to
+        str_replacements.sort(key = lambda r: r.str_from_)
+        for i, rep in enumerate(str_replacements):
+            last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0
+            sql_str += _._sapi_str[last_rep_to:rep.str_from_ - 1]
+            for tok in rep.new_tokens:
+                sql_str = TokenTree.add_token_str2(sql_str, tok)
+        last_rep_to = str_replacements[-1].str_to
         sql_str += _._sapi_str[last_rep_to:]
         return sql_str
+    
+    @staticmethod
+    def add_token_str2(so_far: str, tok: Token) -> str:
+        no_space_prefix = [')', ']', '}', '.', ',']
+        no_space_suffix = ['(', '[', '{', '.'     ]
+
+        if tok.token_type in _common_select_clauses:
+            so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
+            so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
+            return so_far + tok.text
+        
+        elif so_far != "" and so_far[-1] in no_space_suffix: # previous has have no space suffix
+            return so_far.rstrip(' ') + tok.text
+        elif tok.text in no_space_prefix:
+            return so_far.rstrip(' ') + tok.text
+        else:
+            return so_far + ' ' + tok.text
+        
+    @staticmethod
+    def _last_indention(s: str) -> str:
+        last_line = s.split('\n')[-1]
+        indention_count = 0
+        for char in last_line:
+            if char == ' ': indention_count += 1
+            else: break
+        return indention_count * ' '
+
 
     def replace(_, from_: int, to: int, new: list[tuple[TokenType, str]]):
         # checks
@@ -115,8 +148,8 @@ class TokenTree:
         str_from = from_tok.start if from_tok else len(_._sapi_str)
         width = 0 if to == from_ else len(from_tok.text) # len(_.tok().text)
         str_to = str_from + width
-        new_str = ' '.join(t.text for t in new_tokens)
-        _._str_replacements.append(_StrReplacement(str_from, str_to, new_str))
+        # new_str = ' '.join(t.text for t in new_tokens)
+        _._str_replacements.append(_StrReplacement(str_from, str_to, new_tokens))
 
         # modify tokens
         _.tokens[from_:to] = new_tokens
