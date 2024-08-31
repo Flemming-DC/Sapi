@@ -46,6 +46,20 @@ for row in _table_data:
             tables_by_var[col] = []
         tables_by_var[col].append(row['table'])
 
+tables_by_var_and_tree = {}
+for var, tabs_of_var in tables_by_var.items():
+    for tree in table_tree_names:
+        tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
+
+        # if len(tabs_of_var_in_tree) > 1:
+        #     raise Exception(f"The tree '{tree}' contains multiple tables {tabs_of_var_in_tree} with column {var}.")
+        # if len(tabs_of_var_in_tree) == 0:
+        #     continue
+        # # elif len(tabs_of_var_in_tree) == 0:
+        #     raise Exception(f"The tree '{tree}' does not contain any table with column {var}.")
+        # tab = tabs_of_var_in_tree[0]
+        tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
+
 
 node_by_table = {}
 for row in _table_data:

@@ -4,7 +4,7 @@ from textwrap import dedent
 from collections import namedtuple
 from engine.token_tree import Token, TokenType, TokenTree
 from engine.select.tree_join import TreeJoin
-from engine.select import table_finder #, path_finder, join_generator
+from engine.select import select_analyzer #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
 from select_cases import select_cases
 
@@ -81,16 +81,16 @@ def test_get_expected_table_trees():
     # dyn_loop3 = DynLoop(tokens3, sub_token_tree3) 
 
 
-    expected_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
-        join_obj_index=13,
+    expected_1 = TreeJoin(tree_tok = Token(TokenType.VAR, 'A', 3, 32, 57, 57,), 
+        tree_tok_index=13,
         on_clause_end_index=13, first_table='a0', referenced_tables=['a0', 'a0', 'a00'])
-    expected_2 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 8, 26, 143, 143,),
-        join_obj_index=8, on_clause_end_index=8, 
+    expected_2 = TreeJoin(tree_tok = Token(TokenType.VAR, 'A', 8, 26, 143, 143,),
+        tree_tok_index=8, on_clause_end_index=8, 
         first_table='a20', referenced_tables=['a20'])
     # expected_3_1 = TreeJoin(join_obj = Token(TokenType.VAR, 'cte', 11, 9, 203, 205,), 
     #     on_clause_end_index=19, on_clause_tables=[], first_table=None, tables=[], path=[])
-    expected_3 = TreeJoin(join_obj = Token(TokenType.VAR, 'A', 12, 7, 217, 217,), 
-        join_obj_index=21, on_clause_end_index=29, 
+    expected_3 = TreeJoin(tree_tok = Token(TokenType.VAR, 'A', 12, 7, 217, 217,), 
+        tree_tok_index=21, on_clause_end_index=29, 
         first_table='a', referenced_tables=['a10', 'a'])
     expected_1 = [expected_1]
     expected_2 = [expected_2]
@@ -104,18 +104,18 @@ def test_get_expected_table_trees():
         ]
 
     for _, expected, tok_tree in cases:
-        actual: list[TreeJoin] = table_finder.get_tables(DynLoop(tok_tree))
+        actual: list[TreeJoin] = select_analyzer.find_tree_joins(DynLoop(tok_tree))
         for a, e in zip(actual, expected):
             assert _equal_join_data(a, e), "table_finder.get_tables(tokens1) gave incorrect join_data."
 
 
 def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
     # evt. put the comparison into the join data class
-    jo1 = j1.join_obj
+    jo1 = j1.tree_tok
     jot1 = (jo1.token_type, jo1.token_type, jo1.text, jo1.line, jo1.col, jo1.start, jo1.end, jo1.comments)
     j1_comparable = (jot1, j1.on_clause_end_index, j1.first_table, j1.referenced_tables)
 
-    jo2 = j2.join_obj
+    jo2 = j2.tree_tok
     jot2 = (jo2.token_type, jo2.token_type, jo2.text, jo2.line, jo2.col, jo2.start, jo2.end, jo2.comments)
     j2_comparable = (jot2, j2.on_clause_end_index, j2.first_table, j2.referenced_tables)
 

@@ -1,10 +1,10 @@
 from textwrap import dedent
-from engine.hardcodedTrees import tables_by_var, table_tree_names, trees_by_table, all_tables
+from engine.hardcodedTrees import tables_by_var, table_tree_names, trees_by_table, all_tables, tables_by_var_and_tree
 from engine.token_tree import Token, TokenTree, TokenType, ParserError
 from .tree_join import TreeJoin
 from engine.dyn_loop import DynLoop
 
-def get_tables(loop: DynLoop) -> list[TreeJoin]:
+def find_tree_joins(loop: DynLoop) -> list[TreeJoin]:
     print('---')
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
@@ -12,7 +12,7 @@ def get_tables(loop: DynLoop) -> list[TreeJoin]:
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
             continue
-        tree_join, on_clause_tables_in_join = _make_tree_join(loop, [j.join_obj for j in tree_joins])
+        tree_join, on_clause_tables_in_join = _make_tree_join(loop, [j.tree_tok for j in tree_joins])
         if tree_join:
             tree_joins.append(tree_join)
             tabs_in_on_clauses.append(on_clause_tables_in_join)
@@ -20,10 +20,7 @@ def get_tables(loop: DynLoop) -> list[TreeJoin]:
             continue
         if _table_from_prefix(ref_tables, loop):
             continue
-        trees = [j.join_obj.text for j in tree_joins]
-        _table_from_variable(ref_tables, loop, trees)
-        # if _table_from_variable(loop.tok(), ref_tables, loop):
-        #     _insert_table_prefix(loop)
+        _table_from_variable(ref_tables, loop)
 
     _plug_tables_into_tree_joins(ref_tables, tree_joins, tabs_in_on_clauses)
     return tree_joins
@@ -67,15 +64,20 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
         if loop.tok().text in table_tree_names: # is tree
             if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
                 raise ParserError("Expected column after tree, as in tree.column") # why not table?
+            
             var = loop.peek(2).text
-            tabs_of_var = tables_by_var[var] 
             tree = loop.tok().text
-            tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-            if len(tabs_of_var_in_tree) > 1:
-                raise ParserError(f"The tree {tree} contains multiple tables {tabs_of_var_in_tree} with column {var}.")
-            elif len(tabs_of_var_in_tree) == 0:
-                raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
-            tab = tabs_of_var_in_tree[0]
+            tab = _get_table_from_var_and_tree(var, tree)
+
+            # var = loop.peek(2).text
+            # tabs_of_var = tables_by_var[var] 
+            # tree = loop.tok().text
+            # tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
+            # if len(tabs_of_var_in_tree) > 1:
+            #     raise ParserError(f"The tree {tree} contains multiple tables {tabs_of_var_in_tree} with column {var}.")
+            # elif len(tabs_of_var_in_tree) == 0:
+            #     raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
+            # tab = tabs_of_var_in_tree[0]
             loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
         # record table prefixes
         if loop.tok().text in all_tables: # is table
@@ -83,7 +85,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
 
     if not is_tree:
         return None, None
-    tree_join = TreeJoin(join_obj=join_obj, join_obj_index=join_obj_index, on_clause_end_index=loop.index())
+    tree_join = TreeJoin(tree_tok=join_obj, tree_tok_index=join_obj_index, on_clause_end_index=loop.index())
     return tree_join, on_clause_tables
     
 
@@ -97,19 +99,9 @@ def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
         return False
     tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
     if tab_or_tree.text in table_tree_names:
-
         var = loop.tok().text
-        tabs_of_var = tables_by_var[var] 
         tree = loop.peek(-2).text
-        tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-        if len(tabs_of_var_in_tree) > 1:
-            raise ParserError(f"The tree {tree} contains multiple tables {tabs_of_var_in_tree} with column {var}.")
-        elif len(tabs_of_var_in_tree) == 0:
-            raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
-        tab = tabs_of_var_in_tree[0]
-
-
-        # tab_of_var = tables_by_var[loop.tok().text] 
+        tab = _get_table_from_var_and_tree(var, tree)
         loop.replace((TokenType.VAR, tab), distance = -2) # replace tree prefix with table prefix
     
     if tab_or_tree.text in all_tables and tab_or_tree.text not in ref_tables:
@@ -117,12 +109,11 @@ def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
     return True
         
 
-def _table_from_variable(ref_tables: list[str], loop: DynLoop, tree: str) -> bool:
+def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
     "returns true if table found. If table is new, then it is inserted."
+    # we assume unique tab. Is that okay?
     if loop.tok().text not in tables_by_var.keys():
         return
-    # tab = tables_by_var[token.text] # requires that there is a unique table, which contains var
-
     var = loop.tok().text
     tabs_of_var = tables_by_var[var] 
     if len(tabs_of_var) > 1:
@@ -130,14 +121,6 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop, tree: str) -> boo
     elif len(tabs_of_var) == 0:
         raise ParserError(f"The is no table with column {var}.")
     tab = tabs_of_var[0]
-
-    # # tree = loop.peek(-2).text
-    # tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-    # if len(tabs_of_var_in_tree) > 1:
-    #     raise ParserError(f"The tree {tree} contains multiple tables {tabs_of_var_in_tree} with column {var}.")
-    # elif len(tabs_of_var_in_tree) == 0:
-    #     raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
-    # tab = tabs_of_var_in_tree[0]
 
     if loop.found(TokenType.DOT, -1):
         raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
@@ -147,7 +130,14 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop, tree: str) -> boo
         (TokenType.VAR, tab), 
         (TokenType.DOT, '.')])
 
-    
+def _get_table_from_var_and_tree(var: str, tree: str) -> str:
+    tabs = tables_by_var_and_tree[var, tree]
+    if len(tabs) > 1:
+        raise ParserError(f"The tree {tree} contains multiple tables {tabs} with column {var}.")
+    elif len(tabs) == 0:
+        raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
+    return tabs[0]
+
 
 
 def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoin], tabs_in_on_clauses: list[str]):
@@ -165,7 +155,7 @@ def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoi
         if len(new_tables) >= 2:
             raise SyntaxError(dedent(f"""
                 Each tree-on-clause may reference at most one new table. 
-                The on-clause of {j.join_obj} references {new_tables}.
+                The on-clause of {j.tree_tok} references {new_tables}.
                 """))
         # j.first_table can be None in a query like "select 1 from A"
         # min(j.referenced_tables) is the alphabetic minimum
@@ -178,7 +168,7 @@ def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
     trees_of_tab = trees_by_table[table_name]
     already_found = False
     for j in tree_joins:
-        if j.join_obj.text not in trees_of_tab:
+        if j.tree_tok.text not in trees_of_tab:
             continue
         if already_found:
             raise ParserError(
