@@ -47,5 +47,9 @@ usage of demand:
     ? leave join_generator unchanged (initially)
     cleanup join_generator and go directly to index (no loop) and auto generate using the associated data.
 
+evt. make a rule for resolving arbitrary ordering of tables (e.g. alphabetic)
+
+automatically remove trailing comma
+
 
 

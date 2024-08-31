@@ -1,10 +1,9 @@
-from __future__ import annotations
 from sqlglot import Dialect
 from .token_tree import TokenTree, Token, TokenType, ParserError
+from engine.dialect import dialect_str
 
 
-
-_dialect = Dialect.get_or_raise("postgres") # dialekt bør gribes fra et config object
+_dialect = Dialect.get_or_raise(dialect_str) # dialekt bør gribes fra et config object
 
 
 def tokenize(sapi_str: str) -> list[TokenTree]:

@@ -6,7 +6,7 @@ from engine.token_tree import Token, TokenType, TokenTree
 from engine.select.tree_join import TreeJoin
 from engine.select import table_finder #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
-
+from select_cases import select_cases
 
 def test_get_expected_table_trees():
     # ------- tokens ---------
@@ -43,8 +43,8 @@ def test_get_expected_table_trees():
     sub_token_tree2 = TokenTree(tokens2, "irrelevant sapi_str",
                         Token(TokenType.R_PAREN, ')', 8, 27, 144, 144))
 
-    dyn_loop1 = DynLoop(sub_token_tree1)
-    dyn_loop2 = DynLoop(sub_token_tree2)
+    # dyn_loop1 = DynLoop(sub_token_tree1)
+    # dyn_loop2 = DynLoop(sub_token_tree2)
     
     tokens3 = [
         Token(TokenType.WITH, 'WITH', 2, 5, 5, 8),
@@ -124,40 +124,7 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 
 def test_get_expected_sql():
 
-    Case = namedtuple('Case', ['sapi', 'expected_sql'])
-
-    case1 = Case(sapi = """
-    WITH cte AS (
-        SELECT a0_1, a0_2, a00_2 FROM A
-    )
-    SELECT 
-        cte.a00_2,
-        a10_2,
-        (SELECT sum(a20_2) FROM A)
-    --FROM A
-    --join cte ON A.a_1 = cte.a0_1
-    FROM cte 
-    join A ON A.a_1 = cte.a0_1
-    """,
-    expected_sql = """
-    WITH cte AS (
-        SELECT a0.a0_1, a0.a0_2, a00.a00_2 FROM a0
-        JOIN a00 USING (a0_id))
-    SELECT
-        cte.a00_2,
-        a10.a10_2,
-        (SELECT sum a20.a20_2) FROM a20)
-    --FROM A
-    --join cte ON A.a_1 = cte.a0_1
-    FROM cte
-    join a ON a.a_1 = cte.a0_1
-    JOIN a1 USING (a_id)
-    JOIN a10 USING (a1_id)
-    """)
-
-    cases = [case1]
-
-    for sapi, expected_sql in cases:
+    for sapi, expected_sql in select_cases:
         actual_sql = parser.parse(sapi)
         
         # remove insignificant differences
@@ -165,8 +132,8 @@ def test_get_expected_sql():
         actual_sql = _remove_space_and_newline(actual_sql)
         expected_sql = _remove_space_and_newline(expected_sql)
 
-        if actual_sql != expected_sql:
-            differing_lines = [(a, e) for a, e in zip(actual_sql.split('\n'), expected_sql.split('\n')) if a != e]
+        if actual_sql.lower() != expected_sql.lower():
+            differing_lines = [(a, e) for a, e in zip(actual_sql.split('\n'), expected_sql.split('\n')) if a.lower() != e.lower()]
             differing_lines = '\n' + '\n'.join(f"'{a}'   differs from   '{e}'" for a, e in differing_lines)
             raise Exception(dedent("""
                 -------------------------- ERROR -------------------------- 

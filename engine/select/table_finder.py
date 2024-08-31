@@ -1,13 +1,14 @@
 from textwrap import dedent
-from engine.hardcodedTrees import table_by_var, table_tree_names, tree_by_table
+from engine.hardcodedTrees import table_by_var, table_tree_names, trees_by_table, all_tables
 from engine.token_tree import Token, TokenTree, TokenType, ParserError
 from .tree_join import TreeJoin
 from engine.dyn_loop import DynLoop
 
 def get_tables(loop: DynLoop) -> list[TreeJoin]:
+    print('---')
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
-    tables: list[str] = [] # tables from variables and prefixes
+    ref_tables: list[str] = []
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
             continue
@@ -17,12 +18,12 @@ def get_tables(loop: DynLoop) -> list[TreeJoin]:
             tabs_in_on_clauses.append(on_clause_tables_in_join)
         if not loop.found([TokenType.IDENTIFIER, TokenType.VAR], 0):
             continue
-        if _table_from_prefix(tables, loop):
+        if _table_from_prefix(ref_tables, loop):
             continue
-        if _table_from_variable(loop.tok(), tables):
+        if _table_from_variable(loop.tok(), ref_tables):
             _insert_table_prefix(loop)
 
-    _plug_tables_into_tree_join(tables, tree_joins, tabs_in_on_clauses)
+    _plug_tables_into_tree_joins(ref_tables, tree_joins, tabs_in_on_clauses)
     return tree_joins
 
 
@@ -44,7 +45,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
 
     join_obj = loop.tok() # join_obj at end of join_obj prefixes
     join_obj_index = loop.index()
-    if join_obj in prior_join_objs: # any(j.join_obj == join_obj for j in tree_joins):
+    if join_obj in prior_join_objs:
         return None, None # don't dublicate join_data (is that actually correct behaviour??)
     is_tree = join_obj.text in table_tree_names
 
@@ -66,7 +67,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
                 raise ParserError("Expected column after tree, as in tree.column") # why not table?
             tab_of_var = table_by_var[loop.peek(2).text] 
             loop.replace((TokenType.VAR, tab_of_var)) # replace tree prefix with table prefix
-        if loop.tok().text in tree_by_table.keys(): # is table
+        if loop.tok().text in all_tables: # is table
             on_clause_tables.append(loop.tok().text) # register table in on clause
 
     if not is_tree:
@@ -75,7 +76,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
     return tree_join, on_clause_tables
     
 
-def _table_from_prefix(tables: list[str], loop: DynLoop) -> bool:
+def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
     """
     Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     Each call to _table_from_prefix will update the prefix and 
@@ -85,19 +86,21 @@ def _table_from_prefix(tables: list[str], loop: DynLoop) -> bool:
         return False
     tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
     if tab_or_tree.text in table_tree_names:
-        text = table_by_var[loop.tok().text]
-        loop.insert([(TokenType.VAR, text)], distance = -2)
-    tables.append(tab_or_tree.text) 
+        tab_of_var = table_by_var[loop.tok().text] 
+        loop.replace((TokenType.VAR, tab_of_var), distance = -2) # replace tree prefix with table prefix
+    
+    if tab_or_tree.text in all_tables and tab_or_tree.text not in ref_tables:
+        ref_tables.append(tab_or_tree.text) 
     return True
         
 
-def _table_from_variable(token: Token, tables: list[str]) -> bool:
+def _table_from_variable(token: Token, ref_tables: list[str]) -> bool:
     "returns true if table found. If table is new, then it is inserted."
     if token.text not in table_by_var.keys():
         return False
     tab = table_by_var[token.text] # requires that there is a unique table, which contains var
-    if tab not in tables:
-        tables.append(tab)
+    if tab in all_tables and tab not in ref_tables:
+        ref_tables.append(tab)
     return True
 
 def _insert_table_prefix(loop: DynLoop):
@@ -109,19 +112,16 @@ def _insert_table_prefix(loop: DynLoop):
     
 
 
-def _plug_tables_into_tree_join(tables: list[str], tree_joins: list[TreeJoin], tabs_in_on_clauses: list[str]):
-    for tab_name in tables:
-        if tab_name not in tree_by_table.keys():
-            continue # this happens for cte's and probably views.
-        tree_name = tree_by_table[tab_name] # this persumes a table->tree map. Thus you can't have multiple trees containing the same table
-        for j in tree_joins:
-            if j.join_obj.text == tree_name:
-                j.referenced_tables.append(tab_name)
-                break
+def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoin], tabs_in_on_clauses: list[str]):
+    for tab_name in ref_tables:
+        if tab_name in all_tables: # this filters for cte's and probably views.
+            _plug_ref_table_into_tree_join(tab_name, tree_joins)
+    
     prior_tables = []
     for j, tabs_in_on_clause in zip(tree_joins, tabs_in_on_clauses):
         # this can somehow be a non-empty addition in a join akin to "join A ON A.a_1 = cte.a0_1",
-        j.referenced_tables += [t for t in tabs_in_on_clause if t not in j.referenced_tables] 
+        # or maybe not. it looks suspect.
+        # j.referenced_tables += [t for t in tabs_in_on_clause if t not in j.referenced_tables] 
         
         new_tables = [t for t in tabs_in_on_clause if t not in prior_tables]
         if len(new_tables) >= 2:
@@ -130,6 +130,24 @@ def _plug_tables_into_tree_join(tables: list[str], tree_joins: list[TreeJoin], t
                 The on-clause of {j.join_obj} references {new_tables}.
                 """))
         # j.first_table can be None in a query like "select 1 from A"
-        j.first_table = new_tables[0] if new_tables else j.referenced_tables[0] if j.referenced_tables else None
+        # min(j.referenced_tables) is the alphabetic minimum
+        j.first_table = new_tables[0] if new_tables else min(j.referenced_tables) if j.referenced_tables else None
 
         prior_tables += j.referenced_tables
+
+
+def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
+    trees_of_tab = trees_by_table[table_name]
+    already_found = False
+    for j in tree_joins:
+        if j.join_obj.text not in trees_of_tab:
+            continue
+        if already_found:
+            raise ParserError(
+                "You cannot have multiple trees in the same query, while using columns from a table that belongs to both. "
+                f"table {table_name} belongs to {trees_of_tab}.")
+        already_found = True
+    
+        j.referenced_tables.append(table_name)
+        if len(trees_of_tab) == 1:
+            break # this break is an optimization

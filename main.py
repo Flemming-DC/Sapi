@@ -1,5 +1,5 @@
 from engine import parser
-
+# from engine.token_tree import TokenTree
 
 
 if __name__ == '__main__':
@@ -7,18 +7,18 @@ if __name__ == '__main__':
     # a0_1, a0_2, a00_2, a10_2, a20_2, a_1
     sapi_query = """
     WITH cte AS (
-        SELECT a0_1, a0_2, a00_2 FROM A
+        SELECT COL0_1, COL0_2, COL00_2 FROM TREE
     )
     SELECT 
-        cte.a00_2,
-        a10_2,
-        (SELECT sum(a20_2) FROM A)
+        cte.COL00_2,
+        COL10_2,
+        (SELECT sum(COL20_2) FROM TREE)
     -- comment
     /* comment */
     FROM cte 
-    join A ON A.a_1 = cte.a0_1
+    join TREE ON TREE.COL_1 = cte.COL0_1
     """
     sql = parser.parse(sapi_query)
     print("--- sql-str ---")
     print(sql)
-
+    

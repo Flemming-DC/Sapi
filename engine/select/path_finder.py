@@ -16,7 +16,7 @@ def join_path(table_names: list[str], first_table: str|None) -> tuple[pathType, 
         return [], None # this means that there is nothing to join. e.g. "select 1 from A"
 
     ordered_tabs = [first_table] + [t for t in table_names if t != first_table] 
-    table_nodes = [node_by_table[t] for t in ordered_tabs if t in node_by_table.keys()]
+    table_nodes = [node_by_table[t] for t in ordered_tabs]# if t in node_by_table.keys()]
 
     pathInfo = _PathInfo()
     for tab_node in table_nodes:

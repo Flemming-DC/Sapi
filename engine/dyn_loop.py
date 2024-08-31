@@ -1,6 +1,6 @@
 from __future__ import annotations
 # from sqlglot.tokens import Token, TokenType
-from engine.token_tree import TokenTree, Token, TokenType, ParserError
+from engine.token_tree import TokenTree, Token, TokenType, ParserError, common_select_clauses
 
 
 class DynLoop:
@@ -20,11 +20,12 @@ class DynLoop:
         _._token_tree.replace(at, at, new)
         growth = len(new)
         _._count += growth
-        if distance >= 0:
+        if distance <= 0:
             _._i += growth
 
-    def replace(_, new: tuple[TokenType, str]):
-        _._token_tree.replace(_._i, _._i + 1, [new])
+    def replace(_, new: tuple[TokenType, str], distance = 0):
+        at = _._i + distance
+        _._token_tree.replace(at, at + 1, [new])
         
     
     def peek(_, distance: int = 1) -> Token|None: 
@@ -36,15 +37,16 @@ class DynLoop:
     
     def next(_) -> bool:
         "Step to next element and return True, if a next element was found"
-        # if len(_.get_tokens()) != _._count: assert False, ""
         _._i += 1
+        # if _.has_passed("tree."):
+        #     ...
         if _._i >= _._count:
             return False
         if _._breakpoint_index is not None and _._i >= _._breakpoint_index:
             breakpoint()
             _._breakpoint_index = None
         # print(_._tokens[_._i].text + ' ', 
-        #       end = '\n' if _._tokens[_._i].token_type in _common_select_clauses else '') # toggle on or off
+        #       end = '\n' if _._tokens[_._i].token_type in common_select_clauses else '') # toggle on or off
         return True
     
     
@@ -77,9 +79,14 @@ class DynLoop:
             raise ParserError(f"Cannot break on {stopping_obj}, since it is an unrecognized type")
     
     def has_passed(_, stopping_obj: str) -> bool:
-        location = _._sapi_str.find(stopping_obj)
-        return _._i >= location and location != -1
+        return _.at_end() or _._token_tree.has_passed(stopping_obj, _.tok().start)
     
     def at_end(_, distance: int = 0): return _._i + distance >= _._count
+
+    def view(_, from_: int|None = None, to: int = 0):
+        "Meant for debugging"
+        from_ = from_ + _._i if from_ is not None else 0
+        to = to + _._i if to is not None else -1
+        return ' '.join(t.text for t in _._tokens[from_:to])
 
 

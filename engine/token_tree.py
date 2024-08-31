@@ -21,7 +21,7 @@ class _StrReplacement:
 
 class AutoToken(Token):...
 
-_common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
+common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
     TokenType.OUTER, TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
 
 @dataclass
@@ -47,13 +47,22 @@ class TokenTree:
     def comments(self): return None
     #endregion -------------------------------------- 
 
+    def has_passed(_, stopping_obj: str, str_index: int) -> bool:
+        location = _._sapi_str.find(stopping_obj)
+        return str_index >= location and location != -1
         
 
     def replace(_, from_: int, to: int, new: list[tuple[TokenType, str]]):
         # checks
         count = len(_.tokens)
+        if to > from_ + 1:
+            # we reduce the case of to >= from_ + 1 into to == from_ + 1, for which the width (str_to - str_from)
+            # is known: width = len(from_tok.text)
+            for i in range(from_ + 1, to):
+                _.replace(i, i + 1, []) 
+            to = from_ + 1
         if to != from_ and to != from_ + 1:
-            raise ParserError("øv!")
+            raise ParserError("Replace currently only allows the removal of up to one token at a time")
         if from_ < 0 or to > count:
             raise ParserError("index out of bounds")
 
@@ -74,7 +83,7 @@ class TokenTree:
 
         # save str data
         str_from = from_tok.start if from_tok else len(_._sapi_str)
-        width = 0 if to == from_ else len(from_tok.text) # len(_.tok().text)
+        width = 0 if to == from_ else len(from_tok.text) # this line imposes the restriction of removing at most one token at a time
         str_to = str_from + width
         # new_str = ' '.join(t.text for t in new_tokens)
         _._str_replacements.append(_StrReplacement(str_from, str_to, new_tokens))
@@ -108,16 +117,20 @@ class TokenTree:
             sql_str += _._sapi_str[last_rep_to:rep.str_from_ - 1]        # appending a sapi-segment
             for tok in rep.new_tokens:
                 sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
+            if _._if_new_clause_add_newline(sql_str, rep.str_from_):
+                sql_str += '\n'
+
         last_rep_to = str_replacements[-1].str_to
         sql_str += _._sapi_str[last_rep_to:]
         return sql_str
+    
     
     @staticmethod
     def _add_token_str2(so_far: str, tok: Token) -> str:
         no_space_prefix = [')', ']', '}', '.', ',']
         no_space_suffix = ['(', '[', '{', '.'     ]
 
-        if tok.token_type in _common_select_clauses:
+        if tok.token_type in common_select_clauses:
             so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
             so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
             return so_far + tok.text
@@ -138,6 +151,15 @@ class TokenTree:
             else: break
         return indention_count * ' '
 
+    def _if_new_clause_add_newline(_, sql_str: str, str_index_from_: int) -> bool:
+        if sql_str[-1] == '\n':
+            return False
+        remainder = _._sapi_str[str_index_from_:].upper()
+        common_select_clauses_str = [str(t).lstrip('TokenType.') for t in common_select_clauses]
+        for clause in common_select_clauses_str:
+            if remainder.startswith(clause):
+                return True
+        return False
 
 
     # def _to_str_old(self) -> str: 
