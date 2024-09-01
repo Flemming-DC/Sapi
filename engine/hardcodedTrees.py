@@ -17,14 +17,14 @@ trees_by_table = {
     'tab':   ['tree'],
     'tab0':  ['tree'],
     'tab1':  ['tree'],
-    'TaB3':  ['TREE', 'tree'],
+    'shT3':  ['TREE', 'tree'],
 }
 
 # tab, references, columns (other than fk and pk)
 _table_data = [
     {'table': 'TAB',   'refers_to': [],              'columns': ['COL_1',   'COL_2']},
-    {'table': 'TAB0',  'refers_to': ['TAB', 'tab1'], 'columns': ['COL0_1',  'COL0_2', 'SHARED']},
-    {'table': 'TAB1',  'refers_to': ['TAB', 'tab0'], 'columns': ['COL1_1',  'COL1_2', 'SHARED']},
+    {'table': 'TAB0',  'refers_to': ['TAB', 'tab1'], 'columns': ['COL0_1',  'COL0_2', 'SHC']},
+    {'table': 'TAB1',  'refers_to': ['TAB', 'tab0'], 'columns': ['COL1_1',  'COL1_2', 'SHC']},
     {'table': 'TAB2',  'refers_to': ['TAB'],         'columns': ['COL2_1',  'COL2_2']},
     {'table': 'TAB00', 'refers_to': ['TAB0'],        'columns': ['COL00_1', 'COL00_2']},
     {'table': 'TAB01', 'refers_to': ['TAB0'],        'columns': ['COL01_1', 'COL01_2']},
@@ -32,9 +32,9 @@ _table_data = [
     {'table': 'TAB20', 'refers_to': ['TAB2'],        'columns': ['COL20_1', 'COL20_2']},
     {'table': 'TAB21', 'refers_to': ['TAB2'],        'columns': ['COL21_1', 'COL21_2']},
     {'table': 'tab',   'refers_to': [],              'columns': ['col_1',   'col_2']},
-    {'table': 'tab0',  'refers_to': ['tab', 'TAB1'], 'columns': ['col0_1',  'col0_2', 'shared']},
-    {'table': 'tab1',  'refers_to': ['tab', 'TAB0'], 'columns': ['col1_1',  'col1_2', 'shared']},
-    {'table': 'TaB3',  'refers_to': ['tab', 'TAB' ], 'columns': ['CoL4_1',  'CoL3_2']},
+    {'table': 'tab0',  'refers_to': ['tab', 'TAB1'], 'columns': ['col0_1',  'col0_2', 'shc']},
+    {'table': 'tab1',  'refers_to': ['tab', 'TAB0'], 'columns': ['col1_1',  'col1_2', 'shc']},
+    {'table': 'shT3',  'refers_to': ['tab', 'TAB' ], 'columns': ['CoL4_1',  'CoL3_2']},
 ]
 
 

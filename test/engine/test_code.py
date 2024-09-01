@@ -6,7 +6,7 @@ from engine.token_tree import Token, TokenType, TokenTree
 from engine.select.tree_join import TreeJoin
 from engine.select import select_analyzer #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
-from select_cases import select_cases
+from select_cases import select_cases, select_error_cases
 
 def test_get_expected_table_trees():
     # ------- tokens ---------
@@ -147,6 +147,18 @@ def test_get_expected_sql():
                 --------- differing_lines --------- {}
                 """).format(sapi, expected_sql, actual_sql, differing_lines))
 
+
+def test_raise_error():
+    for sapi, error_type in select_error_cases:
+        found_error = False
+        try:   parser.parse(sapi)
+        except error_type: found_error = True
+        except Exception: ...
+
+        if not found_error:
+            sapi = dedent(sapi)
+            raise Exception(f"Failed to raise {error_type.__name__} in {sapi}")
+
         
 
 def _remove_space_and_newline(sql: str) -> str:
@@ -162,6 +174,7 @@ def _remove_space_and_newline(sql: str) -> str:
 if __name__ == '__main__':
     # test_get_expected_table_trees()
     test_get_expected_sql()
+    test_raise_error()
     print("Passed")
 
 

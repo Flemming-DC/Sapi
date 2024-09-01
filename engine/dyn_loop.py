@@ -1,6 +1,5 @@
 from __future__ import annotations
-# from sqlglot.tokens import Token, TokenType
-from engine.token_tree import TokenTree, Token, TokenType, ParserError, common_select_clauses
+from engine.token_tree import TokenTree, Token, TokenType, ParserError
 
 
 class DynLoop:

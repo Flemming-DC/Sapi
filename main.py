@@ -18,6 +18,7 @@ if __name__ == '__main__':
     FROM cte 
     join TREE ON TREE.COL_1 = cte.COL0_1
     """
+    
     sql = parser.parse(sapi_query)
     print("--- sql-str ---")
     print(sql)

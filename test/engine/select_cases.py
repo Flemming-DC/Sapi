@@ -1,5 +1,5 @@
 from collections import namedtuple
-
+from engine.token_tree import ParserError
 
 Case = namedtuple('Case', ['sapi', 'expected_sql'])
 
@@ -128,6 +128,39 @@ join TAB1 on TAB1.col1_1 = tab1.col1_1
 join some_view on some_view.col0_1 = tab0.col0_1
     """)
 
+case7 = Case(
+    sapi = """
+select
+    CoL4_1
+from tree 
+where true
+order by tab0.shc
+    """,
+    expected_sql = """
+select
+    shT3.CoL4_1
+from shT3
+join tab using (tab_id)
+join tab0 using (tab_id)
+where true
+order by tab0.shc
+    """)
+
+case8 = Case(
+    sapi = """
+select shc
+from tree 
+    """,
+    expected_sql = ParserError)
+
+case9 = Case(
+    sapi = """
+select shT3.CoL4_1
+from tree
+from TREE using (shT3_id)
+    """,
+    expected_sql = ParserError)
+
 
 # empty_case = Case(
 #     sapi = """
@@ -135,7 +168,8 @@ join some_view on some_view.col0_1 = tab0.col0_1
 #     expected_sql = """
 #     """)
 
-select_cases = [case1, case2, case3, case4, case5, case6]
+select_cases = [case1, case2, case3, case4, case5, case6, case7]
+select_error_cases = [case8, case9]
 # select_cases = []
 
 
