@@ -31,7 +31,7 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
             (TokenType.VAR, next_tab.name), 
             (TokenType.USING, 'USING'), 
             (TokenType.L_PAREN, '('), 
-            (TokenType.VAR, referenced_table.name + '_id'), 
+            (TokenType.VAR, referenced_table.name.rstrip('_') + '_id'), 
             (TokenType.R_PAREN, ')'), 
             ]
         token_tree.replace(i, i, join_clause_tokens) # equivalent to insert

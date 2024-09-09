@@ -3,8 +3,11 @@ dependencies:
   - Python = 3.10.6
   - pip = 24.2
   - pip:
-    - anytree == 2.12.1
-    - psycopg == 3.2.1
-    - pydantic == 2.8.2
-    - sqlglot == 25.10.0
+    - anytree == 2.12.1 # used for path finding in the select parser
+    - pydantic == 2.8.2 # possible not used at the moment. Will be used later in the editor
+    - sqlglot == 25.10.0 # used for tokenizing sapi queries (this process is identical to tokenizing sql)
+    - psycopg-binary == 3.2.1 # used to communicate with postgres
+    - psycopg-pool == 3.2.2 # not used yet. Will probably be for connection pooling with postgres
+    - oracledb == 2.4.1 # used to communicate with oracle
+
 

@@ -1,0 +1,18 @@
+
+
+* extract data from datamodel into an analogue of the HardCodedTrees file (but this time soft coded :))
+* replace HardCodedTrees with a class or some similar dependancy. 
+    Input this into the parse function, so that it can either accept hardcoded data or a real database
+* setup connection and execute
+
+----
+* Make a dst friendly header
+* oracle support
+* sapi cursor plugin
+* read function and Transaction class or Sapi class
+
+
+
+
+
+

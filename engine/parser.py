@@ -1,6 +1,6 @@
 from typing import TypeVar, Type
 from . import tokenizer
-from .select import select_parser
+from .select_ import select_parser
 from .token_tree import TokenTree, ParserError, TokenType
 
 T = TypeVar('T')

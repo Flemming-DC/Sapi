@@ -1,0 +1,32 @@
+--------- header ---------
+
+drop schema if exists sapi_sys cascade;
+set client_min_messages to warning;
+drop table if exists 
+	sapi_trees, sapi_tables
+;
+set client_min_messages to notice;
+create schema if not exists sapi_sys;
+set search_path to sapi_sys;
+
+--------- sys tables ---------
+
+create table sapi_sys.sapi_trees (
+    sapi_trees_id bigint primary key generated always as identity,
+	tree_name text not null, -- check valid name
+	schema_name text not null, -- check valid name
+	-- evt. catalog name
+
+	unique (tree_name, schema_name) -- evt. add catalog name
+);
+
+create table sapi_sys.sapi_tables (
+    sapi_tables_id bigint primary key generated always as identity,
+	sapi_trees_id bigint not null references sapi_trees,
+	table_name text not null, -- check valid name and check that table exists
+	table_acronym text check (length(table_acronym) < length(table_name)),
+	-- unchecked_references (evt. separate into another table)
+
+	unique (table_name, sapi_trees_id),
+	unique (table_acronym, sapi_trees_id)
+);

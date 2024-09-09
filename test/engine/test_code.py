@@ -3,8 +3,8 @@ from engine import parser
 from textwrap import dedent
 from collections import namedtuple
 from engine.token_tree import Token, TokenType, TokenTree
-from engine.select.tree_join import TreeJoin
-from engine.select import select_analyzer #, path_finder, join_generator
+from engine.select_.tree_join import TreeJoin
+from engine.select_ import select_analyzer #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
 from select_cases import select_cases, select_error_cases
 
@@ -129,8 +129,8 @@ def test_get_expected_sql():
         
         # remove insignificant differences
         sapi = dedent(sapi)
-        actual_sql = _remove_space_and_newline(actual_sql)
-        expected_sql = _remove_space_and_newline(expected_sql)
+        actual_sql = '\n' + _remove_space_and_newline(actual_sql)
+        expected_sql = '\n' + _remove_space_and_newline(expected_sql)
 
         if actual_sql.lower() != expected_sql.lower():
             differing_lines = [(a, e) for a, e in zip(actual_sql.split('\n'), expected_sql.split('\n')) if a.lower() != e.lower()]
