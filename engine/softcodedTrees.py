@@ -1,8 +1,10 @@
 from anytree import Node
 from psycopg import Connection
 from psycopg.rows import dict_row # this only allows access by name, not index :(
-
+import database_deployment
 # only include data for tables and columns that belong to some tree
+
+database_deployment.setup()
 
 def fetch_data_from_postgres():
     with open('../sapi_secret/pg_password.txt') as f:
