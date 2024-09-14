@@ -25,7 +25,7 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
 
         # check for alternative join clauses in the tree
         # this code assumes that foreign key and primary keys follow your naming convention.
-        # in the general case, then you need tab, next_tab, referenced_table and a join rule to make join_clause_tokens
+        # in the general case, then you need next_tab, referenced_table and a join rule to make join_clause_tokens
         join_clause_tokens = [
             (TokenType.JOIN, 'JOIN'), 
             (TokenType.VAR, next_tab.name), 

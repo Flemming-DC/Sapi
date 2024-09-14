@@ -19,7 +19,7 @@ if __name__ == '__main__':
     join TREE ON TREE.COL_1 = cte.COL0_1
     """
     
-    sql = parser.parse(sapi_query)
+    sql = parser.parse(sapi_query) # datamodel
     print("--- sql-str ---")
     print(sql)
     

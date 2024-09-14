@@ -11,12 +11,10 @@ def fetch_data_from_postgres():
         password = f.read()
     with Connection.connect(host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password) as con:
         with con.cursor(row_factory=dict_row) as cur:
-            # one = cur.execute("select 1").fetchall()[0][0]
-            # print(one)
             cur.execute("set search_path to sapi_sys")
 
             table_tree_names_ = cur.execute("select tree_name from sapi_trees").fetchall()
-            table_tree_names_ = [row['tree_name'] for row in table_tree_names_] # to column
+            table_tree_names_: list[str] = [row['tree_name'] for row in table_tree_names_] # to column
             
             trees_by_table_ = cur.execute("""
                 select 
@@ -26,7 +24,8 @@ def fetch_data_from_postgres():
                 join sapi_tables using (sapi_trees_id)	
                 group by table_name
                 """).fetchall()
-            trees_by_table_ = {row['table_name']: row['tree_names'] for row in trees_by_table_} # to dict
+            trees_by_table_: dict[str, list[str]] = {
+                row['table_name']: row['tree_names'] for row in trees_by_table_} # to dict
 
             _columns = cur.execute("""
                 SELECT
@@ -36,31 +35,33 @@ def fetch_data_from_postgres():
                 where table_schema = 'sapi_demo'
                 group by table_name
                     """).fetchall()
-            _columns_by_table = {row['table']: row['columns'] for row in _columns} # to dict
+            _columns_by_table: dict[str, list[str]] = {
+                row['table']: row['columns'] for row in _columns} # to dict
 
             # restrict references by schema
             _references_ = cur.execute("""
                 SELECT
-                    rel.relname                                   AS table, 
-                    array_agg(a.attname)    AS foreign_keys, 
-                    array_agg(frel.relname) AS referenced_tables, 
-                    array_agg(af.attname )  AS primary_keys 
-                FROM pg_constraint AS c
-                JOIN pg_class      AS rel ON rel.oid = c.conrelid
-                JOIN pg_attribute  AS a ON a.attnum = ANY (c.conkey) AND a.attrelid = c.conrelid
-                JOIN pg_class      AS frel ON frel.oid = c.confrelid
-                JOIN pg_attribute  AS af ON af.attnum = ANY (c.confkey) AND af.attrelid = c.confrelid
-                WHERE c.contype = 'f'
-                group by rel.relname
-                -- order by rel.relname
+                    tab.relname             AS table, 
+                    array_agg(ftab.relname) AS referenced_tables, 
+                    -- array_agg(col.attname)    AS primary_key,
+                    -- array_agg(fcol.attname)   AS foreign_key,
+                    null
+                FROM pg_constraint AS con
+                JOIN pg_class      AS tab  ON tab.oid = con.conrelid
+                JOIN pg_attribute  AS col  ON col.attnum = ANY(con.conkey) AND col.attrelid = con.conrelid
+                JOIN pg_class      AS ftab ON ftab.oid = con.confrelid
+                JOIN pg_attribute  AS fcol ON fcol.attnum = ANY(con.confkey) AND fcol.attrelid = con.confrelid
+                WHERE con.contype = 'f'
+                group by tab.relname
                 """).fetchall()
-            # format _table_data_
-            _table_data_ = [{'table': table, 'refers_to': [], 'columns': []} for table in trees_by_table_.keys()]
-            _table_data_.sort(key=lambda row: row['table'].lower())
             referenced_table_dict = {row['table']: row['referenced_tables'] for row in _references_} # to dict
+            
+            # init _table_data_ for the tables that are in some tree
+            _table_data_: list[dict[str, str|list[str]]] = [
+                {'table': table, 'refers_to': [], 'columns': []} for table in trees_by_table_.keys()]
+            _table_data_.sort(key=lambda row: row['table'].lower())
             for i, row in enumerate(_table_data_):
                 _table_data_[i]['columns'] = _columns_by_table[row['table'].lower()]
-                
                 _table_data_[i]['refers_to'] = referenced_table_dict.get(row['table'].lower(), [])
 
     return table_tree_names_, trees_by_table_, _table_data_
@@ -110,9 +111,9 @@ def test_fetch_data_from_postgres():
     assert trees_by_table == _expected_trees_by_table, ""
     assert len(_table_data) == len(_expected_table_data), ""
     for row, expected_row in zip(_table_data, _expected_table_data):
-        # print('--- row ---')
-        # print('actual:  ', row)
-        # print('expected:', expected_row)
+        print('--- row ---')
+        print('actual:  ', row)
+        print('expected:', expected_row)
 
         assert row['refers_to'] is not None, ""
         row['refers_to'] = set(row['refers_to'])
@@ -136,11 +137,10 @@ tables_by_var_and_tree = {}
 for var, tabs_of_var in tables_by_var.items():
     for tree in table_tree_names:
         tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-
         tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
 
 
-node_by_table = {}
+node_by_table: dict[str, Node] = {}
 for row in _table_data:
     trees_with_table = trees_by_table[row['table']]
     for tree in trees_with_table:
@@ -153,7 +153,7 @@ for row in _table_data:
         
 
 
-all_tables = [t['table'] for t in _table_data]
+all_tables: list[str] = [t['table'] for t in _table_data]
 
 
 

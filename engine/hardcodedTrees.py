@@ -1,4 +1,4 @@
-from anytree import Node
+from data_model import DataModel, TableData
 
 # only include data for tables and columns that belong to some tree
 table_tree_names = ['tree', 'tree_']
@@ -22,58 +22,68 @@ trees_by_table = {
 
 # tab, references, columns (other than fk and pk)
 _table_data = [
-    {'table': 'tab',   'refers_to': [],               'columns': ['col_1',   'col_2']},
-    {'table': 'tab0',  'refers_to': ['tab', 'tab1_'], 'columns': ['col0_1',  'col0_2', 'SHC']},
-    {'table': 'tab1',  'refers_to': ['tab', 'tab0_'], 'columns': ['col1_1',  'col1_2', 'SHC']},
-    {'table': 'tab2',  'refers_to': ['tab'],          'columns': ['col2_1',  'col2_2']},
-    {'table': 'tab00', 'refers_to': ['tab0'],         'columns': ['col00_1', 'col00_2']},
-    {'table': 'tab01', 'refers_to': ['tab0'],         'columns': ['col01_1', 'col01_2']},
-    {'table': 'tab10', 'refers_to': ['tab1'],         'columns': ['col10_1', 'col10_2']},
-    {'table': 'tab20', 'refers_to': ['tab2'],         'columns': ['col20_1', 'col20_2']},
-    {'table': 'tab21', 'refers_to': ['tab2'],         'columns': ['col21_1', 'col21_2']},
-    {'table': 'tab_',  'refers_to': [],               'columns': ['col_1_',  'col_2_']},
-    {'table': 'tab0_', 'refers_to': ['tab_', 'tab1'], 'columns': ['col0_1_', 'col0_2_', 'shc_']},
-    {'table': 'tab1_', 'refers_to': ['tab_', 'tab0'], 'columns': ['col1_1_', 'col1_2_', 'shc_']},
-    {'table': 'sht__', 'refers_to': ['tab_', 'tab' ], 'columns': ['col_1__', 'col_2__']},
+    {'table': 'tab',   'refers_to': [],               'columns': ['tab_id',                         'col_1',   'col_2']},
+    {'table': 'tab0',  'refers_to': ['tab', 'tab1_'], 'columns': ['tab0_id',  'tab_id', 'tab1__id', 'col0_1',  'col0_2', 'shc']},
+    {'table': 'tab1',  'refers_to': ['tab', 'tab0_'], 'columns': ['tab1_id',  'tab_id', 'tab0__id', 'col1_1',  'col1_2', 'shc']},
+    {'table': 'tab2',  'refers_to': ['tab'],          'columns': ['tab2_id',  'tab_id',             'col2_1',  'col2_2']},
+    {'table': 'tab00', 'refers_to': ['tab0'],         'columns': ['tab00_id', 'tab0_id',            'col00_1', 'col00_2']},
+    {'table': 'tab01', 'refers_to': ['tab0'],         'columns': ['tab01_id', 'tab0_id',            'col01_1', 'col01_2']},
+    {'table': 'tab10', 'refers_to': ['tab1'],         'columns': ['tab10_id', 'tab1_id',            'col10_1', 'col10_2']},
+    {'table': 'tab20', 'refers_to': ['tab2'],         'columns': ['tab20_id', 'tab2_id',            'col20_1', 'col20_2']},
+    {'table': 'tab21', 'refers_to': ['tab2'],         'columns': ['tab21_id', 'tab2_id',            'col21_1', 'col21_2']},
+    {'table': 'tab_',  'refers_to': [],               'columns': ['tab__id',                        'col_1_',  'col_2_']},
+    {'table': 'tab0_', 'refers_to': ['tab_', 'tab1'], 'columns': ['tab0__id', 'tab__id', 'tab1_id', 'col0_1_', 'col0_2_', 'shc_']},
+    {'table': 'tab1_', 'refers_to': ['tab_', 'tab0'], 'columns': ['tab1__id', 'tab__id', 'tab0_id', 'col1_1_', 'col1_2_', 'shc_']},
+    {'table': 'sht__', 'refers_to': ['tab_', 'tab' ], 'columns': ['sht___id', 'tab__id', 'tab_id' , 'col_1__', 'col_2__']},
 ]
+"""
+tree = Tree(
+    tables = [
+        'tab', 
+        ('tab0', 't0'), 
+        ...
+        ], 
+    join_rules = {
+        ('tab', 'tab0'): 'join_code',
+        ...
+        }
+    )
+
+tree = Tree(
+    tables = [
+        Table(name='tab'),
+        Table(name='tab', acronym='t0', join_rule='join_with_parent_code'), 
+        ...
+        ], 
+    )
+# refers_to and columns will be read from database or provided by hand
+data_model = DataModel(trees=[tree, ...])
+
+# trees can also come from db via sapi_sys tables
+3 what about this?
+tree = Tree(
+    tables = [
+        Table(name='tab'),
+        Table(name='tab', acronym='t0', join_rule='join_with_parent_code'), 
+        ...
+        ], 
+    )
+data_model = DataModel(database_connection, database_dialect, trees containing any info thats not in db)
 
 
-tables_by_var: dict[str, list[str]] = {}
-for row in _table_data:
-    for col in row['columns']:
-        if col not in tables_by_var.keys():
-            tables_by_var[col] = []
-        tables_by_var[col].append(row['table'])
+"""
 
-tables_by_var_and_tree = {}
-for var, tabs_of_var in tables_by_var.items():
-    for tree in table_tree_names:
-        tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-
-        # if len(tabs_of_var_in_tree) > 1:
-        #     raise Exception(f"The tree '{tree}' contains multiple tables {tabs_of_var_in_tree} with column {var}.")
-        # if len(tabs_of_var_in_tree) == 0:
-        #     continue
-        # # elif len(tabs_of_var_in_tree) == 0:
-        #     raise Exception(f"The tree '{tree}' does not contain any table with column {var}.")
-        # tab = tabs_of_var_in_tree[0]
-        tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
+_table_data = [TableData(**td) for td in _table_data]
+_data_model = DataModel(table_tree_names, trees_by_table, _table_data)
 
 
-node_by_table = {}
-for row in _table_data:
-    trees_with_table = trees_by_table[row['table']]
-    for tree in trees_with_table:
-        parents_in_tree = [parent for parent in row['refers_to'] if tree in trees_by_table[parent]]
-        if len(parents_in_tree) > 1:
-            raise Exception(f"table {row['table']} has the parents {parents_in_tree} in the tree {tree}, "
-                            "but multiple parents are not allowed.")
-        parent = parents_in_tree[0] if parents_in_tree else None
-        node_by_table[row['table']] = Node(row['table'], parent = node_by_table.get(parent))
-        
+table_tree_names = _data_model.table_tree_names
+trees_by_table = _data_model.trees_by_table
+tables_by_var = _data_model.tables_by_var
+tables_by_var_and_tree = _data_model.tables_by_var_and_tree
+node_by_table = _data_model.node_by_table
+all_tables = _data_model.all_tables
 
-
-all_tables = [t['table'] for t in _table_data]
 
 
 

@@ -5,20 +5,21 @@ from psycopg import Connection
 from psycopg.rows import dict_row # this only allows access by name, not index :(
 
 
-sql_folder = Path('./engine/database')
-sql_scripts = sorted([str(f) for f in sql_folder.iterdir() if f.name.endswith('.sql')])
 
 
 def setup():
-    sql_folder = './engine/database'
-    sql_scripts: list[str] = os.listdir(sql_folder) # get files and sub-directories
-    sql_scripts = [f for f in sql_scripts if f.endswith('.sql')] # or perhaps f.endswith('.sapi')
-    sql_scripts.sort()
+    # sql_folder = Path('./engine/database')
+    sql_scripts = sorted([str(f) for f in Path('./engine/database').iterdir() if f.name.endswith('.sql')])
+
+    # sql_folder = './engine/database'
+    # sql_scripts: list[str] = os.listdir(sql_folder) # get files and sub-directories
+    # sql_scripts = [f for f in sql_scripts if f.endswith('.sql')] # or perhaps f.endswith('.sapi')
+    # sql_scripts.sort()
 
     deployment_queries: list[str] = []
     for sql_script in sql_scripts:
         with open(sql_script) as f:
-            deployment_queries += f.read()
+            deployment_queries.append(f.read())
 
     with open('../sapi_secret/pg_password.txt') as f:
         password = f.read()
