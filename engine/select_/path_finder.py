@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from anytree import walker, Node
 from .tree_join import TreeJoin
-from engine.hardcodedTrees import node_by_table
+from engine.hardcodedTrees import node_by_tab_and_tree
 
 pathType = list[tuple[Node, Node]]
 @dataclass
@@ -11,12 +11,12 @@ class _PathInfo:
     eldest: Node|None = None
 
 
-def join_path(table_names: list[str], first_table: str|None) -> tuple[pathType, Node|None]:
+def join_path(table_names: list[str], first_table: str|None, tree_name: str) -> tuple[pathType, Node|None]:
     if not first_table:
         return [], None # this means that there is nothing to join. e.g. "select 1 from A"
 
     ordered_tabs = [first_table] + [t for t in table_names if t != first_table] 
-    table_nodes = [node_by_table[t] for t in ordered_tabs]# if t in node_by_table.keys()]
+    table_nodes = [node_by_tab_and_tree[(t, tree_name)] for t in ordered_tabs]# if t in node_by_table.keys()]
 
     pathInfo = _PathInfo()
     for tab_node in table_nodes:

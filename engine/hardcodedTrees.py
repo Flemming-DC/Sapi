@@ -81,9 +81,10 @@ table_tree_names = _data_model.table_tree_names
 trees_by_table = _data_model.trees_by_table
 tables_by_var = _data_model.tables_by_var
 tables_by_var_and_tree = _data_model.tables_by_var_and_tree
-node_by_table = _data_model.node_by_table
+node_by_tab_and_tree = _data_model.node_by_tab_and_tree
 all_tables = _data_model.all_tables
 
+# error: node_by_table['sht__'] has ill-defined parent, since its parent is different in different trees
 
 
 

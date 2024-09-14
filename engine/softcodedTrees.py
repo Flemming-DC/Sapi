@@ -152,7 +152,8 @@ for row in _table_data:
         node_by_table[row['table']] = Node(row['table'], parent = node_by_table.get(parent))
         
 
-
+# error: node_by_table['sht__'] has ill-defined parent, since its parent is different in different trees
+# error: node_by_table['sht__'] has incorrect parent, namely None
 all_tables: list[str] = [t['table'] for t in _table_data]
 
 

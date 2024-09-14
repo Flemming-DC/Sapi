@@ -1,6 +1,6 @@
 """
 plan:
-    * database -> Table, Tree
+    * database -> Table, Tree (done, omg man)
     * Table, Tree -> InternalForest
     * test the code by plugging it into the hardcoded trees file
     * separate datamodel / externals from parsing.

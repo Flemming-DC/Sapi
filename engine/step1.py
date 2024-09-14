@@ -71,7 +71,7 @@ def with_cursor(func: Callable):
             func(cur)
 
 
-def work(cur: Cursor[DictRow]):
+def make_trees(cur: Cursor[DictRow]):
     columns_data = cur.execute(f"""
         WITH columns as ({columns_query})
         SELECT 
@@ -79,7 +79,6 @@ def work(cur: Cursor[DictRow]):
             tree.tree_name,
             sapi_tables.table_name,
             col.column_name,
---            tree.sapi_trees_id,
             sapi_tables.sapi_tables_id
         FROM sapi_sys.sapi_trees AS tree 
         JOIN sapi_sys.sapi_tables ON sapi_tables.sapi_trees_id = tree.sapi_trees_id
@@ -90,7 +89,6 @@ def work(cur: Cursor[DictRow]):
         WITH foreign_keys as ({foreign_keys_query})
         select 
             tab.sapi_tables_id,
-            -- tab.table_name as tab_name,
             ref_tab.table_name as parent,
             fk.primary_key_col,
             fk.foreign_key_col 
@@ -108,14 +106,6 @@ def work(cur: Cursor[DictRow]):
     trees: list[Tree] = []
     current_tree: Tree|None = None
     current_table: Table|None = None
-
-    sapi_table_names: list[str] = []
-    # tab_by_schema_tab_names: dict[tuple[str, str], Table] = {} # table_name, schema_name -> table
-    ohh_come_on: dict[tuple[str, str], list[Table]] = {} # table_name, schema_name -> table
-    tab_id_tab_by_schema_tab_names: dict[tuple[str, tuple[int, Table]], str] = {} # table_name, schema_name -> table_id, table
-    # trees_by_schema_tab_names: dict[tuple[str, str], list[str]] = {} # table_name, schema_name -> trees
-    tree_by_table_id: dict[int, Tree] = {}
-
     for col_row in columns_data:
         if not current_tree or col_row['tree_name'] != current_tree.name:
             current_tree = Tree(tables=[], name=col_row['tree_name'], schema=col_row['schema_name'])
@@ -141,15 +131,12 @@ def work(cur: Cursor[DictRow]):
         # now col_row['column_name'] must exist
         current_table.columns.append(col_row['column_name'])
 
-    
+    return trees
 
-    print('---------')
-    pprint([(t.name, t.parent) for t in trees[0].tables])
-    pprint([(t.name, t.parent) for t in trees[1].tables])
-    # ...
-    # pprint(trees)
+# pprint([(t.name, t.parent) for t in trees[0].tables])
+# pprint([(t.name, t.parent) for t in trees[1].tables])
 
 
 if __name__ == '__main__':
-    with_cursor(work)
+    with_cursor(make_trees)
 

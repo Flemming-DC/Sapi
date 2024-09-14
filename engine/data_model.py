@@ -15,7 +15,7 @@ class DataModel:
         self.trees_by_table = trees_by_table
         self.tables_by_var = _make_tables_by_var(table_data)
         self.tables_by_var_and_tree = _make_tables_by_var_and_tree(table_tree_names, trees_by_table, self.tables_by_var)
-        self.node_by_table = _make_node_by_table(table_data, self.trees_by_table)
+        self.node_by_tab_and_tree = _make_node_by_tab_and_tree(table_data, self.trees_by_table)
         self.all_tables: list[str] = [t.table for t in table_data]
 
 
@@ -39,8 +39,8 @@ def _make_tables_by_var_and_tree(
             tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
     return tables_by_var_and_tree
 
-def _make_node_by_table(_table_data: list[TableData], trees_by_table: dict[str, list[str]]) -> dict[str, Node]:
-    node_by_table: dict[str, Node] = {}
+def _make_node_by_tab_and_tree(_table_data: list[TableData], trees_by_table: dict[str, list[str]]) -> dict[tuple[str, str], Node]:
+    node_by_tab_and_tree: dict[str, Node] = {}
     for row in _table_data:
         trees_with_table = trees_by_table[row.table]
         for tree in trees_with_table:
@@ -49,8 +49,8 @@ def _make_node_by_table(_table_data: list[TableData], trees_by_table: dict[str, 
                 raise Exception(f"table {row.table} has the parents {parents_in_tree} in the tree {tree}, "
                                 "but multiple parents are not allowed.")
             parent = parents_in_tree[0] if parents_in_tree else None
-            node_by_table[row.table] = Node(row.table, parent = node_by_table.get(parent))
-    return node_by_table
+            node_by_tab_and_tree[(row.table, tree)] = Node(row.table, parent = node_by_tab_and_tree.get((parent, tree)))
+    return node_by_tab_and_tree
 
 
 
