@@ -48,6 +48,8 @@ all_tables: list[str] = []
 
 
 for tree in trees:
+    if tree.name in table_tree_names:
+        raise Exception(f"You cannot have two trees with the same name. name = {tree.name}")
     table_tree_names.append(tree.name)
     for tab in tree.tables:
         if tab.name not in all_tables:
@@ -55,20 +57,22 @@ for tree in trees:
         
         if tab.name not in trees_by_table.keys():
             trees_by_table[tab.name] = []
-        trees_by_table[tab.name].append(tree.name)
+        if tree.name not in trees_by_table[tab.name]: 
+            trees_by_table[tab.name].append(tree.name)
 
         node_by_tab_and_tree[(tab.name, tree.name)] = Node(tab.name) # parent is set later
 
         for col in tab.columns:
             if col not in tables_by_var.keys():
                 tables_by_var[col] = []
-            tables_by_var[col].append(tab.name)
+            if tab.name not in tables_by_var[col]: 
+                tables_by_var[col].append(tab.name)
 
-            if col not in tables_by_var_and_tree.keys():
+            if (col, tree.name) not in tables_by_var_and_tree.keys():
                 tables_by_var_and_tree[(col, tree.name)] = []
-            tables_by_var_and_tree[(col, tree.name)].append(tab.name)
+            if tab.name not in tables_by_var_and_tree[(col, tree.name)]: 
+                tables_by_var_and_tree[(col, tree.name)].append(tab.name)
             
-
     for tab in tree.tables:
         node = node_by_tab_and_tree.get((tab.name, tree.name))
         parent_node = node_by_tab_and_tree.get((tab.parent, tree.name))

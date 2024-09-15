@@ -36,7 +36,8 @@ def _make_tables_by_var_and_tree(
     for var, tabs_of_var in tables_by_var.items():
         for tree in table_tree_names:
             tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-            tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
+            if tabs_of_var_in_tree:
+                tables_by_var_and_tree[(var, tree)] = tabs_of_var_in_tree
     return tables_by_var_and_tree
 
 def _make_node_by_tab_and_tree(_table_data: list[TableData], trees_by_table: dict[str, list[str]]) -> dict[tuple[str, str], Node]:

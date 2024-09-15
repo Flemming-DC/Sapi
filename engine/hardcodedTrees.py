@@ -86,6 +86,46 @@ all_tables = _data_model.all_tables
 
 # error: node_by_table['sht__'] has ill-defined parent, since its parent is different in different trees
 
+import step2
+from anytree import Node
+
+
+# print(1, set(table_tree_names) == set(step2.table_tree_names)) # True
+# print(2, trees_by_table == step2.trees_by_table) # True
+# print(3, tables_by_var == step2.tables_by_var)
+# print(4, tables_by_var_and_tree == step2.tables_by_var_and_tree)
+# print(5, node_by_tab_and_tree == step2.node_by_tab_and_tree)
+# print(6, set(step2.all_tables) == set(all_tables)) # True
+
+# print(7, tables_by_var.keys() == step2.tables_by_var.keys()) # True
+# print(8, tables_by_var_and_tree.keys() == step2.tables_by_var_and_tree.keys()) # True
+# print(9, node_by_tab_and_tree.keys() == step2.node_by_tab_and_tree.keys()) # True
+
+# for var in tables_by_var.keys():
+#     if set(tables_by_var[var]) != set(step2.tables_by_var[var]):
+#         print(3, var, ": ", set(tables_by_var[var]), set(step2.tables_by_var[var])) # True
+# for vt in tables_by_var_and_tree.keys():
+#     if set(tables_by_var_and_tree[vt]) != set(step2.tables_by_var_and_tree[vt]):
+#         print(4, vt, ": ", set(tables_by_var_and_tree[vt]) - set(step2.tables_by_var_and_tree[vt]), "   ", set(step2.tables_by_var_and_tree[vt]))
+# for tt in node_by_tab_and_tree.keys():
+#     def same(n1: Node, n2: Node):
+#         if repr(n1) != repr(n2):
+#             return False
+#         if str(n1) != str(n2):
+#             return False
+#         if repr(n1.parent) != repr(n2.parent):
+#             return False
+#         return True
+#     if not same(node_by_tab_and_tree[tt], step2.node_by_tab_and_tree[tt]):
+#         print(5, tt, ": ", node_by_tab_and_tree[tt], step2.node_by_tab_and_tree[tt])
+
+...
+table_tree_names = step2.table_tree_names
+trees_by_table = step2.trees_by_table
+tables_by_var = step2.tables_by_var
+tables_by_var_and_tree = step2.tables_by_var_and_tree
+node_by_tab_and_tree = step2.node_by_tab_and_tree
+all_tables = step2.all_tables
 
 
 
