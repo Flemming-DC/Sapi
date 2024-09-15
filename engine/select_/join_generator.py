@@ -1,5 +1,5 @@
 from engine.token_tree import TokenType, TokenTree
-from engine.dialect import blank_from_clause, dialect_str
+from engine.externals.database_py.dialect import blank_from_clause, dialect_str
 from .path_finder import pathType, Node
 from .tree_join import TreeJoin
 

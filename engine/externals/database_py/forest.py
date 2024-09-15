@@ -1,47 +1,16 @@
+from __future__ import annotations
+from dataclasses import dataclass
+from anytree import Node
 from textwrap import dedent
-from psycopg import Connection, Cursor
+
+from psycopg import Connection, Cursor # suspect
 from psycopg.rows import dict_row, DictRow # this only allows access by name, not index :(
-import database_deployment
+from . import database_deployment
 from dataclasses import dataclass
 from typing import Callable
-from pprint import pprint
+from . import dialect
 
-# postgres
-columns_query = """
-    SELECT 
-        schema.nspname as schema_name,
-        tab.relname as table_name,
-        col.attname as column_name
-    FROM pg_namespace  AS schema
-    JOIN pg_class      AS tab ON tab.relnamespace = schema.oid
-    JOIN pg_attribute  AS col ON col.attrelid = tab.oid    
-    WHERE col.attnum > 0 -- exclude system columns
-        and not col.attisdropped   
-        and schema.nspname not in ('pg_catalog', 'pg_toast', 'information_schema')
-    """
 
-# postgres
-foreign_keys_query = """
-    SELECT
-        schema.nspname  as schema,
-        fschema.nspname as referenced_schema,
-        tab.relname     AS table,
-        ftab.relname    AS referenced_table,
-        col.attname     AS primary_key_col, -- note that a pk can contain multiple columns
-        fcol.attname    AS foreign_key_col -- note that a fk can contain multiple columns
-    FROM pg_constraint AS con
-    JOIN pg_class      AS tab     ON tab.oid = con.conrelid
-    JOIN pg_namespace  AS schema  ON schema.oid = tab.relnamespace
-    JOIN pg_attribute  AS col     ON col.attnum = ANY(con.conkey) AND col.attrelid = con.conrelid
-    JOIN pg_class      AS ftab    ON ftab.oid = con.confrelid
-    JOIN pg_namespace  AS fschema ON fschema.oid = ftab.relnamespace
-    JOIN pg_attribute  AS fcol    ON fcol.attnum = ANY(con.confkey) AND fcol.attrelid = con.confrelid
-    WHERE con.contype = 'f'
-        and col.attnum > 0 -- exclude system columns
-        and fcol.attnum > 0 -- exclude system columns
-        and not col.attisdropped 
-        and not fcol.attisdropped 
-    """
 
 @dataclass
 class Table:
@@ -61,7 +30,54 @@ class Tree: # by hand or from sapi_sys, evt. call it TableTree
     # insertable: bool = True
     # deletable: bool = True
 
-def with_cursor(func: Callable):
+
+class Forest:
+    _current: Forest|None = None
+    # forest = Forest.from_datebase(connection_info, dialect)
+    # trees = _load_trees_from_db(connection_info, dialect)
+
+    def __init__(_, trees: list[Tree]):
+        _._table_tree_names: list[str] = []
+        _._trees_by_table: dict[str, list[str]] = {}
+        _._tables_by_var: dict[str, list[str]]  = {}
+        _._tables_by_var_and_tree: dict[tuple[str, str], list[str]] = {}
+        _._node_by_tab_and_tree: dict[tuple[str, str], Node] = {}
+        _._all_tables: list[str] = []
+
+        for tree in trees:
+            if tree.name in _._table_tree_names:
+                raise Exception(f"You cannot have two trees with the same name. name = {tree.name}")
+            _._table_tree_names.append(tree.name)
+            for tab in tree.tables:
+                if tab.name not in _._all_tables:
+                    _._all_tables.append(tab.name)
+                
+                if tab.name not in _._trees_by_table.keys():
+                    _._trees_by_table[tab.name] = []
+                if tree.name not in _._trees_by_table[tab.name]: 
+                    _._trees_by_table[tab.name].append(tree.name)
+
+                _._node_by_tab_and_tree[(tab.name, tree.name)] = Node(tab.name) # parent is set later
+
+                for col in tab.columns:
+                    if col not in _._tables_by_var.keys():
+                        _._tables_by_var[col] = []
+                    if tab.name not in _._tables_by_var[col]: 
+                        _._tables_by_var[col].append(tab.name)
+
+                    if (col, tree.name) not in _._tables_by_var_and_tree.keys():
+                        _._tables_by_var_and_tree[(col, tree.name)] = []
+                    if tab.name not in _._tables_by_var_and_tree[(col, tree.name)]: 
+                        _._tables_by_var_and_tree[(col, tree.name)].append(tab.name)
+                    
+            for tab in tree.tables:
+                node = _._node_by_tab_and_tree.get((tab.name, tree.name))
+                parent_node = _._node_by_tab_and_tree.get((tab.parent, tree.name))
+                if node and parent_node:
+                    node.parent = parent_node
+
+
+def _with_cursor(func: Callable):
     database_deployment.setup()
     with open('../sapi_secret/pg_password.txt') as f:
         password = f.read()
@@ -70,8 +86,10 @@ def with_cursor(func: Callable):
             cur.execute("set search_path to sapi_sys")
             func(cur)
 
+def _make_trees(cur: Cursor[DictRow]):
+    columns_query = dialect.columns_query[dialect.dialect_str]
+    foreign_keys_query = dialect.foreign_keys_query[dialect.dialect_str]
 
-def make_trees(cur: Cursor[DictRow]):
     columns_data = cur.execute(f"""
         WITH columns as ({columns_query})
         SELECT 
@@ -133,10 +151,16 @@ def make_trees(cur: Cursor[DictRow]):
 
     return trees
 
-# pprint([(t.name, t.parent) for t in trees[0].tables])
-# pprint([(t.name, t.parent) for t in trees[1].tables])
+
+def set_current(forest: Forest): Forest._current = forest
+
+# read from current forest
+def table_tree_names():       return Forest._current._table_tree_names
+def trees_by_table():         return Forest._current._trees_by_table
+def tables_by_var():          return Forest._current._tables_by_var
+def tables_by_var_and_tree(): return Forest._current._tables_by_var_and_tree
+def node_by_tab_and_tree():   return Forest._current._node_by_tab_and_tree
+def all_tables():             return Forest._current._all_tables
 
 
-if __name__ == '__main__':
-    with_cursor(make_trees)
 

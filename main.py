@@ -1,4 +1,5 @@
 from engine import parser
+from engine.externals.database_py.forest import Forest
 # from engine.token_tree import TokenTree
 
 
@@ -18,8 +19,13 @@ if __name__ == '__main__':
     FROM cte 
     join TREE ON TREE.COL_1 = cte.COL0_1
     """
+    # trees = [...]
+    # trees = load_trees_from_db(connection_info, dialect)
+    # forest.from(trees) # evt. also dialect
+    # forest.from(connection_info, dialect)
     
-    sql = parser.parse(sapi_query) # datamodel
+    forest = Forest()
+    sql = parser.parse(sapi_query, forest) # datamodel
     print("--- sql-str ---")
     print(sql)
     

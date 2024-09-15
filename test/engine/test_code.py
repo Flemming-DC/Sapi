@@ -6,7 +6,7 @@ from engine.token_tree import Token, TokenType, TokenTree
 from engine.select_.tree_join import TreeJoin
 from engine.select_ import select_analyzer #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
-from select_cases import select_cases, select_error_cases
+from select_cases import select_cases, select_error_cases, forest
 
 def test_get_expected_table_trees():
     # ------- tokens ---------
@@ -125,7 +125,7 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 def test_get_expected_sql():
 
     for sapi, expected_sql in select_cases:
-        actual_sql = parser.parse(sapi)
+        actual_sql = parser.parse(sapi, forest)
         
         # remove insignificant differences
         sapi = dedent(sapi)
@@ -151,7 +151,7 @@ def test_get_expected_sql():
 def test_raise_error():
     for sapi, error_type in select_error_cases:
         found_error = False
-        try:   parser.parse(sapi)
+        try:   parser.parse(sapi, forest)
         except error_type: found_error = True
         except Exception: ...
 

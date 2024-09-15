@@ -5,16 +5,9 @@ from psycopg import Connection
 from psycopg.rows import dict_row # this only allows access by name, not index :(
 
 
-
-
 def setup():
-    # sql_folder = Path('./engine/database')
     sql_scripts = sorted([str(f) for f in Path('./engine/database').iterdir() if f.name.endswith('.sql')])
 
-    # sql_folder = './engine/database'
-    # sql_scripts: list[str] = os.listdir(sql_folder) # get files and sub-directories
-    # sql_scripts = [f for f in sql_scripts if f.endswith('.sql')] # or perhaps f.endswith('.sapi')
-    # sql_scripts.sort()
 
     deployment_queries: list[str] = []
     for sql_script in sql_scripts:

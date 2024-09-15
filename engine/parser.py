@@ -2,12 +2,13 @@ from typing import TypeVar, Type
 from . import tokenizer
 from .select_ import select_parser
 from .token_tree import TokenTree, ParserError, TokenType
+from engine.externals.database_py import forest
 
 T = TypeVar('T')
-def parse(sapi_str: str, return_type: Type[T] = str) -> T:
+def parse(sapi_str: str, forest_: forest.Forest, return_type: Type[T] = str) -> T:
     token_trees = tokenizer.tokenize(sapi_str)
-    
-    
+    forest.set_current(forest_)
+
     for i, root_tree in enumerate(token_trees):
         token_trees[i] = _parse_token_tree(root_tree) # token_trees goes from sapi to sql
 

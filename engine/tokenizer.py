@@ -1,6 +1,6 @@
 from sqlglot import Dialect
 from .token_tree import TokenTree, Token, TokenType, ParserError
-from engine.dialect import dialect_str
+from engine.externals.database_py.dialect import dialect_str
 
 
 _dialect = Dialect.get_or_raise(dialect_str) # dialekt bør gribes fra et config object
