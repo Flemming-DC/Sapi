@@ -27,7 +27,10 @@ _tree_ = Tree(
         ], 
     name='tree_', schema='sapi_demo')
 
-forest = Forest([_tree, _tree_])
+# forest = Forest([_tree, _tree_])
+with open('../sapi_secret/pg_password.txt') as f:
+    password = f.read()
+forest = Forest.from_database(host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
 
 
 # -------- define cases -------- #

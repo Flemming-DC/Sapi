@@ -2,28 +2,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 from anytree import Node
 from textwrap import dedent
-
-from psycopg import Connection, Cursor # suspect
-from psycopg.rows import dict_row, DictRow # this only allows access by name, not index :(
 from . import database_deployment
-from dataclasses import dataclass
-from typing import Callable
 from . import dialect
-
+from .pep249_database_api_spec_v2 import Cursor
 
 
 @dataclass
 class Table:
-    name: str # by hand or from sapi_sys
-    # acronym: str # by hand or from sapi_sys
-    # join_rule: str # by hand or from sapi_sys, evt. cast to type list[token], code for joing on parent
-    parent: str # by hand or from builtin metadata, evt. cast to Table 
-    columns: list[str] # by hand or from builtin metadata
-    # tree: 'Tree'
+    name: str 
+    parent: str 
+    columns: list[str] 
+    # acronym: str 
+    # join_rule: str 
 
-# does this even need to be a class?
 @dataclass
-class Tree: # by hand or from sapi_sys, evt. call it TableTree 
+class Tree: # evt. call it TableTree 
     tables: list[Table]
     name: str
     schema: str
@@ -33,8 +26,6 @@ class Tree: # by hand or from sapi_sys, evt. call it TableTree
 
 class Forest:
     _current: Forest|None = None
-    # forest = Forest.from_datebase(connection_info, dialect)
-    # trees = _load_trees_from_db(connection_info, dialect)
 
     def __init__(_, trees: list[Tree]):
         _._table_tree_names: list[str] = []
@@ -76,21 +67,22 @@ class Forest:
                 if node and parent_node:
                     node.parent = parent_node
 
+    @staticmethod
+    def from_database(**connection_info) -> Forest:
+        database_deployment.setup() # temp
+        con = dialect.connect(**connection_info)
+        cur = con.cursor()
+        cur.execute("set search_path to sapi_sys")
+        trees = _make_trees(cur)
+        con.close()
+        return Forest(trees)
 
-def _with_cursor(func: Callable):
-    database_deployment.setup()
-    with open('../sapi_secret/pg_password.txt') as f:
-        password = f.read()
-    with Connection.connect(host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password) as con:
-        with con.cursor(row_factory=dict_row) as cur:
-            cur.execute("set search_path to sapi_sys")
-            func(cur)
 
-def _make_trees(cur: Cursor[DictRow]):
+def _make_trees(cur: Cursor) -> list[Tree]:
     columns_query = dialect.columns_query[dialect.dialect_str]
     foreign_keys_query = dialect.foreign_keys_query[dialect.dialect_str]
 
-    columns_data = cur.execute(f"""
+    cur.execute(f"""
         WITH columns as ({columns_query})
         SELECT 
             tree.schema_name,
@@ -102,8 +94,10 @@ def _make_trees(cur: Cursor[DictRow]):
         JOIN sapi_sys.sapi_tables ON sapi_tables.sapi_trees_id = tree.sapi_trees_id
         LEFT JOIN columns AS col ON col.table_name = sapi_tables.table_name and col.schema_name = tree.schema_name
         ORDER BY tree.schema_name, tree.tree_name, sapi_tables.table_name, col.column_name
-        """).fetchall()
-    join_info = cur.execute(f"""
+        """)
+    columns_data = cur.fetchall()
+    
+    cur.execute(f"""
         WITH foreign_keys as ({foreign_keys_query})
         select 
             tab.sapi_tables_id,
@@ -118,13 +112,20 @@ def _make_trees(cur: Cursor[DictRow]):
             and trees.schema_name = fk.referenced_schema
             and tab.table_name = fk.table
             and ref_tab.table_name = fk.referenced_table
-        """).fetchall()
-    join_info_by_table_id = {j['sapi_tables_id']: j for j in join_info}
+        """)
+    join_info = cur.fetchall()
+    join_info_by_table_id = {j[0]: {'parent': j[1], 'primary_key_col': j[2], 'foreign_key_col': j[3]} for j in join_info}
 
     trees: list[Tree] = []
     current_tree: Tree|None = None
     current_table: Table|None = None
     for col_row in columns_data:
+        col_row = {
+            'schema_name': col_row[0],
+            'tree_name': col_row[1],
+            'table_name': col_row[2],
+            'column_name': col_row[3],
+            'sapi_tables_id': col_row[4]}
         if not current_tree or col_row['tree_name'] != current_tree.name:
             current_tree = Tree(tables=[], name=col_row['tree_name'], schema=col_row['schema_name'])
             trees.append(current_tree)

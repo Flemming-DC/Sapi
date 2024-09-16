@@ -1,5 +1,7 @@
+import psycopg
+import oracledb # probably shouldn't force import of oracledb. Maybe not even psycopg.
 from engine.token_tree import TokenType
-
+from . import pep249_database_api_spec_v2
 
 dialect_str = "postgres"
 
@@ -55,3 +57,10 @@ foreign_keys_query: dict[str, str] = {
 } 
 
 
+_connect: dict[str, pep249_database_api_spec_v2.Connect] = {
+    'postgres': psycopg.Connection.connect,
+    'oracle': oracledb.connect
+}
+
+def connect(*args, **kwargs): 
+    return _connect[dialect_str](*args, **kwargs)

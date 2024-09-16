@@ -24,5 +24,7 @@
 * support choice between runtime forest or database forest and choice of database
 
 ---
-softcode dialect and database / connection / forest
+* softcode dialect and database / connection / forest
+* replace forest.foo()[key] with forest.foo(key)
+* code connection againt the "PEP 249 - Python Database API Specification v2.0" standard
 

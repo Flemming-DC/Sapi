@@ -6,7 +6,7 @@ from psycopg.rows import dict_row # this only allows access by name, not index :
 
 
 def setup():
-    sql_scripts = sorted([str(f) for f in Path('./engine/database').iterdir() if f.name.endswith('.sql')])
+    sql_scripts = sorted([str(f) for f in Path('./engine/externals/database_sql').iterdir() if f.name.endswith('.sql')])
 
 
     deployment_queries: list[str] = []
