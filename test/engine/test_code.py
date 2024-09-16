@@ -1,7 +1,6 @@
 import __sys_path__
 from engine import parser
 from textwrap import dedent
-from collections import namedtuple
 from engine.token_tree import Token, TokenType, TokenTree
 from engine.select_.tree_join import TreeJoin
 from engine.select_ import select_analyzer #, path_finder, join_generator

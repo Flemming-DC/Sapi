@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from anytree import Node
 from textwrap import dedent
 from . import database_deployment
-from . import dialect
+from .dialect import Dialect
 from .pep249_database_api_spec_v2 import Cursor
 
 
@@ -27,13 +27,14 @@ class Tree: # evt. call it TableTree
 class Forest:
     _current: Forest|None = None
 
-    def __init__(_, trees: list[Tree]):
+    def __init__(_, dialect: Dialect, trees: list[Tree]):
         _._table_tree_names: list[str] = []
         _._trees_by_table: dict[str, list[str]] = {}
         _._tables_by_var: dict[str, list[str]]  = {}
         _._tables_by_var_and_tree: dict[tuple[str, str], list[str]] = {}
         _._node_by_tab_and_tree: dict[tuple[str, str], Node] = {}
         _._all_tables: list[str] = []
+        _._dialect = dialect
 
         for tree in trees:
             if tree.name in _._table_tree_names:
@@ -68,19 +69,19 @@ class Forest:
                     node.parent = parent_node
 
     @staticmethod
-    def from_database(**connection_info) -> Forest:
+    def from_database(dialect: Dialect, **connection_info) -> Forest:
         database_deployment.setup() # temp
-        con = dialect.current.connect(**connection_info)
+        con = dialect.connect(**connection_info)
         cur = con.cursor()
         cur.execute("set search_path to sapi_sys")
-        trees = _make_trees(cur)
+        trees = _make_trees(dialect, cur)
         con.close()
-        return Forest(trees)
+        return Forest(dialect, trees)
 
 
-def _make_trees(cur: Cursor) -> list[Tree]:
-    columns_query = dialect.current.columns_query
-    foreign_keys_query = dialect.current.foreign_keys_query
+def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
+    columns_query = dialect.columns_query
+    foreign_keys_query = dialect.foreign_keys_query
 
     cur.execute(f"""
         WITH columns as ({columns_query})
@@ -163,6 +164,6 @@ def tables_by_var(var: str):                     return Forest._current._tables_
 def trees_by_table(table_name: str):             return Forest._current._trees_by_table[table_name]
 def node_by_tab_and_tree(tab: str, tree: str):   return Forest._current._node_by_tab_and_tree[(tab, tree)]
 def tables_by_var_and_tree(var: str, tree: str): return Forest._current._tables_by_var_and_tree[(var, tree)]
-
+def dialect(): return Forest._current._dialect
 
 

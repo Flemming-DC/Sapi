@@ -1,6 +1,5 @@
 from engine import parser
-from engine.externals.database_py.forest import Forest
-# from engine.token_tree import TokenTree
+from engine.externals.database_py import dialect, forest
 
 
 if __name__ == '__main__':
@@ -21,8 +20,9 @@ if __name__ == '__main__':
     
     with open('../sapi_secret/pg_password.txt') as f:
         password = f.read()
-    forest = Forest.from_database(host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
-
+    forest = forest.Forest.from_database(dialect.postgres(),
+        host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
+    
     sql = parser.parse(sapi_query, forest)
 
     print("--- sql-str ---")

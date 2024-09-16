@@ -1,6 +1,7 @@
 from collections import namedtuple
 from engine.token_tree import ParserError
 from engine.externals.database_py.forest import Forest, Tree, Table
+from engine.externals.database_py import dialect
 
 # -------- define runtime forest -------- #
 _tree = Tree(
@@ -27,10 +28,11 @@ _tree_ = Tree(
         ], 
     name='tree_', schema='sapi_demo')
 
-# forest = Forest([_tree, _tree_])
+# forest = Forest(dialect.postgres(), [_tree, _tree_])
 with open('../sapi_secret/pg_password.txt') as f:
     password = f.read()
-forest = Forest.from_database(host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
+forest = Forest.from_database(dialect.postgres(), 
+    host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
 
 
 # -------- define cases -------- #
