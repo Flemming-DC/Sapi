@@ -1,5 +1,5 @@
 from engine.token_tree import TokenType, TokenTree
-from engine.externals.database_py.dialect import blank_from_clause, dialect_str
+from engine.externals.database_py import dialect
 from .path_finder import pathType, Node
 from .tree_join import TreeJoin
 
@@ -9,7 +9,7 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
     if not tree_join.first_table:
         # replace A with a "blank" from clause, such as "from dual" in Oracle or "" in postgres
         # note that replacing from i + 1 to i + 1 is including the lower bound, but excluding the upper bound
-        token_tree.replace(i - 1, i + 1, blank_from_clause[dialect_str])
+        token_tree.replace(i - 1, i + 1, dialect.current.blank_from_clause_tokens())
         return
 
     # replace table_tree with first table in join_path

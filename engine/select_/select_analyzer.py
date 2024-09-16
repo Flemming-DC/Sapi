@@ -46,7 +46,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
     join_obj_index = loop.index()
     if join_obj in prior_join_objs:
         return None, None # don't dublicate join_data (is that actually correct behaviour??)
-    is_tree = join_obj.text in forest.table_tree_names()
+    is_tree = forest.is_tree(join_obj.text)
 
     def _on_clause_done(): 
         return loop.at_end(1) or loop.found([ # join or clause-after-from
@@ -61,7 +61,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
     while not _on_clause_done():
         loop.next()
         # resolve tree prefixes
-        if loop.tok().text in forest.table_tree_names(): # is tree
+        if forest.is_tree(loop.tok().text):
             if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
                 raise ParserError("Expected column after tree, as in tree.column") # why not table?
             
@@ -80,7 +80,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
             # tab = tabs_of_var_in_tree[0]
             loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
         # record table prefixes
-        if loop.tok().text in forest.all_tables(): # is table
+        if forest.is_table(loop.tok().text):
             on_clause_tables.append(loop.tok().text) # register table in on clause
 
     if not is_tree:
@@ -98,13 +98,13 @@ def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
     if not loop.found(TokenType.DOT, -1):
         return False
     tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
-    if tab_or_tree.text in forest.table_tree_names():
+    if forest.is_tree(tab_or_tree.text):
         var = loop.tok().text
         tree = loop.peek(-2).text
         tab = _get_table_from_var_and_tree(var, tree)
         loop.replace((TokenType.VAR, tab), distance = -2) # replace tree prefix with table prefix
     
-    if tab_or_tree.text in forest.all_tables() and tab_or_tree.text not in ref_tables:
+    if forest.is_table(tab_or_tree.text) and tab_or_tree.text not in ref_tables:
         ref_tables.append(tab_or_tree.text) 
     return True
         
@@ -112,10 +112,10 @@ def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
 def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
     "returns true if table found. If table is new, then it is inserted."
     # we assume unique tab. Is that okay?
-    if loop.tok().text not in forest.tables_by_var().keys():
+    if not forest.is_var(loop.tok().text):
         return
     var = loop.tok().text
-    tabs_of_var = forest.tables_by_var()[var] 
+    tabs_of_var = forest.tables_by_var(var)
     if len(tabs_of_var) > 1:
         raise ParserError(f"There are multiple tables {tabs_of_var} with column {var}.")
     elif len(tabs_of_var) == 0:
@@ -124,14 +124,14 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
 
     if loop.found(TokenType.DOT, -1):
         raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
-    if tab in forest.all_tables() and tab not in ref_tables:
+    if forest.is_table(tab) and tab not in ref_tables:
         ref_tables.append(tab)
     loop.insert([
         (TokenType.VAR, tab), 
         (TokenType.DOT, '.')])
 
 def _get_table_from_var_and_tree(var: str, tree: str) -> str:
-    tabs = forest.tables_by_var_and_tree()[var, tree]
+    tabs = forest.tables_by_var_and_tree(var, tree)
     if len(tabs) > 1:
         raise ParserError(f"The tree {tree} contains multiple tables {tabs} with column {var}.")
     elif len(tabs) == 0:
@@ -142,7 +142,7 @@ def _get_table_from_var_and_tree(var: str, tree: str) -> str:
 
 def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoin], tabs_in_on_clauses: list[str]):
     for tab_name in ref_tables:
-        if tab_name in forest.all_tables(): # this filters for cte's and probably views.
+        if forest.is_table(tab_name): # this filters for cte's and probably views.
             _plug_ref_table_into_tree_join(tab_name, tree_joins)
     
     prior_tables = []
@@ -165,7 +165,7 @@ def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoi
 
 
 def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
-    trees_of_tab = forest.trees_by_table()[table_name]
+    trees_of_tab = forest.trees_by_table(table_name)
     already_found = False
     for j in tree_joins:
         if j.tree_tok.text not in trees_of_tab:

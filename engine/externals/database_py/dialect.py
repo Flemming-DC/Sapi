@@ -1,23 +1,38 @@
+from __future__ import annotations
+import sqlglot
 import psycopg
-import oracledb # probably shouldn't force import of oracledb. Maybe not even psycopg.
 from engine.token_tree import TokenType
 from . import pep249_database_api_spec_v2
+from dataclasses import dataclass
 
-dialect_str = "postgres"
+# import oracledb # probably shouldn't force import of oracledb. Maybe not even psycopg.
+#     'oracle': "from dual",
+#     'oracle': oracledb.connect
 
 
-# currently only postgres and oracle are supported
-blank_from_clause: dict[str, list[tuple[TokenType, str]]] = {
-    'postgres': [],
-    'oracle': [
-        (TokenType.FROM, 'FROM'),
-        (TokenType.VAR, 'dual'),
-        ],
-}
+@dataclass
+class Dialect:
+    name: str
+    blank_from_clause: str
+    columns_query: str
+    foreign_keys_query: str
+    connect: pep249_database_api_spec_v2.Connect
 
-# currently only postgres is supported
-columns_query: dict[str, str] = {
-    'postgres': """
+    def __post_init__(_):
+        _._sqlglot_dialect = sqlglot.Dialect.get_or_raise(_.name)
+        _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
+            for t in _._sqlglot_dialect.tokenize(_.blank_from_clause)]
+
+    def sqlglot_dialect(_): return _._sqlglot_dialect
+    def blank_from_clause_tokens(_): return _._blank_from_clause
+
+current: Dialect = None
+
+
+postgress = Dialect(
+    name = "postgres",
+    blank_from_clause = "",
+    columns_query = """
         SELECT 
             schema.nspname as schema_name,
             tab.relname as table_name,
@@ -28,12 +43,8 @@ columns_query: dict[str, str] = {
         WHERE col.attnum > 0 -- exclude system columns
             and not col.attisdropped   
             and schema.nspname not in ('pg_catalog', 'pg_toast', 'information_schema')
-        """
-} 
-
-# currently only postgres is supported
-foreign_keys_query: dict[str, str] = {
-    'postgres': """
+        """,
+    foreign_keys_query = """
         SELECT
             schema.nspname  as schema,
             fschema.nspname as referenced_schema,
@@ -53,14 +64,8 @@ foreign_keys_query: dict[str, str] = {
             and fcol.attnum > 0 -- exclude system columns
             and not col.attisdropped 
             and not fcol.attisdropped 
-        """
-} 
+        """,
+    connect = psycopg.Connection.connect,
+)
 
-
-_connect: dict[str, pep249_database_api_spec_v2.Connect] = {
-    'postgres': psycopg.Connection.connect,
-    'oracle': oracledb.connect
-}
-
-def connect(*args, **kwargs): 
-    return _connect[dialect_str](*args, **kwargs)
+current = postgress # temp

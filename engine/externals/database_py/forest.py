@@ -70,7 +70,7 @@ class Forest:
     @staticmethod
     def from_database(**connection_info) -> Forest:
         database_deployment.setup() # temp
-        con = dialect.connect(**connection_info)
+        con = dialect.current.connect(**connection_info)
         cur = con.cursor()
         cur.execute("set search_path to sapi_sys")
         trees = _make_trees(cur)
@@ -79,8 +79,8 @@ class Forest:
 
 
 def _make_trees(cur: Cursor) -> list[Tree]:
-    columns_query = dialect.columns_query[dialect.dialect_str]
-    foreign_keys_query = dialect.foreign_keys_query[dialect.dialect_str]
+    columns_query = dialect.current.columns_query
+    foreign_keys_query = dialect.current.foreign_keys_query
 
     cur.execute(f"""
         WITH columns as ({columns_query})
@@ -156,12 +156,13 @@ def _make_trees(cur: Cursor) -> list[Tree]:
 def set_current(forest: Forest): Forest._current = forest
 
 # read from current forest
-def table_tree_names():       return Forest._current._table_tree_names
-def trees_by_table():         return Forest._current._trees_by_table
-def tables_by_var():          return Forest._current._tables_by_var
-def tables_by_var_and_tree(): return Forest._current._tables_by_var_and_tree
-def node_by_tab_and_tree():   return Forest._current._node_by_tab_and_tree
-def all_tables():             return Forest._current._all_tables
+def is_var(tok_text: str):   return tok_text in Forest._current._tables_by_var.keys()
+def is_tree(tok_text: str):  return tok_text in Forest._current._table_tree_names
+def is_table(tok_text: str): return tok_text in Forest._current._all_tables
+def tables_by_var(var: str):                     return Forest._current._tables_by_var[var]
+def trees_by_table(table_name: str):             return Forest._current._trees_by_table[table_name]
+def node_by_tab_and_tree(tab: str, tree: str):   return Forest._current._node_by_tab_and_tree[(tab, tree)]
+def tables_by_var_and_tree(var: str, tree: str): return Forest._current._tables_by_var_and_tree[(var, tree)]
 
 
 

@@ -1,15 +1,14 @@
-from sqlglot import Dialect
+# from sqlglot import Dialect
 from .token_tree import TokenTree, Token, TokenType, ParserError
-from engine.externals.database_py.dialect import dialect_str
+from engine.externals.database_py import dialect
 
 
-_dialect = Dialect.get_or_raise(dialect_str) # dialekt bør gribes fra et config object
+# _dialect = Dialect.get_or_raise(dialect.current.dialect_str) # dialekt bør gribes fra et config object
 
 
 def tokenize(sapi_str: str) -> list[TokenTree]:
-    tokens: list = _dialect.tokenize(sapi_str) # list of builtins.token, which seems to behave like Token, except for type checks
-    # cast to sqlglot.tokens.Token and drop the unreliable token.end
-    # evt. drop all the unused stuff.
+    tokens: list = dialect.current.sqlglot_dialect().tokenize(sapi_str) # list of builtins.token, which seems to behave like Token, except for type checks
+    # cast to sqlglot.tokens.Token and drop the unreliable token.end. evt. drop all the unused stuff.
     tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.col, t.start, None, t.comments) for t in tokens]
     statements: list[str] = sapi_str.split(';')
 

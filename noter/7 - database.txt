@@ -27,4 +27,5 @@
 * softcode dialect and database / connection / forest
 * replace forest.foo()[key] with forest.foo(key)
 * code connection againt the "PEP 249 - Python Database API Specification v2.0" standard
+* seperate sapi_sys datamodel from user supplied datamodel.
 
