@@ -14,18 +14,13 @@
 
 --------------
 
-* database -> Table, Tree (done, omg man)
-* Table, Tree -> Forest (done)
-* test the code by plugging it into the hardcoded trees file (done)
-* separate datamodel / externals from parsing. (done)
 * support runtime forest by skipping all or some of the step (database -> Table, Tree) when data is provided explicitly 
     (done, but only when all data is provided, even column_names)
 * support safety by checking the validity of the trees in step (database -> Table, Tree)
-* support choice between runtime forest or database forest and choice of database
 
 ---
-* softcode dialect and database / connection / forest
-* replace forest.foo()[key] with forest.foo(key)
-* code connection againt the "PEP 249 - Python Database API Specification v2.0" standard
 * seperate sapi_sys datamodel from user supplied datamodel.
+* handle database setup
+* test both datamodel from db runtime datamodel
+
 
