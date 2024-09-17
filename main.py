@@ -1,28 +1,23 @@
 from engine import parser
-from engine.externals.database_py import dialect, forest
-
+from test.engine import runtime_forest, postgres_forest
 
 if __name__ == '__main__':
     
     sapi_query = """
         WITH cte AS (
-            SELECT COL0_1, COL0_2, COL00_2 FROM TREE
+            SELECT col0_1, col0_2, col00_2 FROM tree
         )
         SELECT 
-            cte.COL00_2,
-            COL10_2,
-            (SELECT sum(COL20_2) FROM TREE)
-        -- comment
-        /* comment */
+            cte.col00_2,
+            col10_2,
+            (SELECT sum(col20_2) FROM tree)
+        --comment from from 
         FROM cte 
-        join TREE ON TREE.COL_1 = cte.COL0_1
+        join tree ON tree.col_1 = cte.col0_1
         """
     
-    with open('../sapi_secret/pg_password.txt') as f:
-        password = f.read()
-    forest = forest.Forest.from_database(dialect.postgres(),
-        host='localhost', port = 5432, dbname = 'postgres', user = 'postgres', password=password)
-    
+    # forest = postgres_forest.setup_db_and_make_forest()
+    forest = runtime_forest.make_forest()
     sql = parser.parse(sapi_query, forest)
 
     print("--- sql-str ---")

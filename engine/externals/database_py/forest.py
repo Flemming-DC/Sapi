@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from anytree import Node
 from textwrap import dedent
-from . import database_deployment
+from . import deployment
 from .dialect import Dialect
 from .pep249_database_api_spec_v2 import Cursor
 
@@ -70,9 +70,11 @@ class Forest:
 
     @staticmethod
     def from_database(dialect: Dialect, **connection_info) -> Forest:
-        database_deployment.setup() # temp
         con = dialect.connect(**connection_info)
+        dialect._set_to_read_only(con)
         cur = con.cursor()
+        if not deployment.is_deployed(cur, dialect):
+            raise Exception("You must call deployment.setup, before calling this function.")
         cur.execute("set search_path to sapi_sys")
         trees = _make_trees(dialect, cur)
         con.close()
@@ -117,6 +119,13 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
     join_info = cur.fetchall()
     join_info_by_table_id = {j[0]: {'parent': j[1], 'primary_key_col': j[2], 'foreign_key_col': j[3]} for j in join_info}
 
+    cur.execute("""
+        select distinct schema_name, table_name
+        from sapi_sys.sapi_tables
+        join sapi_sys.sapi_trees using (sapi_trees_id)
+        """) 
+    remaining_expected_tables = [schema + '.' + tab for schema, tab in cur.fetchall()] # used for error checking 
+
     trees: list[Tree] = []
     current_tree: Tree|None = None
     current_table: Table|None = None
@@ -142,14 +151,19 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
             if join_info: # join_info is None for the root table
                 current_table.parent = join_info['parent']
 
+            qualified_table = current_tree.schema + '.' + current_table.name
+            if qualified_table in remaining_expected_tables:
+                remaining_expected_tables.remove(qualified_table)
+
         # now current_table must exist
         if col_row['column_name'] is None:
-            raise Exception(dedent(f"""
-                Failed to find any schema {col_row['schema_name']} containing a tree {col_row['tree_name']} 
-                containing a table {col_row['table_name']} containing any columns. 
-                """))
+            full_name = f"{col_row['schema_name']}.{col_row['tree_name']}.{col_row['table_name']}"
+            raise Exception(f"Failed to find any table '{full_name}' containing any columns.")
         # now col_row['column_name'] must exist
         current_table.columns.append(col_row['column_name'])
+
+    if remaining_expected_tables:
+        raise Exception(f"Failed to find the following table even though they are listed in sapi_sys.sapi_tables.\n{remaining_expected_tables}")
 
     return trees
 

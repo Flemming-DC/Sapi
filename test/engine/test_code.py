@@ -5,9 +5,15 @@ from engine.token_tree import Token, TokenType, TokenTree
 from engine.select_.tree_join import TreeJoin
 from engine.select_ import select_analyzer #, path_finder, join_generator
 from engine.dyn_loop import DynLoop
-from select_cases import select_cases, select_error_cases, forest
+from engine.externals.database_py.forest import Forest
+from engine.externals.database_py import forest as forest_module
+from select_cases import select_cases, select_error_cases
+import postgres_forest, runtime_forest
 
-def test_get_expected_table_trees():
+
+
+def _test_get_expected_table_trees(forest: Forest):
+    forest_module.set_current(forest)
     # ------- tokens ---------
     tokens1 = [
         Token(TokenType.SELECT, 'SELECT', 3, 7, 27, 32),
@@ -121,7 +127,7 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
     return j1_comparable == j2_comparable
 
 
-def test_get_expected_sql():
+def _test_get_expected_sql(forest: Forest):
 
     for sapi, expected_sql in select_cases:
         actual_sql = parser.parse(sapi, forest)
@@ -147,7 +153,7 @@ def test_get_expected_sql():
                 """).format(sapi, expected_sql, actual_sql, differing_lines))
 
 
-def test_raise_error():
+def _test_raise_error(forest: Forest):
     for sapi, error_type in select_error_cases:
         found_error = False
         try:   parser.parse(sapi, forest)
@@ -164,17 +170,18 @@ def _remove_space_and_newline(sql: str) -> str:
     sql = dedent(sql).lstrip('\n').rstrip(' \n')
     sql = '\n'.join(line.rstrip(' \n') for line in sql.split('\n'))
     return sql
-        
+ 
 
-
-       
+def _test_forest(forest: Forest):
+    _test_get_expected_table_trees(forest)
+    _test_get_expected_sql(forest)
+    _test_raise_error(forest)
 
 
 if __name__ == '__main__':
-    # test_get_expected_table_trees()
-    test_get_expected_sql()
-    test_raise_error()
-    print("Passed")
+    _test_forest(runtime_forest.make_forest())
+    _test_forest(postgres_forest.setup_db_and_make_forest())
+    print("All Tests Passed")
 
 
 

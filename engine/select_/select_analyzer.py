@@ -5,7 +5,6 @@ from .tree_join import TreeJoin
 from engine.dyn_loop import DynLoop
 
 def find_tree_joins(loop: DynLoop) -> list[TreeJoin]:
-    print('---')
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
     ref_tables: list[str] = []

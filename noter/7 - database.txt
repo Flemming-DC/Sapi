@@ -22,5 +22,9 @@
 * seperate sapi_sys datamodel from user supplied datamodel.
 * handle database setup
 * test both datamodel from db runtime datamodel
-
-
+* hyp: put create_sapi_sys into dialect. 
+    evt. let schema names variables that default to sapi_sys and sapi_test (evt. exclude sapi_test)
+* enforce rust-inspired (single mutator connection or any number of readonly connections) 
+    rule to guard against deadlocks.
+    note that forest.load_from_database can encounter deadlocks if the ordering of setup sapi-datamodel, 
+    app-sql-datamodel and forest is incorrect.
