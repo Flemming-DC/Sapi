@@ -1,10 +1,18 @@
 
+--- git commands ---
 git add . && git commit -m "m" && git push
-sapi_env\Scripts\activate
 
 
---------
+--- env commands ---
+create env:     python -m venv <env_name>
+activate env:   sapi_env\Scripts\activate
+list packages:  pip list
 
-python -m venv env
-pip list
+--- designer commands ---
+nb: the environment must be activated first
+qt5-tools designer
+pyuic5 source.ui -o destination.py  (-x foran source tilføjer en __name__ == '__main__' block) 
+pyuic5 editor\designer\editor.ui -o editor\auto\editor.py   
+
+
 

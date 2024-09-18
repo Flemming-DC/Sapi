@@ -1,30 +1,14 @@
 
 
-* extract data from datamodel into an analogue of the HardCodedTrees file (but this time soft coded :))
-* replace HardCodedTrees with a class or some similar dependancy. 
-    Input this into the parse function, so that it can either accept hardcoded data or a real database
-* setup connection and execute
-
-----
-* Make a dst friendly header
+* Make a dst friendly dialect
 * oracle support
 * sapi cursor plugin
 * read function and Transaction class or Sapi class
-
-
---------------
-
-* support runtime forest by skipping all or some of the step (database -> Table, Tree) when data is provided explicitly 
-    (done, but only when all data is provided, even column_names)
 * support safety by checking the validity of the trees in step (database -> Table, Tree)
-
----
-* seperate sapi_sys datamodel from user supplied datamodel.
-* handle database setup
-* test both datamodel from db runtime datamodel
-* hyp: put create_sapi_sys into dialect. 
-    evt. let schema names variables that default to sapi_sys and sapi_test (evt. exclude sapi_test)
 * enforce rust-inspired (single mutator connection or any number of readonly connections) 
     rule to guard against deadlocks.
     note that forest.load_from_database can encounter deadlocks if the ordering of setup sapi-datamodel, 
     app-sql-datamodel and forest is incorrect.
+
+
+
