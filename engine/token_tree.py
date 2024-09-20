@@ -17,7 +17,7 @@ class ParserError(Exception): ...
 class _StrReplacement:
     str_from_: int
     str_to: int
-    new_tokens: str
+    new_tokens: list[Token]
 
 class AutoToken(Token):...
 
@@ -114,7 +114,7 @@ class TokenTree:
         str_replacements.sort(key = lambda r: r.str_from_)
         for i, rep in enumerate(str_replacements):
             last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
-            sql_str += _._sapi_str[last_rep_to:rep.str_from_ - 1]        # appending a sapi-segment
+            sql_str += _._sapi_str[last_rep_to:rep.str_from_]            # appending a sapi-segment
             for tok in rep.new_tokens:
                 sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
             if _._if_new_clause_add_newline(sql_str, rep.str_from_):
@@ -140,7 +140,7 @@ class TokenTree:
         elif tok.text in no_space_prefix:
             return so_far.rstrip(' ') + tok.text
         else:
-            return so_far + ' ' + tok.text
+            return (so_far if so_far.endswith(' ') else so_far + ' ') + tok.text
         
     @staticmethod
     def _last_indention(s: str) -> str:

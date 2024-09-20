@@ -13,7 +13,7 @@ case1 = Case( # cte, subquery and comments
         SELECT 
             cte.col00_2,
             col10_2,
-            (SELECT sum(col20_2) FROM tree)
+            (SELECT count(col20_2) FROM tree)
         --FROM tree
         --join cte ON tree.col_1 = cte.col0_1
         FROM cte 
@@ -26,7 +26,7 @@ case1 = Case( # cte, subquery and comments
         SELECT
             cte.col00_2,
             tab10.col10_2,
-            (SELECT sum tab20.col20_2) FROM tab20)
+            (SELECT count(tab20.col20_2) FROM tab20)
         --FROM tree
         --join cte ON tree.col_1 = cte.col0_1
         FROM cte
@@ -47,7 +47,7 @@ case3 = Case( # join multiple trees
 select 
     col1_1_, 
     col_2_, 
-    col_2, 
+    col_2
 from tree
 join tree_ on tree_.col_1_ = tree.col_1
     """,
@@ -55,10 +55,10 @@ join tree_ on tree_.col_1_ = tree.col_1
 select 
     tab1_.col1_1_, 
     tab_.col_2_, 
-    tab.col_2, 
+    tab.col_2
 from tab
 join tab_ on tab_.col_1_ = tab.col_1
-join tab1_ using (tab_id)
+join tab1_ using (tab__id)
     """)
 
 
@@ -67,17 +67,17 @@ case4 = Case(
 select
     col1_1_,
     tab0_.col0_1_,
-    tree_.col1_2_,
+    tree_.col1_2_
 from tree_
     """,
     expected_sql = """
 select
     tab1_.col1_1_,
     tab0_.col0_1_,
-    tab1_.col1_2_,
+    tab1_.col1_2_
 from tab0_
-join tab_ using (tab_id)
-join tab1_ using (tab_id)
+join tab_ using (tab__id)
+join tab1_ using (tab__id)
     """)
 
 # make a case for joining multiple trees via a using statement
@@ -89,19 +89,19 @@ case5 = Case(
 select
     col1_1_,
     col0_1_,
-    tab1_.col1_2_,
+    tab1_.col1_2_
 from tab0_
-join tab_ using (tab_id)
-join tab1_ using (tab_id)
+join tab_ using (tab__id)
+join tab1_ using (tab__id)
     """,
     expected_sql = """
 select
     tab1_.col1_1_,
     tab0_.col0_1_,
-    tab1_.col1_2_,
+    tab1_.col1_2_
 from tab0_
-join tab_ using (tab_id)
-join tab1_ using (tab_id)
+join tab_ using (tab__id)
+join tab1_ using (tab__id)
     """)
 
 case6 = Case(
@@ -113,7 +113,7 @@ select
     some_view.col0_1_,
     x
 from tree_
-join tab1 on tab1.col1_1_ = tree_.col1_1_
+join tab1 on tab1.col1_1 = tree_.col1_1_
 join some_view on some_view.col0_1_ = tab0_.col0_1_
     """,
     expected_sql = """
@@ -124,9 +124,9 @@ select
     some_view.col0_1_,
     x
 from tab0_
-JOIN tab_ USING (tab_id)
-JOIN tab1_ USING (tab_id)
-join tab1 on tab1.col1_1_ = tab1_.col1_1_
+JOIN tab_ USING (tab__id)
+JOIN tab1_ USING (tab__id)
+join tab1 on tab1.col1_1 = tab1_.col1_1_
 join some_view on some_view.col0_1_ = tab0_.col0_1_
     """)
 
@@ -136,16 +136,16 @@ select
     col_1__
 from tree_ 
 where true
-order by tab0_.shc
+order by tab0_.shc_
     """,
     expected_sql = """
 select
     sht__.col_1__
 from sht__
-join tab_ using (tab_id)
-join tab0_ using (tab_id)
+join tab_ using (tab__id)
+join tab0_ using (tab__id)
 where true
-order by tab0_.shc
+order by tab0_.shc_
     """)
 
 case8 = Case(
@@ -159,7 +159,7 @@ case9 = Case(
     sapi = """
 select sht__.col_1__
 from tree_
-from tree using (shT3_id)
+from tree using (sht___id)
     """,
     expected_sql = ParserError)
 
@@ -170,6 +170,7 @@ from tree using (shT3_id)
 #     expected_sql = """
 #     """)
 
+# select_cases = [case1, case2, case3, case4, case5, case6, case7]
 select_cases = [case1, case2, case3, case4, case5, case6, case7]
 select_error_cases = [case8, case9]
 # select_cases = [] 

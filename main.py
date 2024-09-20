@@ -1,5 +1,7 @@
+import psycopg
 from engine import parser
 from test.engine import runtime_forest, postgres_forest
+
 
 if __name__ == '__main__':
     
@@ -10,8 +12,8 @@ if __name__ == '__main__':
         SELECT 
             cte.col00_2,
             col10_2,
-            (SELECT sum(col20_2) FROM tree)
-        --comment from from 
+            (SELECT count(col20_2) FROM tree)
+        -- here we have a select query. sapi parsed to sql
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
         """
@@ -23,3 +25,10 @@ if __name__ == '__main__':
     print("--- sql-str ---")
     print(sql)
     
+    connection_info = postgres_forest.get_connection_info()
+    with psycopg.Connection.connect(**connection_info) as con:
+        with con.cursor() as cur:
+            cur.execute("set search_path to sapi_demo")
+            data = cur.execute(sql).fetchall()
+            print("--- data ---")
+            print(data)

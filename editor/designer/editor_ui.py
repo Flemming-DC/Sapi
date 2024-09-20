@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'editor\designer\editor.ui'
+# Form implementation generated from reading ui file 'c:\Mine\Python\Sapi\editor\designer\editor.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #

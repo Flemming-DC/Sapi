@@ -10,7 +10,7 @@ list packages:  pip list
 
 --- designer commands ---
 nb: the environment must be activated first
-qt5-tools designer
+sapi_env\Scripts\activate && qt5-tools designer
 pyuic5 source.ui -o destination.py  (-x foran source tilføjer en __name__ == '__main__' block) 
 pyuic5 editor\designer\editor.ui -o editor\auto\editor.py   
 

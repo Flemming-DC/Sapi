@@ -67,16 +67,6 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
             var = loop.peek(2).text
             tree = loop.tok().text
             tab = _get_table_from_var_and_tree(var, tree)
-
-            # var = loop.peek(2).text
-            # tabs_of_var = tables_by_var[var] 
-            # tree = loop.tok().text
-            # tabs_of_var_in_tree = [tab for tab in tabs_of_var if tree in trees_by_table[tab]]
-            # if len(tabs_of_var_in_tree) > 1:
-            #     raise ParserError(f"The tree {tree} contains multiple tables {tabs_of_var_in_tree} with column {var}.")
-            # elif len(tabs_of_var_in_tree) == 0:
-            #     raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
-            # tab = tabs_of_var_in_tree[0]
             loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
         # record table prefixes
         if forest.is_table(loop.tok().text):

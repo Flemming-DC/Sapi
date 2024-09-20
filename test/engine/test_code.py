@@ -1,4 +1,6 @@
 import __sys_path__
+import sys
+import psycopg 
 from engine import parser
 from textwrap import dedent
 from engine.token_tree import Token, TokenType, TokenTree
@@ -128,7 +130,6 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 
 
 def _test_get_expected_sql(forest: Forest):
-
     for sapi, expected_sql in select_cases:
         actual_sql = parser.parse(sapi, forest)
         
@@ -164,7 +165,28 @@ def _test_raise_error(forest: Forest):
             sapi = dedent(sapi)
             raise Exception(f"Failed to raise {error_type.__name__} in {sapi}")
 
-        
+
+def _test_expected_queries_works():
+    connection_info = postgres_forest.get_connection_info()
+    with psycopg.Connection.connect(**connection_info) as con:
+        with con.cursor() as cur:
+            cur.execute("set search_path to sapi_demo")
+            con.commit()
+            exc = None
+            for _, expected_sql in select_cases:
+                if 'some_view' in expected_sql:
+                    continue # some_view doesnt actually exist, so we dont demand this query to work
+                try:
+                    cur.execute(expected_sql)
+                except Exception as e:
+                    exc = e
+                    con.rollback()
+                    print("------ failed to execute expected_sql ------")
+                    print(expected_sql)
+                    print()
+                    print(e)
+            if exc:
+                sys.exit()
 
 def _remove_space_and_newline(sql: str) -> str:
     sql = dedent(sql).lstrip('\n').rstrip(' \n')
@@ -181,6 +203,7 @@ def _test_forest(forest: Forest):
 if __name__ == '__main__':
     _test_forest(runtime_forest.make_forest())
     _test_forest(postgres_forest.setup_db_and_make_forest())
+    _test_expected_queries_works()
     print("All Tests Passed")
 
 
