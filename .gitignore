@@ -1,3 +1,18 @@
+# custom ignores
+sandbox/
+notes/
+noter/
+sapi_env/
+where-to-put-this/
+**/dummy.py/**
+**/dummy.ts/**
+
+# extension ignores
+*/out/
+*/node_modules
+*/.vscode-test
+*/tsconfig.tsbuildinfo
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
