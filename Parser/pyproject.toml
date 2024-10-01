@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sapi-lib"
+version = "0.0.46"
+authors = [
+  { name="fch", email="flem1431@hotmail.com" },
+]
+description = "An extension of the SQL language. It can also be used as a SQL generator."
+readme = "../README.md"
+requires-python = ">=3.10.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    # "Operating System :: OS Independent",
+]
+dependencies = [
+  "anytree>=2.12.1",
+  "pydantic>=2.8.2",
+  "sqlglot>=25.10.0",
+  "psycopg-binary>=3.2.1",
+  "psycopg-pool>=3.2.2",
+  # "oracledb>=2.4.1",
+]
+
+[project.urls]
+repo = "https://github.com/Flemming-DC/Sapi"
+issues = "https://github.com/Flemming-DC/Sapi/issues"
+
+# [hatchling.build]
+# prepare_metadata_for_build_editable
+
+[tool.hatch.build]
+# include = ["src/**"] # includ src except env 
+exclude = ["env", "venv", "sapi_env", "tests", "docs", "where-to-put-this", "dist"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sapi"]
