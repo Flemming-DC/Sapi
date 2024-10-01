@@ -10,8 +10,8 @@ sapi_env/
 */local_editor_env/
 */remote_editor_env/
 where-to-put-this/
-**/dummy.py/**
-**/dummy.ts/**
+**/dummy.py
+**/dummy.ts
 
 # extension ignores
 **/out/
