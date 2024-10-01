@@ -1,6 +1,6 @@
 {
-  "name": "a-lang-serv-4",
-  "description": "precursor to sapi extension",
+  "name": "sapi",
+  "description": "Provides syntax highlighting and other editor support for the sapi query language.",
   "author": "fch",
   "bugs": { "url": "https://github.com/Flemming-DC/Sapi/issues" },
   "repository": {
