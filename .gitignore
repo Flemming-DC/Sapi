@@ -14,8 +14,8 @@ where-to-put-this/
 **/dummy.ts/**
 
 # extension ignores
-*/out/
-*/node_modules
+**/out/
+**/node_modules
 */.vscode-test
 */tsconfig.tsbuildinfo
 
