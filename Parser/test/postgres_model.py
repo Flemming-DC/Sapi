@@ -1,16 +1,13 @@
 import psycopg
 from pathlib import Path
-from sapi.externals.database_py.forest import Forest
-from sapi.externals.database_py import dialect
-from sapi.externals.database_py import deployment
+from sapi import setup_sapi, dialect, DataModel
 
-
-def setup_db_and_make_forest():
+def setup_db_and_make_datamodel():
     connection_info = get_connection_info()
     # these three calls must happen in this order
-    deployment.setup(dialect.postgres(), **connection_info)
+    setup_sapi(dialect.postgres(), **connection_info)
     setup_test_datamodel(**connection_info)
-    return Forest.from_database(dialect.postgres(), **connection_info)
+    return DataModel.from_database(dialect.postgres(), **connection_info)
 
 
 def setup_test_datamodel(**connection_info):
@@ -25,7 +22,10 @@ def setup_test_datamodel(**connection_info):
 
 
 def get_connection_info() -> dict[str, str|int]:
-    with open('../sapi_secret/pg_password.txt') as f:
+    password_path = Path('sapi_secret/pg_password.txt')
+    while not password_path.exists():
+        password_path = '..' / password_path # go up the file tree until we find password file
+    with open(password_path) as f:
         password = f.read()
     connection_info = {'host': 'localhost', 'port': 5432, 'dbname': 'postgres', 'user': 'postgres', 'password': password}
     return connection_info

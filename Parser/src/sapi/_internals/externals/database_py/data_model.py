@@ -24,8 +24,8 @@ class Tree: # evt. call it TableTree
     # deletable: bool = True
 
 
-class Forest:
-    _current: Forest|None = None
+class DataModel:
+    _current: DataModel|None = None
 
     def __init__(_, dialect: Dialect, trees: list[Tree]):
         _._table_tree_names: list[str] = []
@@ -69,7 +69,7 @@ class Forest:
                     node.parent = parent_node
 
     @staticmethod
-    def from_database(dialect: Dialect, **connection_info) -> Forest:
+    def from_database(dialect: Dialect, **connection_info) -> DataModel:
         con = dialect.connect(**connection_info)
         dialect._set_to_read_only(con)
         cur = con.cursor()
@@ -78,7 +78,7 @@ class Forest:
         cur.execute("set search_path to sapi_sys")
         trees = _make_trees(dialect, cur)
         con.close()
-        return Forest(dialect, trees)
+        return DataModel(dialect, trees)
 
 
 def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
@@ -168,16 +168,16 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
     return trees
 
 
-def set_current(forest: Forest): Forest._current = forest
+def set_current(dataModel: DataModel): DataModel._current = dataModel
 
-# read from current forest
-def is_var(tok_text: str):   return tok_text in Forest._current._tables_by_var.keys()
-def is_tree(tok_text: str):  return tok_text in Forest._current._table_tree_names
-def is_table(tok_text: str): return tok_text in Forest._current._all_tables
-def tables_by_var(var: str):                     return Forest._current._tables_by_var[var]
-def trees_by_table(table_name: str):             return Forest._current._trees_by_table[table_name]
-def node_by_tab_and_tree(tab: str, tree: str):   return Forest._current._node_by_tab_and_tree[(tab, tree)]
-def tables_by_var_and_tree(var: str, tree: str): return Forest._current._tables_by_var_and_tree[(var, tree)]
-def dialect(): return Forest._current._dialect
+# read from current dataModel
+def is_var(tok_text: str):   return tok_text in DataModel._current._tables_by_var.keys()
+def is_tree(tok_text: str):  return tok_text in DataModel._current._table_tree_names
+def is_table(tok_text: str): return tok_text in DataModel._current._all_tables
+def tables_by_var(var: str):                     return DataModel._current._tables_by_var[var]
+def trees_by_table(table_name: str):             return DataModel._current._trees_by_table[table_name]
+def node_by_tab_and_tree(tab: str, tree: str):   return DataModel._current._node_by_tab_and_tree[(tab, tree)]
+def tables_by_var_and_tree(var: str, tree: str): return DataModel._current._tables_by_var_and_tree[(var, tree)]
+def dialect(): return DataModel._current._dialect
 
 

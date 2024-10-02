@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sqlglot
 from typing import Callable
-from sapi.token_tree import TokenType
+from sapi._internals.token_tree import TokenType
 from .pep249_database_api_spec_v2 import Connect, Connection
 from dataclasses import dataclass
 

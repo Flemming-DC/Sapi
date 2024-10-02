@@ -1,5 +1,5 @@
 from collections import namedtuple
-from sapi.token_tree import ParserError
+from sapi._internals.token_tree import ParserError
 
 # -------- define cases -------- #
 

@@ -1,8 +1,8 @@
-from sapi.externals.database_py.forest import Forest, Tree, Table
-from sapi.externals.database_py import dialect
+from sapi import dialect, DataModel
+from sapi._internals.externals.database_py.data_model import Tree, Table
 
 
-def make_forest():
+def make_datamodel():
     _tree = Tree(
         tables=[
             Table(name='sht__', parent='tab',  columns=['col_1__', 'col_2__', 'sht___id', 'tab__id', 'tab_id']), 
@@ -27,5 +27,5 @@ def make_forest():
             ], 
         name='tree_', schema='sapi_demo')
 
-    return Forest(dialect.postgres(), [_tree, _tree_])
+    return DataModel(dialect.postgres(), [_tree, _tree_])
 

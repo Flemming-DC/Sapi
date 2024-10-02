@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from anytree import walker, Node
-from sapi.externals.database_py import forest
+from sapi._internals.externals.database_py import data_model
 
 pathType = list[tuple[Node, Node]]
 @dataclass
@@ -15,7 +15,7 @@ def join_path(table_names: list[str], first_table: str|None, tree_name: str) -> 
         return [], None # this means that there is nothing to join. e.g. "select 1 from A"
 
     ordered_tabs = [first_table] + [t for t in table_names if t != first_table] 
-    table_nodes = [forest.node_by_tab_and_tree(t, tree_name) for t in ordered_tabs]# if t in node_by_table.keys()]
+    table_nodes = [data_model.node_by_tab_and_tree(t, tree_name) for t in ordered_tabs]# if t in node_by_table.keys()]
 
     pathInfo = _PathInfo()
     for tab_node in table_nodes:

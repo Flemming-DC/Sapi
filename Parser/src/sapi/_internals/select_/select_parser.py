@@ -1,6 +1,6 @@
 from . import select_analyzer, path_finder, join_generator
-from sapi.token_tree import TokenTree
-from sapi.dyn_loop import DynLoop
+from sapi._internals.token_tree import TokenTree
+from sapi._internals.dyn_loop import DynLoop
 
 
 def parse_select(token_tree: TokenTree) -> TokenTree:

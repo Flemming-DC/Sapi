@@ -1,7 +1,6 @@
 import psycopg
-from sapi import parser
-from test.engine import runtime_forest, postgres_forest
-
+import sapi
+from test import postgres_model, runtime_model
 
 if __name__ == '__main__':
     
@@ -19,13 +18,13 @@ if __name__ == '__main__':
         """
     
     # forest = postgres_forest.setup_db_and_make_forest()
-    forest = runtime_forest.make_forest()
-    sql = parser.parse(sapi_query, forest)
+    forest = runtime_model.make_datamodel()
+    sql = sapi.parse(sapi_query, forest)
     
     print("--- sql-str ---")
     print(sql)
     
-    connection_info = postgres_forest.get_connection_info()
+    connection_info = postgres_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con:
         with con.cursor() as cur:
             cur.execute("set search_path to sapi_demo")

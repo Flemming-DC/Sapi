@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from sapi.token_tree import Token
+from sapi._internals.token_tree import Token
 
 
 @dataclass

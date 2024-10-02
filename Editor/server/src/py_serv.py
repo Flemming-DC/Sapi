@@ -5,6 +5,7 @@ from pygls.server import LanguageServer
 import greet
 import os
 import pathlib
+import sapi_demo
 
 COLOR = re.compile(r"""\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})(?!\w)""")
 server = LanguageServer("color-server", "v1")
@@ -17,18 +18,19 @@ def document_color(params: types.CodeActionParams):
     # document = server.workspace.get_text_document(params.text_document.uri)
     # current_line = document.lines[params.position.line].strip()
     # server.send_notification("hi. server is here")
-    server.show_message(f"""
-        server.workspace.root_path, os.getcwd(), '.'
-        {server.workspace.root_path}
-        {os.getcwd()}
-        {str(pathlib.Path('.').resolve())}
-        """)
+    # server.show_message(f"""
+    #     server.workspace.root_path, os.getcwd(), '.'
+    #     {server.workspace.root_path}
+    #     {os.getcwd()}
+    #     {str(pathlib.Path('.').resolve())}
+    #     """)
+    server.show_message(sapi_demo.get_sql())
     if not server.workspace.root_path:
         raise Exception("failed to find root directory")
-    greet.greet(server.workspace.root_path, 'rp')
-    greet.greet(os.getcwd(), 'cwd')
-    greet.greet('.', '.')
-    greet.greet(str(pathlib.Path('.').resolve()), 'p.')
+    # greet.greet(server.workspace.root_path, 'rp')
+    # greet.greet(os.getcwd(), 'cwd')
+    # greet.greet('.', '.')
+    # greet.greet(str(pathlib.Path('.').resolve()), 'p.')
     items = []
     document_uri = params.text_document.uri
     document = server.workspace.get_text_document(document_uri)

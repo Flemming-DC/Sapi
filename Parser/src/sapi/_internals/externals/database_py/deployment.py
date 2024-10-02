@@ -3,7 +3,7 @@ from .pep249_database_api_spec_v2 import Cursor
 from .dialect import Dialect
 
 
-def setup(dialect: Dialect, **connection_info):
+def setup_sapi(dialect: Dialect, **connection_info):
     con = dialect.connect(**connection_info)
     cur = con.cursor()
     if is_deployed(cur, dialect):

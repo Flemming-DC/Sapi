@@ -1,21 +1,20 @@
 import __sys_path__
 import sys
-import psycopg 
-from sapi import parser
+import psycopg
 from textwrap import dedent
-from sapi.token_tree import Token, TokenType, TokenTree
-from sapi.select_.tree_join import TreeJoin
-from sapi.select_ import select_analyzer #, path_finder, join_generator
-from sapi.dyn_loop import DynLoop
-from sapi.externals.database_py.forest import Forest
-from sapi.externals.database_py import forest as forest_module
+from sapi import DataModel, parse
+from sapi._internals.token_tree import Token, TokenType, TokenTree
+from sapi._internals.select_.tree_join import TreeJoin
+from sapi._internals.select_ import select_analyzer
+from sapi._internals.dyn_loop import DynLoop
+from sapi._internals.externals.database_py import data_model
 from select_cases import select_cases, select_error_cases
-import postgres_forest, runtime_forest
+import postgres_model, runtime_model
 
 
 
-def _test_get_expected_table_trees(forest: Forest):
-    forest_module.set_current(forest)
+def _test_get_expected_table_trees(dataModel: DataModel):
+    data_model.set_current(dataModel)
     # ------- tokens ---------
     tokens1 = [
         Token(TokenType.SELECT, 'SELECT', 3, 7, 27, 32),
@@ -129,9 +128,9 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
     return j1_comparable == j2_comparable
 
 
-def _test_get_expected_sql(forest: Forest):
+def _test_get_expected_sql(dataModel: DataModel):
     for sapi, expected_sql in select_cases:
-        actual_sql = parser.parse(sapi, forest)
+        actual_sql = parse(sapi, dataModel)
         
         # remove insignificant differences
         sapi = dedent(sapi)
@@ -154,10 +153,10 @@ def _test_get_expected_sql(forest: Forest):
                 """).format(sapi, expected_sql, actual_sql, differing_lines))
 
 
-def _test_raise_error(forest: Forest):
+def _test_raise_error(dataModel: DataModel):
     for sapi, error_type in select_error_cases:
         found_error = False
-        try:   parser.parse(sapi, forest)
+        try:   parse(sapi, dataModel)
         except error_type: found_error = True
         except Exception: ...
 
@@ -167,7 +166,7 @@ def _test_raise_error(forest: Forest):
 
 
 def _test_expected_queries_works():
-    connection_info = postgres_forest.get_connection_info()
+    connection_info = postgres_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con:
         with con.cursor() as cur:
             cur.execute("set search_path to sapi_demo")
@@ -194,15 +193,15 @@ def _remove_space_and_newline(sql: str) -> str:
     return sql
  
 
-def _test_forest(forest: Forest):
-    _test_get_expected_table_trees(forest)
-    _test_get_expected_sql(forest)
-    _test_raise_error(forest)
+def _test_forest(dataModel: DataModel):
+    _test_get_expected_table_trees(dataModel)
+    _test_get_expected_sql(dataModel)
+    _test_raise_error(dataModel)
 
 
 if __name__ == '__main__':
-    _test_forest(runtime_forest.make_forest())
-    _test_forest(postgres_forest.setup_db_and_make_forest())
+    _test_forest(runtime_model.make_datamodel())
+    _test_forest(postgres_model.setup_db_and_make_datamodel())
     _test_expected_queries_works()
     print("All Tests Passed")
 
