@@ -284,7 +284,7 @@ join tree_ on tree_.col_1_ = tree.col_1
 
     # forest = postgres_forest.setup_db_and_make_forest()
     forest = runtime_model.make_datamodel()
-    sql = sapi.parse(multi_query, forest)
+    sql = sapi.parse(messed_up_query, forest)
     
     print("--- sql-str ---")
     print(sql)

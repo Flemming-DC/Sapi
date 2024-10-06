@@ -98,8 +98,6 @@ class TokenTree:
 #region -------------- cast to str --------------
 
     def __str__(_) -> str:
-        if len(_._sapi_str.split(' ')) < 6:
-            ...
         # collect replacements in subtrees
         str_replacements = _._str_replacements
         for tok in _.tokens:

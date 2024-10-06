@@ -67,13 +67,9 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
             var = loop.peek(2).text
             tree = loop.tok().text
             tab = _get_table_from_var_and_tree(var, tree)
-            if loop.tok().text == 'tree':
-                ...
             loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
         # record table prefixes
         if data_model.is_table(loop.tok().text):
-            if loop.tok().text == 'tab10':
-                ...
             on_clause_tables.append(loop.tok().text) # register table in on clause
             
     if not is_tree:
