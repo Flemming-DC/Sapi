@@ -235,7 +235,7 @@ case1 = Case( # cte, subquery and comments
         --join cte ON tree.col_1 = cte.col0_1
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
-    
+    ;
     --expected_sql = """
         WITH cte AS (
             SELECT tab0.col0_1, tab0.col0_2, tab00.col00_2 FROM tab0

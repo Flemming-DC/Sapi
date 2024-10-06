@@ -164,6 +164,7 @@ from tree using (sht___id)
     expected_sql = ParserError)
 
 delim = '\n;\n'
+
 case10 = Case( # multi query
     sapi = case1.sapi + delim + case2.sapi,
     expected_sql = case1.expected_sql + delim + case2.expected_sql,
@@ -174,6 +175,77 @@ case11 = Case( # multi query
     expected_sql = case3.expected_sql + delim + case4.expected_sql + delim + case5.expected_sql + delim,
     )
 
+case12 = Case( # leading junk and multi query
+    sapi = '''
+
+1scscd
+2scscd
+
+3scscd
+4hn
+
+select 1 
+
+from collections import namedtuple
+from sapi._internals.token_tree import ParserError
+
+# -------- define cases -------- #
+
+Case = namedtuple('Case', ['sapi', 'expected_sql'])
+
+case1 = Case( # cte, subquery and comments
+    
+        WITH cte AS (
+            SELECT col0_1, col0_2, col00_2 FROM tree
+        )
+        SELECT 
+            cte.col00_2,
+            col10_2,
+            (SELECT count(col20_2) FROM tree)
+        --FROM tree
+        --join cte ON tree.col_1 = cte.col0_1
+        FROM cte 
+        join tree ON tree.col_1 = cte.col0_1
+    ;
+    select 1 from tree
+''',
+    expected_sql = '''
+
+1scscd
+2scscd
+
+3scscd
+4hn
+
+select 1 
+
+from collections import namedtuple
+from sapi._internals.token_tree import ParserError
+
+# -------- define cases -------- #
+
+Case = namedtuple('Case', ['sapi', 'expected_sql'])
+
+case1 = Case( # cte, subquery and comments
+    
+        WITH cte AS (
+            SELECT tab0.col0_1, tab0.col0_2, tab00.col00_2 FROM tab0
+            JOIN tab00 USING (tab0_id))
+        SELECT
+            cte.col00_2,
+            tab10.col10_2,
+            (SELECT count(tab20.col20_2) FROM tab20)
+        --FROM tree
+        --join cte ON tree.col_1 = cte.col0_1
+        FROM cte
+        join tab ON tab.col_1 = cte.col0_1
+        JOIN tab1 USING (tab_id)
+        JOIN tab10 USING (tab1_id)
+    ;
+    select 1
+'''
+    )
+
 # empty_case = Case(
 #     sapi = """
 #     """,
@@ -181,7 +253,7 @@ case11 = Case( # multi query
 #     """)
 
 # select_cases = [case1, case2, case3, case4, case5, case6, case7]
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11] # case11
+select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12] # case11
 select_error_cases = [case8, case9]
 select_cases = [case10] # [case10] case2
 select_error_cases = []
