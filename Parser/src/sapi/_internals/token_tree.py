@@ -27,11 +27,11 @@ common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, Token
 @dataclass
 class TokenTree:
     tokens: list[Token|TokenTree] # variable
-    _sapi_str: str # const (evt. only store at the root tree)
+    _sapi_str: str # const (evt. only store at the root tree) # contains sapi code for one statement
     _next_token: Token|None # const
     _str_replacements: list[_StrReplacement] = field(default_factory=list) # variable
 
-    #region ---------- Token Compatibility ---------- 
+    #region ---------- Token ---------- 
     token_type: TokenType = _TOKENTYPE_TOKEN_TREE
     @property 
     def text(self): return "[TokenTree]" # str(self)
@@ -86,6 +86,9 @@ class TokenTree:
         width = 0 if to == from_ else len(from_tok.text) # this line imposes the restriction of removing at most one token at a time
         str_to = str_from + width
         # new_str = ' '.join(t.text for t in new_tokens)
+
+        # str_from -= _.tokens[0].start
+        # str_to -= _.tokens[0].start
         _._str_replacements.append(_StrReplacement(str_from, str_to, new_tokens))
 
         # modify tokens
@@ -95,6 +98,8 @@ class TokenTree:
 #region -------------- cast to str --------------
 
     def __str__(_) -> str:
+        if len(_._sapi_str.split(' ')) < 6:
+            ...
         # collect replacements in subtrees
         str_replacements = _._str_replacements
         for tok in _.tokens:
@@ -160,33 +165,6 @@ class TokenTree:
             if remainder.startswith(clause):
                 return True
         return False
-
-
-    # def _to_str_old(self) -> str: 
-    #     s = '['
-    #     for tok in self.tokens:
-    #         if isinstance(tok, TokenTree):
-    #             s += indent(repr(tok), '    ').lstrip()
-    #             # s += tok.text + ' '
-    #         else:
-    #             s = TokenTree._add_token_str1(s, tok)
-    #     return s.rstrip(' ') + ']'
-
-    # @staticmethod
-    # def _add_token_str_old(so_far: str, tok: Token) -> str:
-    #     no_space_prefix = [')', ']', '}', '.', ',']
-    #     no_space_suffix = ['(', '[', '{', '.'     ]
-
-    #     if tok.token_type in _common_select_clauses:
-    #         return so_far + '\n' + tok.text + ' '
-    #     elif tok.text == '.': # in no_space_prefix and no_space_suffix
-    #         return so_far.rstrip(' ') + tok.text
-    #     elif tok.text in no_space_suffix:
-    #         return so_far + tok.text
-    #     elif tok.text in no_space_prefix: 
-    #         return so_far.rstrip(' ') + tok.text + ' '
-    #     else:
-    #         return so_far + tok.text + ' '
 
 
 #endregion --------------------------------------

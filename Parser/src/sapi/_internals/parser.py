@@ -7,16 +7,19 @@ from sapi._internals.externals.database_py import data_model
 
 T = TypeVar('T')
 def parse(sapi_str: str, model: data_model.DataModel, return_type: Type[T] = str) -> T:
+    # print(sapi_str)
     data_model.set_current(model)
-    token_trees = tokenizer.tokenize(sapi_str)
+    statements: list[str] = [stmt for stmt in sapi_str.split(';') if stmt.strip() != '']
 
-    for i, root_tree in enumerate(token_trees):
-        token_trees[i] = _parse_token_tree(root_tree) # token_trees goes from sapi to sql
+    sql_token_trees = [] # sapi tok tree
+    for i, stmt in enumerate(statements):
+        sapi_tok_tree = tokenizer.tokenize(stmt)
+        sql_token_trees.append(_parse_token_tree(sapi_tok_tree))
 
     if return_type == list[TokenTree]:
-        return token_trees
+        return sql_token_trees
     elif return_type == str:
-        return '\n;\n'.join(str(t) for t in token_trees) # stringifier.to_sql_str(token_trees, sapi_code)
+        return '\n;\n'.join(str(t) for t in sql_token_trees) 
     else:
         # evt. allow out = abstrakt syntax tree
         raise TypeError("Unrecognized out_type")

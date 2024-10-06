@@ -10,7 +10,14 @@
       "console":"integratedTerminal"
     },
     {
-      "name": "Launch Client",
+      "name":"Server",
+      "type":"debugpy",
+      "request":"launch",
+      "program": "${workspaceFolder}/server/src/main.py",
+      "console":"integratedTerminal"
+    },
+    {
+      "name": "Client",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",

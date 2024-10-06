@@ -1,3 +1,12 @@
+
+1scscd
+2scscd
+
+3scscd
+4hn
+
+select 1 
+
 from collections import namedtuple
 from sapi._internals.token_tree import ParserError
 
@@ -163,16 +172,6 @@ from tree using (sht___id)
     """,
     expected_sql = ParserError)
 
-delim = '\n;\n'
-case10 = Case( # multi query
-    sapi = case1.sapi + delim + case2.sapi,
-    expected_sql = case1.expected_sql + delim + case2.expected_sql,
-    )
-
-case11 = Case( # multi query
-    sapi = case3.sapi + delim + case4.sapi + delim + case5.sapi + delim,
-    expected_sql = case3.expected_sql + delim + case4.expected_sql + delim + case5.expected_sql + delim,
-    )
 
 # empty_case = Case(
 #     sapi = """
@@ -181,10 +180,10 @@ case11 = Case( # multi query
 #     """)
 
 # select_cases = [case1, case2, case3, case4, case5, case6, case7]
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11] # case11
+select_cases = [case1, case2, case3, case4, case5, case6, case7]
 select_error_cases = [case8, case9]
-select_cases = [case10] # [case10] case2
-select_error_cases = []
+# select_cases = [] 
+# select_error_cases = []
 
 
 

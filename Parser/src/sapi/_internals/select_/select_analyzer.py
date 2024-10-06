@@ -67,11 +67,15 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
             var = loop.peek(2).text
             tree = loop.tok().text
             tab = _get_table_from_var_and_tree(var, tree)
+            if loop.tok().text == 'tree':
+                ...
             loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
         # record table prefixes
         if data_model.is_table(loop.tok().text):
+            if loop.tok().text == 'tab10':
+                ...
             on_clause_tables.append(loop.tok().text) # register table in on clause
-
+            
     if not is_tree:
         return None, None
     tree_join = TreeJoin(tree_tok=join_obj, tree_tok_index=join_obj_index, on_clause_end_index=loop.index())
@@ -136,9 +140,6 @@ def _plug_tables_into_tree_joins(ref_tables: list[str], tree_joins: list[TreeJoi
     
     prior_tables = []
     for j, tabs_in_on_clause in zip(tree_joins, tabs_in_on_clauses):
-        # this can somehow be a non-empty addition in a join akin to "join A ON A.a_1 = cte.a0_1",
-        # or maybe not. it looks suspect.
-        # j.referenced_tables += [t for t in tabs_in_on_clause if t not in j.referenced_tables] 
         
         new_tables = [t for t in tabs_in_on_clause if t not in prior_tables]
         if len(new_tables) >= 2:
