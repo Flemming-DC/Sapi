@@ -12,12 +12,14 @@ def parse(sapi_str: str, model: data_model.DataModel, return_type: Type[T] = str
     statements: list[str] = [stmt for stmt in sapi_str.split(';') if stmt.strip() != '']
 
     sql_token_trees = [] # sapi tok tree
-    for i, stmt in enumerate(statements):
+    for stmt in statements:
         sapi_tok_tree = tokenizer.tokenize(stmt)
         sql_token_trees.append(_parse_token_tree(sapi_tok_tree))
 
     if return_type == list[TokenTree]:
         return sql_token_trees
+    elif return_type == list[str]:
+        return [str(t) for t in sql_token_trees]
     elif return_type == str:
         return '\n;\n'.join(str(t) for t in sql_token_trees) 
     else:

@@ -3,6 +3,8 @@ import pathlib
 from lsprotocol import types
 from tools.server import server
 from tools.log import log
+import sapi
+from sandbox import runtime_model
 
 # register code action ideally by ctrl-enter-enter. 
 # first connect, then execute or parse (you choose)
@@ -16,14 +18,56 @@ from tools.log import log
     types.TEXT_DOCUMENT_CODE_ACTION,
     types.CodeActionOptions(code_action_kinds=[types.CodeActionKind.QuickFix]))
 def code_actions(params: types.CodeActionParams):
+    # log("\n--- code_actions ---\n")
     items = []
     document_uri = params.text_document.uri
     document = server.workspace.get_text_document(document_uri)
+    
+    # sapi_query = """
+    #     WITH cte AS (
+    #         SELECT col0_1, col0_2, col00_2 FROM tree
+    #     )
+    #     SELECT 
+    #         cte.col00_2,
+    #         col10_2,
+    #         (SELECT count(col20_2) FROM tree)
+    #     -- here we have a select query. sapi parsed to sql
+    #     FROM cte 
+    #     join tree ON tree.col_1 = cte.col0_1
+    #     """
 
-    start_line = params.range.start.line
-    end_line = params.range.end.line
+    sapi_query = '\n'.join([line.strip('\n\r') for line in document.lines]) # assumes the document only contains one query
+    forest = runtime_model.make_datamodel() # hardcoded datamodel
+    # log(sapi_query)
+    sql_query = sapi.parse(sapi_query, forest, str)
+    # log("\n--- output ---")
+    # log(sql_query)
 
-    lines = document.lines[start_line : end_line + 1]
+
+    range_ = types.Range(
+        start=types.Position(line=0 + 0, character=0),
+        end=types.Position(line=len(document.lines) - 1, character=len(sapi_query) - 1),
+    )
+    text_edit = types.TextEdit(
+        range=range_, new_text=sql_query
+    )
+
+    action = types.CodeAction(
+        title=f"cast to SQL",
+        kind=types.CodeActionKind.QuickFix,
+        edit=types.WorkspaceEdit(changes={document_uri: [text_edit]}),
+    )
+    items.append(action)
+
+
+    # start_line = params.range.start.line
+    # end_line = params.range.end.line
+
+
+    # for idx, line in enumerate(document.lines): 
+    #     sapi.parse()
+
+    # lines = document.lines[start_line : end_line + 1]
     # log(document.lines)
     # log("----")
     # log(lines)

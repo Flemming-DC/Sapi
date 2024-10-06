@@ -4,18 +4,19 @@ from test import postgres_model, runtime_model
 
 if __name__ == '__main__':
     
-    # sapi_query = """
-    #     WITH cte AS (
-    #         SELECT col0_1, col0_2, col00_2 FROM tree
-    #     )
-    #     SELECT 
-    #         cte.col00_2,
-    #         col10_2,
-    #         (SELECT count(col20_2) FROM tree)
-    #     -- here we have a select query. sapi parsed to sql
-    #     FROM cte 
-    #     join tree ON tree.col_1 = cte.col0_1
-    #     """
+    sapi_query = """
+        WITH cte AS (
+            SELECT col0_1, col0_2, col00_2 FROM tree
+        )
+        SELECT 
+            cte.col00_2,
+            col10_2,
+            (SELECT count(col20_2) FROM tree)
+        -- here we have a select query. sapi parsed to sql
+        FROM cte 
+        join tree ON tree.col_1 = cte.col0_1
+        """
+    
     mega_messed_up_query = '''
 
 1scscd
@@ -284,10 +285,12 @@ join tree_ on tree_.col_1_ = tree.col_1
 
     # forest = postgres_forest.setup_db_and_make_forest()
     forest = runtime_model.make_datamodel()
-    sql = sapi.parse(messed_up_query, forest)
+    sql = sapi.parse(multi_query, forest, list[str])
     
-    print("--- sql-str ---")
-    print(sql)
+    for query in sql:
+        print("--- sql-str ---")
+        print(query)
+    # print(sql)
     
     # connection_info = postgres_model.get_connection_info()
     # with psycopg.Connection.connect(**connection_info) as con:

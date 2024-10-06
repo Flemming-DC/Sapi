@@ -3,6 +3,7 @@ from pygls.workspace.text_document import TextDocument
 from lsprotocol import types
 from tools.server import server
 from tools.log import log
+import sapi
 
 _current_uri = None
 
