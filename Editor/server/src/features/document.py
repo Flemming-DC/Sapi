@@ -23,7 +23,7 @@ class _:
     def _on_document_change(server_: LanguageServer, params: types.DidChangeTextDocumentParams):
         uri = params.text_document.uri
         document = server_.workspace.get_document(uri)
-        # TODO: for performance, only look at the changes, not the whole file.
+        # TODO: for performance: only look at the changes, not the whole file.
         _split_document_into_queries(document)
         
         # for change in params.content_changes:

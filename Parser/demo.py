@@ -1,6 +1,9 @@
 import psycopg
 import sapi
 from test import postgres_model, runtime_model
+import sqlglot
+sqlglot.Dialect.get_or_raise('postgress')
+
 
 if __name__ == '__main__':
     

@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Mine\Python\Sapi\Editor/server/src/main.py", line 8, in main
+    from features import demo_features, executor, document
+  File "C:\Mine\Python\Sapi\Editor/server/src\features\executor.py", line 9, in <module>
+    from tools import data_model
+  File "C:\Mine\Python\Sapi\Editor/server/src\tools\data_model.py", line 1, in <module>
+    from .settings import Settings
+  File "C:\Mine\Python\Sapi\Editor/server/src\tools\settings.py", line 47, in <module>
+    def _read_password_from_file(con_keys: dict_keys[str, Any]):
+TypeError: 'type' object is not subscriptable
+

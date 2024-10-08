@@ -14,13 +14,23 @@
   "engines": {
     "vscode": "^1.75.0"
   },
+  "main": "./client/out/extension",
   "activationEvents": [
     "onLanguage"
   ],
-  "main": "./client/out/extension",
+
   "contributes": {
-    "configuration": {}
+    "languages": [
+      {
+        "id": "sapi",
+        "aliases": ["sapi"],
+        "extensions": [".sapi"],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+    
   },
+
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
@@ -32,3 +42,4 @@
     "typescript": "^5.6.2"
   }
 }
+

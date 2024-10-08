@@ -1,8 +1,19 @@
-from typing import Callable, Any, TypeVar
+# from typing import Callable, Any, TypeVar
 from pygls.server import LanguageServer
 
+# F = TypeVar("F", bound=Callable)
+# class SapiLanguageServer(LanguageServer):
+    
+#     def feature(self, feature_name: str, options: Any = None) -> Callable[[F], F]:
+#         return super().feature(feature_name, options)
+
+#     def _filter_file_type(self, func):
+#         ...
+
+
 # starts reacting when start io is called
-server: LanguageServer = LanguageServer("color-server", "v1")
+server = LanguageServer("sapi-server", "v1")
+
 
 # def _lazy_init():
 #     global _server

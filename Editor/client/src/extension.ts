@@ -12,6 +12,8 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+  const config = vscode.workspace.getConfiguration("sapi")
+
   const pythonInterpreter = context.asAbsolutePath(path.join("local_editor_env", "Scripts", "python.exe"));
   const serverModule = context.asAbsolutePath(path.join("server", "src", "main.py"));
 

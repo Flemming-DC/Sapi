@@ -24,6 +24,12 @@ class Dialect:
     def blank_from_clause_tokens(_): return _._blank_from_clause
 
 
+def get_or_raise(dialect_name: str):
+    if dialect_name == 'postgres': return postgres()
+    # elif dialect_name == 'oracle': return oracle()
+    # ...
+    else: raise ValueError(
+        "This dialect is not yet implemented in sapi. You must instantiate the dialect class to implement the dialect.")
 
 def postgres():
     import psycopg
@@ -83,5 +89,6 @@ def postgres():
 #         connect = oracledb.connect,
 #         _set_to_read_only = missing,
 #     )
+
 
 

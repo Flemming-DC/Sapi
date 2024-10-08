@@ -25,7 +25,7 @@ class Connection(Protocol):
     # def rollback(self) -> None: ...
 
 
-Connect = Callable[..., Connection]
+Connect = Callable[..., Connection] # is this really any input, or might it be restricted to int's and str's ?
 
 
 
