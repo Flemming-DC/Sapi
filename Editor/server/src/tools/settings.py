@@ -16,6 +16,7 @@ class _Database(BaseModel):
     dialect: str|dialect.Dialect # starts out as a str, then it gets processed into a Dialect
 class Settings(BaseModel):
     databases: dict[str, _Database]
+    current_database: str
 
     @staticmethod
     def try_load(): return _try_load()

@@ -1,9 +1,3 @@
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\src\main.py", line 8, in main
-    from features import demo_features, executor, document
-  File "c:\Mine\Python\Sapi\Editor\server\src\features\executor.py", line 9, in <module>
-    from tools import data_model
-  File "c:\Mine\Python\Sapi\Editor\server\src\tools\data_model.py", line 1, in <module>
-    from settings import Settings
-ModuleNotFoundError: No module named 'settings'
+<class 'str'>
+
 

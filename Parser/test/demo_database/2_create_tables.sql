@@ -117,3 +117,4 @@ create table sapi_demo.sht__ (
 
 alter table tab0 add foreign key (tab1__id) references tab1_;
 alter table tab1 add foreign key (tab0__id) references tab0_;
+

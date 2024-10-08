@@ -17,6 +17,6 @@ databases:
             # password: 
             password_file: C:\Mine\Python\sapi_secret\pg_password.txt
 
-# current_database: demo_database
+current_database: demo_database
 
 
