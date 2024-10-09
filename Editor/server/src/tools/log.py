@@ -2,7 +2,7 @@ from typing import Any
 # from attempt import Attempt
 # from fallible import fallible
 
-_max_size = 1000 # const
+_max_size = 10000 # const
 _has_logged = False
 
 # @fallible
@@ -15,10 +15,10 @@ def log(msg: Any):
     global _has_logged
     if _has_logged:
         with open('log.txt', 'r') as f:
-            size = f.read()
-            if len(size) > _max_size and size.endswith('...'):
+            text = f.read()
+            if len(text) > _max_size and text.rstrip().endswith('...'):
                 return
-            elif len(size) > _max_size:
+            elif len(text) > _max_size:
                 msg = '...'
 
     with open('log.txt', 'a' if _has_logged else 'w') as f:

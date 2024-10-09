@@ -1,4 +1,100 @@
 
+import operator
+from functools import reduce
+from enum import IntFlag, auto
+from lsprotocol import types as t
+from tools.server import server, serverType
+# from sapi._internals.tokenizer
+from tools import data_model
+from sqlglot import TokenType # temp
+from sqlglot.tokens import _ALL_TOKEN_TYPES # temp
+import sapi
+from sapi._internals.token_tree import TokenTree # temp
+from dataclasses import dataclass, field
+from tools.log import log
+token_type_names = [name for name, type in TokenType.__members__.items()] # temp
+if 'TOKEN_TREE' not in token_type_names:
+    token_type_names.append('TOKEN_TREE')
+    log("adding TOKEN_TREE")
+log("TOKEN_TREE" in token_type_names)
+# log(token_type_names)
+# log(_ALL_TOKEN_TYPES)
+
+
+class TokenModifier(IntFlag):
+    # deprecated = auto()
+    # readonly = auto()
+    # defaultLibrary = auto()
+    definition = auto()
+modifier_names = [m.name for m in TokenModifier]
+# get TokenTypes as list[str] from sapi parser
+# also contruct modifier information in parser e.g. via optional out flag
+
+
+@dataclass
+class Token:
+    line: int
+    offset: int
+    text: str
+    tok_type: str #= ""
+    tok_modifiers: list[TokenModifier] # = field(default_factory=list)
+
+
+@server.feature(
+    t.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    t.SemanticTokensLegend(token_types=token_type_names, token_modifiers=modifier_names)
+    )
+def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens:
+    """Return the semantic tokens for the entire document"""
+    # repeated code
+    document_uri = params.text_document.uri
+    if not document_uri.endswith('.sapi'):
+        return []
+    document = server.workspace.get_text_document(document_uri)
+    # repeated code
+    fal_dataModel = data_model.make_datamodel()
+    if fal_dataModel.is_err():
+        server.show_message(fal_dataModel.err, t.MessageType.Error)
+        return []
+    
+    sapi_query = '\n'.join([line.strip('\n\r') for line in document.lines]) # assumes the document only contains one query
+    tok_trees = sapi.parse(sapi_query, fal_dataModel.ok, list[TokenTree]) # try-parse
+
+    ## get tokens from tok_trees
+    tokens: list[Token] = []
+    for tok_tree in tok_trees:
+        tokens.extend([Token(
+            line = tok.line,
+            offset = tok.start,
+            text = tok.text,
+            tok_type = tok.token_type.name,
+            tok_modifiers = [], # no modifiers to begin with
+        ) for tok in tok_tree.tokens])
+    # __slots__ = ("token_type", "text", "line", "col", "start", "end", "comments")
+
+    data = []
+    # tokens = server.tokens.get(document_uri, [])
+
+    for token in tokens:
+        log(token)
+        # Token(line=12, offset=228, text='col0_1', tok_type='VAR', tok_modifiers=[])
+        # Token(line=<Token token_type: TokenType.VAR, text: col0_1, line: 12, col: 36, start: 228, end: None, comments: []>, 
+        # offset=238, text='JOIN', tok_type='JOIN', tok_modifiers=[])
+        # bullshit! thats not a line number.
+
+        data.extend(
+            [
+                token.line,
+                token.offset,
+                len(token.text),
+                token_type_names.index(token.tok_type), # returns index into token_type_names
+                reduce(operator.or_, token.tok_modifiers, 0), # returns bitmap into modifier_names
+            ]
+        )
+
+    return t.SemanticTokens(data=data)
+
+
 
 # get tokens
 # loop over tokens and color by TokenType

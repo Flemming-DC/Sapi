@@ -5,8 +5,12 @@ from sqlglot.tokens import TokenType, Token
 # from sqlglot.expressions import Expression, Select, Insert, Update, Delete, Column, Table, Create, Drop, With # many kinds of alter 
 
 
+@dataclass
+class _fake_enum_variant:
+    name: str
+    value: str # auto() makes the values equal to the names
 
-TokenType.TOKEN_TREE = auto()
+TokenType.TOKEN_TREE = _fake_enum_variant(name='TOKEN_TREE', value='TOKEN_TREE')
 _TOKENTYPE_TOKEN_TREE = TokenType.TOKEN_TREE
 # TokenType.AUTO_JOIN = auto() # token type for an auto generated collection of join clauses. A fairly big token, I must admit.
 # TOKENTYPE_AUTO_JOIN = TokenType.AUTO_JOIN
@@ -76,10 +80,13 @@ class TokenTree:
             for t in new:
                 prev_start = new_tokens[-1].start if new_tokens else next.start if next else len(_._sapi_str)
                 # prev_end = new_tokens[-1] if new_tokens else last.end
-                new_tokens.append(Token(t[0], t[1], 
-                    next.line if next else _.tokens[-1], 
-                    next.col if next else _.tokens[-1], 
-                    prev_start + len(t[1]), 'invalid data'))
+                new_tokens.append(Token(
+                    token_type = t[0], 
+                    text = t[1], 
+                    line = next.line if next else _.tokens[-1].line, 
+                    col = next.col if next else _.tokens[-1].col, 
+                    start = prev_start + len(t[1]), 
+                    end = 'invalid data'))
 
         # save str data
         str_from = from_tok.start if from_tok else len(_._sapi_str)

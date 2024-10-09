@@ -295,10 +295,10 @@ join tree_ on tree_.col_1_ = tree.col_1
         print(query)
     # print(sql)
     
-    # connection_info = postgres_model.get_connection_info()
-    # with psycopg.Connection.connect(**connection_info) as con:
-    #     with con.cursor() as cur:
-    #         cur.execute("set search_path to sapi_demo")
-    #         data = cur.execute(sql).fetchall()
-    #         print("--- data ---")
-    #         print(data)
+    connection_info = postgres_model.get_connection_info()
+    with psycopg.Connection.connect(**connection_info) as con:
+        with con.cursor() as cur:
+            cur.execute("set search_path to sapi_demo")
+            data = cur.execute(sql).fetchall()
+            print("--- data ---")
+            print(data)

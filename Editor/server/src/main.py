@@ -5,7 +5,7 @@ from tools.server import server
 def main():
     try:
         # features are initialized on import
-        from features import executor #, demo_features, document
+        from features import executor, highlighter #, demo_features, document
         server.start_io()
     except Exception as e:
         log(traceback.format_exc())

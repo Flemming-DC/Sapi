@@ -53,7 +53,7 @@ export function activate(context: ExtensionContext) {
   client.onNotification('output', (data) => {
     outputChannel.appendLine("---- QUERY RESULT ----");
     outputChannel.appendLine(data);
-    // outputChannel.show(); // this puts the cursor into the outputChannel
+    outputChannel.show(true); // true means preserve focus
   });
 
   client.start(); // Start the client. This will also launch the server

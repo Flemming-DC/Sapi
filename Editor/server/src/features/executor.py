@@ -1,7 +1,4 @@
-import os
-import pathlib
 from lsprotocol import types as t
-# from lsprotocol.types import CodeActionOptions, CodeActionKind, CodeActionParams
 from tools.server import server, serverType
 from tools.log import log
 import sapi
