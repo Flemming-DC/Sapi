@@ -1,7 +1,6 @@
-from pygls.server import LanguageServer
 from pygls.workspace.text_document import TextDocument
-from lsprotocol import types
-from tools.server import server
+from lsprotocol import types as t
+from tools.server import server, serverType
 from tools.log import log
 import sapi
 
@@ -10,19 +9,19 @@ _current_uri = None
 class _:
 
     # Handler for when a document is opened
-    @server.feature(types.TEXT_DOCUMENT_DID_OPEN)
-    def _on_document_open(server_: LanguageServer, params: types.DidOpenTextDocumentParams):
+    @server.feature(t.TEXT_DOCUMENT_DID_OPEN)
+    def _on_document_open(_: serverType, params: t.DidOpenTextDocumentParams):
         uri = params.text_document.uri
-        document = server_.workspace.get_document(uri)
+        document = server.workspace.get_document(uri)
         _split_document_into_queries(document)
         # log(f"Document opened: {document.uri}")
         # log(f"Initial content:\n{document.source}")
 
     
-    @server.feature(types.TEXT_DOCUMENT_DID_CHANGE)
-    def _on_document_change(server_: LanguageServer, params: types.DidChangeTextDocumentParams):
+    @server.feature(t.TEXT_DOCUMENT_DID_CHANGE)
+    def _on_document_change(_: serverType, params: t.DidChangeTextDocumentParams):
         uri = params.text_document.uri
-        document = server_.workspace.get_document(uri)
+        document = server.workspace.get_document(uri)
         # TODO: for performance: only look at the changes, not the whole file.
         _split_document_into_queries(document)
         

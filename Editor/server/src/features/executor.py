@@ -2,7 +2,7 @@ import os
 import pathlib
 from lsprotocol import types as t
 # from lsprotocol.types import CodeActionOptions, CodeActionKind, CodeActionParams
-from tools.server import server
+from tools.server import server, serverType
 from tools.log import log
 import sapi
 # from sandbox import runtime_model
@@ -10,7 +10,6 @@ from tools import data_model
 from sapi import DataModel
 from tools.fallible import err
 from tools.settings import Settings
-from pygls.server import LanguageServer
 
 # register code action ideally by ctrl-enter-enter. 
 # first connect, then execute or parse (you choose)
@@ -66,7 +65,7 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
 
 
 @server.command('_execute')
-def _execute(_: LanguageServer, params: list[str]):
+def _execute(params: list[str]):
 # def execute(sql_query: str):
     # WOW! et cirkus. Det må kunne gøres nemmere !
     if len(params) != 1 or not isinstance(params[0], str):
@@ -92,11 +91,6 @@ def _execute(_: LanguageServer, params: list[str]):
     con.commit()
     con.close()
 
-    server.show_message(str(data), t.MessageType.Info) # how to dumb data properly ?
+    server.send_output(data)
 
 
-
-# t.Command(title='_helloWorld', command='helloWorld', arguments=[param]),
-# @server.command('helloWorld')
-# def _helloWorld(ls: LanguageServer, param):
-#     ls.show_message('Hello, World!', t.MessageType.Info)

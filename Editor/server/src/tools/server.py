@@ -1,8 +1,12 @@
-# from typing import Callable, Any, TypeVar
+from typing import Any
 from pygls.server import LanguageServer
 
 # F = TypeVar("F", bound=Callable)
-# class SapiLanguageServer(LanguageServer):
+class SapiLanguageServer(LanguageServer):
+    
+    def send_output(self, data: Any):
+        self.send_notification('output', str(data))
+
     
 #     def feature(self, feature_name: str, options: Any = None) -> Callable[[F], F]:
 #         return super().feature(feature_name, options)
@@ -12,8 +16,8 @@ from pygls.server import LanguageServer
 
 
 # starts reacting when start io is called
-server = LanguageServer("sapi-server", "v1")
-
+server = SapiLanguageServer("sapi-server", "v1")
+serverType = SapiLanguageServer
 
 # def _lazy_init():
 #     global _server

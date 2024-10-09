@@ -12,7 +12,16 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  const config = vscode.workspace.getConfiguration("sapi")
+  // const config = vscode.workspace.getConfiguration("sapi")
+
+  // const outputChannel = vscode.window.createOutputChannel("My Extension");
+  // // outputChannel.appendLine("out: Hello, world!");
+  // // outputChannel.show();
+
+  // const terminal = vscode.window.createTerminal("My Terminal");
+  // terminal.sendText("echo term: Hello, world!");
+  // terminal.show();
+
 
   const pythonInterpreter = context.asAbsolutePath(path.join("local_editor_env", "Scripts", "python.exe"));
   const serverModule = context.asAbsolutePath(path.join("server", "src", "main.py"));
@@ -25,18 +34,28 @@ export function activate(context: ExtensionContext) {
   const clientOptions: LanguageClientOptions = {
     // Register the server for all documents by default
     documentSelector: [{ scheme: "file", language: "*" }],
+    // outputChannel,
     // synchronize: {
     //   // Notify the server about file changes to '.clientrc files contained in the workspace
     //   fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
     // },
   };
 
+
   client = new LanguageClient(
     "LanguageClient-id",
     "LanguageClient-name",
     serverOptions,
-    clientOptions
+    clientOptions,
   );
+
+  const outputChannel = vscode.window.createOutputChannel("Sapi");
+  client.onNotification('output', (data) => {
+    outputChannel.appendLine("---- QUERY RESULT ----");
+    outputChannel.appendLine(data);
+    // outputChannel.show(); // this puts the cursor into the outputChannel
+  });
+
   client.start(); // Start the client. This will also launch the server
 }
 
