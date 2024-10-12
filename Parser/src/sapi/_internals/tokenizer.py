@@ -10,6 +10,11 @@ def tokenize(sapi_stmt: str) -> TokenTree:
     # tokens is a list of builtins.token, which seems to behave like Token, except for type checks.
     # cast to sqlglot.tokens.Token and drop the unreliable token.end. evt. drop all the unused stuff.
     tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.col, t.start, None, t.comments) for t in tokens]
+    """
+    line: The line that the token ends on.
+    col: The column that the token ends on. (seeemingly fails to understand whitespace)
+    start: The start index of the token.
+    """
     _cut_leading_junk(tokens)
     tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
     return tree

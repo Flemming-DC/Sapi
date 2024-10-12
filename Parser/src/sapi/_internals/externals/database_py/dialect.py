@@ -20,7 +20,7 @@ class Dialect:
         _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
             for t in _._sqlglot_dialect.tokenize(_.blank_from_clause)]
 
-    def sqlglot_dialect(_): return _._sqlglot_dialect
+    def sqlglot_dialect(_) -> sqlglot.Dialect: return _._sqlglot_dialect
     def blank_from_clause_tokens(_): return _._blank_from_clause
 
 

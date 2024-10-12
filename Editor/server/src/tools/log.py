@@ -2,17 +2,19 @@ from typing import Any
 # from attempt import Attempt
 # from fallible import fallible
 
-_max_size = 10000 # const
+_max_size = 100000 # const
 _has_logged = False
 
 # @fallible
-def log(msg: Any):
+def log(*msg: Any):
     """
     Append to log, but clear content from previous run of the program.
     Eliminate this from release.
     We do not mark it as fallible, it doesnt go in release, and tracebacks are nice in development.
     """
     global _has_logged
+    if isinstance(msg, (tuple, list)):
+        msg = ' '.join(str(m) for m in msg)
     if _has_logged:
         with open('log.txt', 'r') as f:
             text = f.read()
