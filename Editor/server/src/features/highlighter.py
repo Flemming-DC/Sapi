@@ -5,18 +5,21 @@ from lsprotocol import types as t
 from tools.server import server, serverType
 # from tools import data_model
 import sapi
+from sapi import _editor_tok
 from sqlglot import TokenType # temp
 # from sqlglot.tokens import _ALL_TOKEN_TYPES # temp
 from sapi._internals import tokenizer # temp
+
 from dataclasses import dataclass
 from tools.log import log
-token_type_names = [name for name, type in TokenType.__members__.items()] # temp
-if 'TOKEN_TREE' not in token_type_names:
-    token_type_names.append('TOKEN_TREE')
-    token_type_names.append('keyword')
+# token_type_names = [name for name, type in TokenType.__members__.items()] # temp
+_keyword_str = 'keyword' # sql_keyword
+# if 'TOKEN_TREE' not in token_type_names:
+#     token_type_names.append('TOKEN_TREE')
+#     token_type_names.append(_keyword_str)
 # log(token_type_names)
 # log(_ALL_TOKEN_TYPES)
-
+token_type_names = _editor_tok.token_type_names()
 
 class TokenModifier(IntFlag):
     # deprecated = auto()
@@ -29,7 +32,7 @@ modifier_names = [m.name for m in TokenModifier]
 
 
 @dataclass
-class Token_:
+class EditorToken:
     delta_line: int
     delta_offset: int
     text: str
@@ -65,13 +68,14 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
         last_line_length = len(line)#.strip('\n\r'))# + 1
 
     tokens = sapi.dialect.postgres().sqlglot_dialect().tokenize(sapi_code) # temp
-    tokens_: list[Token_] = []
+    tokens_: list[EditorToken] = []
     last_line = 0
     last_offset = 0
     log([' '.join([f"{t.text}" for t in tokens])])
     for tok in tokens:
         line = tok.line - 1
         log(len(line_start_indices), line, tok)
+        # evt. bail out on line == len(line_start_indices)
         
         line_start_index = line_start_indices[line] if line > 0 else 0
         offset = (tok.start - 0) - line_start_index
@@ -92,12 +96,13 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
             raise Exception("_delta_offset < 0")
         # log(f"{type(tok.line)}, {type(last_line)}, {type(_delta_line)}, {type(_delta_offset)}")
 
-        tok_ = Token_(
+        tok_ = EditorToken(
             delta_line = _delta_line,
             delta_offset = _delta_offset,
-            text = tok.text,
-            # tok_type_str = 'keyword' if tok.token_type.name == 'WITH' else tok.token_type.name,
-            tok_type_str = 'keyword' if tok.token_type in tokenizer._keywords else tok.token_type.name,
+            text = sapi_code[tok.start : tok.end + 1], # tok.text,
+            # tok_type_str = _keyword_str if tok.token_type.name == 'WITH' else tok.token_type.name,
+            # tok_type_str = _keyword_str if tok.token_type in _editor_tok.keywords() else tok.token_type.name,
+            tok_type_str = _editor_tok.get_group_names(tok.token_type),
             tok_modifiers = [], # no modifiers to begin with
             )
         tokens_.append(tok_)
@@ -108,7 +113,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
 
     data = []
     for tok_ in tokens_:
-        if tok_.tok_type_str  == 'keyword':
+        if tok_.tok_type_str  == _keyword_str:
             a = (
                 tok_.delta_line,
                 tok_.delta_offset,
@@ -133,6 +138,13 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
     return t.SemanticTokens(data=data)
 
 
+
+
+
+
+
+
+
 # get tokens
 # loop over tokens and color by TokenType
 # indications of nullability, triggers, checks and no-access comes later and elsewhere.
@@ -146,31 +158,35 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
 # evt. give separate colors to schema, tree, table, column, view, aliases
 # 
 
-# ----------- ChatGPT suggests ----------- #
-# Bad Token: #FF0000 (bright red) – typically indicates errors or invalid tokens.
-# Braces: #A9B7C6 (light gray-blue) – for {} characters.
-# Brackets: #A9B7C6 (light gray-blue) – for [] characters.
-# Column: #9876AA (light purple) – for database column names.
-# Comma: #A9B7C6 (light gray-blue) – for commas , in code.
-# Comment: #808080 or #629755 (grayish-green) – for comments in SQL or other code.
-# Database Object: #CC7832 (orange) – for database objects such as tables, views, etc.
-# Dot: #A9B7C6 (light gray-blue) – for dots . in expressions.
-# External Command: #9876AA (light purple) – for external references or commands.
-# Keyword: #CC7832 (orange) – for SQL keywords like SELECT, FROM, WHERE.
-# Label: #E8BF6A (light yellow) – for labels used in procedures or loops.
-# Number Token: #6897BB (light blue) – for numeric literals like 123, 1.23.
-# Outer Query Column: #9876AA (light purple) – for columns used in outer queries.
-# Parameter: #9876AA (light purple) – for SQL parameters (e.g., in prepared statements).
-# Parenthesis: #A9B7C6 (light gray-blue) – for () characters.
-# Procedure or Function: #FFC66D (light orange) – for procedure or function names.
-# Schema: #9876AA (light purple) – for schema names in fully qualified names.
-# Semicolon: #A9B7C6 (light gray-blue) – for semicolons ; in SQL or other code.
-# String Token: #6A8759 (green) – for string literals like 'text', "text".
-# Synthetic Entity: #A9B7C6 (light gray-blue) – for system-generated entities.
-# Table: #FFC66D (light orange) – for table names in SQL queries.
-# Table or Columns Alias: #9876AA (light purple) – for aliases in SQL queries.
-# Type: #CC7832 (orange) – for SQL types like VARCHAR, INT, DATE.
-# Variable: #9876AA (light purple) – for variables in SQL procedures or scripts.
+# ----------- ChatGPT suggests ----------- 
+"""
+Bad Token:        #FF0000 (bright red) 
+Braces:           #A9B7C6 (light gray-blue) 
+Brackets:         #A9B7C6 (light gray-blue) 
+Column:           #9876AA (light purple)
+Comma:            #A9B7C6 (light gray-blue) 
+Comment:          #808080 or #629755 (grayish-green)
+Database Object:  #CC7832 (orange)
+Dot:              #A9B7C6 (light gray-blue) 
+External Command: #9876AA (light purple) 
+Keyword:          #CC7832 (orange)
+Label:            #E8BF6A (light yellow)
+Number Token:     #6897BB (light blue) 
+Outer Query Col:  #9876AA (light purple)
+Parameter:        #9876AA (light purple)
+Parenthesis:      #A9B7C6 (light gray-blue) 
+Routine:          #FFC66D (light orange)
+Schema:           #9876AA (light purple)
+Semicolon:        #A9B7C6 (light gray-blue) 
+String Token:     #6A8759 (green)
+Synthetic Entity: #A9B7C6 (light gray-blue)
+Table:            #FFC66D (light orange)
+Alias:            #9876AA (light 
+Type:             #CC7832 (orange) 
+Variable:         #9876AA (light purple)
+
+"""
+
 
 
 # ----------- Junk ----------- #
@@ -190,7 +206,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
     #             delta_line = tok.line - last_line,
     #             delta_offset = tok.start - last_offset,
     #             text = tok.text,
-    #             tok_type = 'keyword' if tok.token_type in tokenizer._keywords else tok.text,
+    #             tok_type = _keyword_str if tok.token_type in tokenizer._keywords else tok.text,
     #             tok_modifiers = [], # no modifiers to begin with
     #             )
     #         tokens.append(tok_)
@@ -203,7 +219,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
         #     delta_line = tok.line,
         #     delta_offset = tok.start,
         #     text = tok.text,
-        #     tok_type = 'keyword' if tok.token_type in _keywords else tok.text,
+        #     tok_type = _keyword_str if tok.token_type in _keywords else tok.text,
         #     tok_modifiers = [], # no modifiers to begin with
         # ) for tok in tok_tree.tokens])
     # __slots__ = ("token_type", "text", "line", "col", "start", "end", "comments")
@@ -214,7 +230,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
         # offset=238, text='JOIN', tok_type='JOIN', tok_modifiers=[])
         # bullshit! thats not a line number.
         
-        # 'keyword' if tok.token_type in _keywords else tok.text
+        # _keyword_str if tok.token_type in _keywords else tok.text
                         # Token(
                         #     line=current_line - prev_line,
                         #     offset=current_offset - prev_offset,

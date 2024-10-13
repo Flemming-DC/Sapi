@@ -39,11 +39,11 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
         if isinstance(tok, TokenTree):
             continue
         found_stmt_type = True # to be overridden, if not found
-        match tok.token_type:
+        match tok.type:
             case TokenType.SELECT:
                 token_tree = select_parser.parse_select(token_tree) # this only changes the leaf tokens
             case TokenType.INSERT | TokenType.UPDATE | TokenType.DELETE | TokenType.CREATE | TokenType.ALTER | TokenType.DROP:
-                raise ParserError(f"{tok.token_type} is not yet implemented")
+                raise ParserError(f"{tok.type} is not yet implemented")
             case _:
                 found_stmt_type = False
         if found_stmt_type:

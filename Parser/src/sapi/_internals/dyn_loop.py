@@ -55,27 +55,27 @@ class DynLoop:
         if index < 0 or index >= _._count:
             return False
         tokenTypes = tokenType if isinstance(tokenType, list) else [tokenType]
-        return _._tokens[index].token_type in tokenTypes
+        return _._tokens[index].type in tokenTypes
     
     
     def index(_): return _._i # hopefully temp
     
-    def break_on(_, stopping_obj: TokenType|str):
-        # find first example of stopping_obj in remaining code to be parsed and store its index
-        if isinstance(stopping_obj, str):
-            remaining_str = _._sapi_str[_.tok().start:]
-            _._breakpoint_index = remaining_str.find(stopping_obj)
-            if _._breakpoint_index == -1:
-                _._breakpoint_index = None
-        elif isinstance(stopping_obj, TokenType):
-            remaining_tokens = _._tokens[_._i:]
-            _._breakpoint_index = None
-            for i, tok in enumerate(remaining_tokens):
-                if tok.token_type == stopping_obj:
-                    _._breakpoint_index = i
-                    break
-        else:
-            raise ParserError(f"Cannot break on {stopping_obj}, since it is an unrecognized type")
+    # def break_on(_, stopping_obj: TokenType|str):
+    #     # find first example of stopping_obj in remaining code to be parsed and store its index
+    #     if isinstance(stopping_obj, str):
+    #         remaining_str = _._sapi_str[_.tok().start:]
+    #         _._breakpoint_index = remaining_str.find(stopping_obj)
+    #         if _._breakpoint_index == -1:
+    #             _._breakpoint_index = None
+    #     elif isinstance(stopping_obj, TokenType):
+    #         remaining_tokens = _._tokens[_._i:]
+    #         _._breakpoint_index = None
+    #         for i, tok in enumerate(remaining_tokens):
+    #             if tok.token_type == stopping_obj:
+    #                 _._breakpoint_index = i
+    #                 break
+    #     else:
+    #         raise ParserError(f"Cannot break on {stopping_obj}, since it is an unrecognized type")
     
     def has_passed(_, stopping_obj: str) -> bool:
         return _.at_end() or _._token_tree.has_passed(stopping_obj, _.tok().start)

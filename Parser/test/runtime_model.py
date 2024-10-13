@@ -1,6 +1,5 @@
 from sapi import dialect, DataModel
-from sapi._internals.externals.database_py.data_model import Tree, Table
-
+from sapi._test import Tree, Table
 
 def make_datamodel():
     _tree = Tree(

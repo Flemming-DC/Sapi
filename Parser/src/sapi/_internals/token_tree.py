@@ -1,21 +1,23 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from sqlglot.tokens import auto
-from sqlglot.tokens import TokenType, Token
-# from sqlglot.expressions import Expression, Select, Insert, Update, Delete, Column, Table, Create, Drop, With # many kinds of alter 
+from collections import namedtuple
+from sqlglot.tokens import TokenType
 
 
 @dataclass
-class _fake_enum_variant:
-    name: str
-    value: str # auto() makes the values equal to the names
+class Token:
+    type: TokenType # evt. type: TokType
+    text: str
+    line: int # The line that the token ends on. (used by editor, not by parser. could in principle be recalculated)
+    start: int # start index (used in parser and editor)
+    end: int = None # start + len(text) + 2 * len(string_boundary) # careful!!!
 
-TokenType.TOKEN_TREE = _fake_enum_variant(name='TOKEN_TREE', value='TOKEN_TREE')
-_TOKENTYPE_TOKEN_TREE = TokenType.TOKEN_TREE
-# TokenType.AUTO_JOIN = auto() # token type for an auto generated collection of join clauses. A fairly big token, I must admit.
-# TOKENTYPE_AUTO_JOIN = TokenType.AUTO_JOIN
+    def __str__(_): return f"{_.type.name}: {_.text}" # at {_.start} on {_.line}
+    # def end(_): return _.start + len(_.text)
 
-class ParserError(Exception): ...
+
+
+class ParserError(Exception): ... # why is this located here ??
 
 @dataclass 
 class _StrReplacement:
@@ -23,7 +25,6 @@ class _StrReplacement:
     str_to: int
     new_tokens: list[Token]
 
-class AutoToken(Token):...
 
 common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
     TokenType.OUTER, TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
@@ -35,21 +36,18 @@ class TokenTree:
     _next_token: Token|None # const
     _str_replacements: list[_StrReplacement] = field(default_factory=list) # variable
 
-    #region ---------- Token ---------- 
-    token_type: TokenType = _TOKENTYPE_TOKEN_TREE
+    # ---------- Immitate Token ---------- #
+    TokenType.TOKEN_TREE = namedtuple('fake_enum_variant', ['name', 'value'])(name='TOKEN_TREE', value='TOKEN_TREE')
+    type: TokenType = TokenType.TOKEN_TREE
     @property 
-    def text(self): return "[TokenTree]" # str(self)
+    def text(_): return "[TokenTree]"
     @property 
-    def line(self): return self.tokens[0].line if self.tokens else None
+    def line(_): return _.tokens[0].line if _.tokens else None
     @property 
-    def col(self): return self.tokens[0].col if self.tokens else None
+    def start(_): return _.tokens[0].start if _.tokens else None
     @property 
-    def start(self): return self.tokens[0].start if self.tokens else None
-    @property 
-    def end(self): raise ParserError(f"the end property is extremely unreliable. Don't use it!")
-    @property 
-    def comments(self): return None
-    #endregion -------------------------------------- 
+    def end(_): raise Exception("Don't call end() on TokenTree.") # dont use this
+    # -------------------------------------- # 
 
     def has_passed(_, stopping_obj: str, str_index: int) -> bool:
         location = _._sapi_str.find(stopping_obj)
@@ -69,11 +67,12 @@ class TokenTree:
             raise ParserError("Replace currently only allows the removal of up to one token at a time")
         if from_ < 0 or to > count:
             raise ParserError("index out of bounds")
+        # if _.tokens[from_].type
 
         # make from_tok and new_tokens
         from_tok: Token|None = _.tokens[from_] if from_ < count else _._next_token
         if from_tok:
-            new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.col, from_tok.start, from_tok.end) for t in new]
+            new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.start) for t in new]
         else:
             next = _._next_token # also = from_tok and to_tok
             new_tokens: list[Token] = []
@@ -81,17 +80,17 @@ class TokenTree:
                 prev_start = new_tokens[-1].start if new_tokens else next.start if next else len(_._sapi_str)
                 # prev_end = new_tokens[-1] if new_tokens else last.end
                 new_tokens.append(Token(
-                    token_type = t[0], 
+                    type = t[0], 
                     text = t[1], 
                     line = next.line if next else _.tokens[-1].line, 
-                    col = next.col if next else _.tokens[-1].col, 
-                    start = prev_start + len(t[1]), 
-                    end = 'invalid data'))
+                    start = prev_start + len(t[1])
+                    ))
 
         # save str data
         str_from = from_tok.start if from_tok else len(_._sapi_str)
-        width = 0 if to == from_ else len(from_tok.text) # this line imposes the restriction of removing at most one token at a time
-        str_to = str_from + width
+        # width = 0 if to == from_ else len(from_tok.text) # this line imposes the restriction of removing at most one token at a time
+        # str_to = str_from + width
+        str_to = str_from if to == from_ else from_tok.end + 1 if from_tok else len(_._sapi_str)
         # new_str = ' '.join(t.text for t in new_tokens)
 
         # str_from -= _.tokens[0].start
@@ -140,7 +139,7 @@ class TokenTree:
         no_space_prefix = [')', ']', '}', '.', ',']
         no_space_suffix = ['(', '[', '{', '.'     ]
 
-        if tok.token_type in common_select_clauses:
+        if tok.type in common_select_clauses:
             so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
             so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
             return so_far + tok.text

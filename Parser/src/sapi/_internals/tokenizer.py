@@ -1,20 +1,14 @@
 # from sqlglot import Dialect
-from .token_tree import TokenTree, Token, TokenType, ParserError
+from .token_tree import TokenTree, TokenType, ParserError, Token
 from sapi._internals.externals.database_py import data_model
 
-# _dialect = Dialect.get_or_raise(dialect.current.dialect_str) # dialekt bør gribes fra et config object
 
 
 def tokenize(sapi_stmt: str) -> TokenTree:
-    tokens: list = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
-    # tokens is a list of builtins.token, which seems to behave like Token, except for type checks.
-    # cast to sqlglot.tokens.Token and drop the unreliable token.end. evt. drop all the unused stuff.
-    tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.col, t.start, None, t.comments) for t in tokens]
-    """
-    line: The line that the token ends on.
-    col: The column that the token ends on. (seeemingly fails to understand whitespace)
-    start: The start index of the token.
-    """
+    # tokens is a list of builtins.token, which seems to behave like sqlglot-Token, except for type checks.
+    raw_tokens = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
+    # cast to our own Token class and drop useless and / or unreliable data from raw_tokens
+    tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.start, t.end) for t in raw_tokens]
     _cut_leading_junk(tokens)
     tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
     return tree
@@ -23,7 +17,7 @@ def tokenize(sapi_stmt: str) -> TokenTree:
 
 
 def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tuple[TokenTree, int]:
-    if all_tokens[i].token_type == TokenType.L_PAREN:
+    if all_tokens[i].type == TokenType.L_PAREN:
         ParserError("TokenTree should not start with (") 
     depth = 0 # parenthesis nesting depth
     token_count = len(all_tokens)
@@ -32,13 +26,13 @@ def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tup
     def _continue(i: int, depth: int): 
         if i >= token_count: 
             return False
-        depth_goes_negative = (all_tokens[i].token_type == TokenType.R_PAREN and depth <= 0)
-        return all_tokens[i].token_type != TokenType.SEMICOLON and not depth_goes_negative
+        depth_goes_negative = (all_tokens[i].type == TokenType.R_PAREN and depth <= 0)
+        return all_tokens[i].type != TokenType.SEMICOLON and not depth_goes_negative
        
     
     while _continue(i, depth):
         token = all_tokens[i]
-        match token.token_type:
+        match token.type:
             case TokenType.L_PAREN: depth += 1 # evt. check if next token if a sub query start
             case TokenType.R_PAREN: depth -= 1
             # case TokenType.SEMICOLON: depth = -1000 # exit tokentree
@@ -48,7 +42,7 @@ def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tup
                     token = sub_tree
         tokens_at_this_level.append(token) # token can be overridden by a sub_tree
         i += 1
-    if i < len(all_tokens) and all_tokens[i].token_type == TokenType.R_PAREN:
+    if i < len(all_tokens) and all_tokens[i].type == TokenType.R_PAREN:
         i -= 1 # dont include finishing parenthesis
     next_token = all_tokens[i + 1] if i + 1 < len(all_tokens) else None
 
@@ -59,12 +53,13 @@ def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tup
 
 def _cut_leading_junk(tokens: list[Token]):
     for i, tok in enumerate(tokens):
-        if tok.token_type in _keywords:
+        if tok.type in _keywords:
             tokens = tokens[i:] # modifying list is ok, since we break the loop
             return
 
+def keywords(): return _keywords
 
-_keywords = [
+_keywords = {
     TokenType.ALIAS,
     TokenType.ALTER,
     TokenType.ALWAYS,
@@ -252,7 +247,6 @@ _keywords = [
     TokenType.VERSION_SNAPSHOT,
     TokenType.TIMESTAMP_SNAPSHOT,
     TokenType.OPTION,
-]
-
+}
 
 

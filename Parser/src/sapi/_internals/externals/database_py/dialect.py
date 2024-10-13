@@ -1,6 +1,9 @@
 from __future__ import annotations
 import sqlglot
 from typing import Callable
+
+import sqlglot.dialects
+import sqlglot.dialects.postgres
 from sapi._internals.token_tree import TokenType
 from .pep249_database_api_spec_v2 import Connect, Connection
 from dataclasses import dataclass
@@ -16,12 +19,29 @@ class Dialect:
     _set_to_read_only: Callable[[Connection], None] = lambda: None # optional parameter
 
     def __post_init__(_):
-        _._sqlglot_dialect = sqlglot.Dialect.get_or_raise(_._name)
+        _._glot_dialect = sqlglot.Dialect.get_or_raise(_._name)
+        _fix_sqlglot_oversights(_._glot_dialect)
         _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
-            for t in _._sqlglot_dialect.tokenize(_.blank_from_clause)]
+            for t in _._glot_dialect.tokenize(_.blank_from_clause)]
 
-    def sqlglot_dialect(_) -> sqlglot.Dialect: return _._sqlglot_dialect
+    def sqlglot_dialect(_) -> sqlglot.Dialect: return _._glot_dialect
     def blank_from_clause_tokens(_): return _._blank_from_clause
+
+
+# 'VARCHAR, VARCHAR2, NVARCHAR, NVARCHAR2, LONGVARCHAR'
+
+
+def _fix_sqlglot_oversights(glot_dialect: sqlglot.Dialect):
+    if isinstance(glot_dialect, sqlglot.dialects.postgres.Postgres): 
+        to_be_removed = ['VARCHAR2', 'NVARCHAR', 'NVARCHAR2', 'LONGVARCHAR']
+        for k in to_be_removed:
+            glot_dialect.tokenizer.KEYWORDS.pop(k, None)
+    # elif isinstance(glot_dialect, sqlglot.dialects.oracle): 
+    # fix q-strings
+    else: raise ValueError(
+        "This dialect is not yet implemented in sapi. You must instantiate the dialect class to implement the dialect.")
+
+
 
 
 def get_or_raise(dialect_name: str):
