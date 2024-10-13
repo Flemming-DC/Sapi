@@ -45,16 +45,5 @@
 16 13 <Token token_type: TokenType.DOT, text: ., line: 14, col: 30, start: 263, end: 263, comments: []>
 16 13 <Token token_type: TokenType.VAR, text: col0_1, line: 14, col: 36, start: 264, end: 269, comments: []>
 16 14 <Token token_type: TokenType.SEMICOLON, text: ;, line: 15, col: 1, start: 272, end: 272, comments: []>
-keyword: WITH, (1, 0, 4, 5, 0)
-keyword: AS, (0, 4, 2, 5, 0)
-keyword: SELECT, (1, 4, 6, 5, 0)
-keyword: FROM, (0, 8, 4, 5, 0)
-keyword: SELECT, (1, 0, 6, 5, 0)
-keyword: SELECT, (0, 1, 6, 5, 0)
-keyword: FROM, (0, 2, 4, 5, 0)
-keyword: FROM, (3, 0, 4, 5, 0)
-keyword: join, (1, 0, 4, 5, 0)
-keyword: ON, (0, 5, 2, 5, 0)
-keyword: ;, (1, 0, 1, 5, 0)
 
 

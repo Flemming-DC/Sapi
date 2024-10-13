@@ -1,25 +1,37 @@
 import yaml
 import json
 from pathlib import Path
-from typing import Any
-from _collections_abc import dict_keys
 from pydantic import BaseModel
-from .fallible import fallible
+from .error import fallible, is_err
 from sapi import dialect
 
 _primitive = None | bool | int | float | str
-_JsonishValue =      _primitive | list[_primitive] | list['_Jsonish'] | dict[str, '_JsonishValue']
-_Jsonish = dict[str, _primitive | list[_primitive] | list['_Jsonish'] | dict[str, '_JsonishValue']]
+# _JsonishValue =      _primitive | list[_primitive] | list['_Jsonish'] | dict[str, '_JsonishValue']
+# _Jsonish = dict[str, _primitive | list[_primitive] | list['_Jsonish'] | dict[str, '_JsonishValue']]
 
-class _Database(BaseModel):
-    connection_info: dict[str, Any]
+class Database(BaseModel):
+    connection_info: dict[str, _primitive]
     dialect: str|dialect.Dialect # starts out as a str, then it gets processed into a Dialect
+
 class Settings(BaseModel):
-    databases: dict[str, _Database]
+    databases: dict[str, Database]
     current_database: str
 
     @staticmethod
     def try_load(): return _try_load()
+        
+
+    @staticmethod
+    def try_load_database(database_name: str = None) -> Database | Exception:
+        fal_settings = _try_load()
+        if is_err(fal_settings): return fal_settings
+        # if isinstance(fal_settings, Exception): return fal_settings
+
+        if database_name is None:
+            database_name = fal_settings.current_database
+        return fal_settings.databases[database_name]
+
+
 
 @fallible
 def _try_load() -> Settings:
@@ -39,7 +51,7 @@ def _try_load() -> Settings:
 
     setting_file = setting_files[0]
     with open(setting_file) as f: # can raise
-        setting_data: _Jsonish = json.load(f) if setting_file.endswith('json') else yaml.safe_load(f) # can raise
+        setting_data: dict = json.load(f) if setting_file.endswith('json') else yaml.safe_load(f) # can raise
     
     settings = Settings(**setting_data) # can raise
     _resolve_file_reference_and_dialect(settings) # can raise
@@ -80,41 +92,8 @@ def _read_password_from_file(connection_info: dict[str, _primitive]):
         password = password.strip('\r') # fck carriage return. We won't hold the user responsible for that windows BS.
     return password
 
-    # if not isinstance(setting_data, dict):
-    #     raise Exception("not isinstance(setting_data, dict) -> ØV! (implement proper errorhandling later)")
-    # non_str_keys = [k for k in setting_data.keys() if not isinstance(k, str)]
-    # if non_str_keys:
-    #     raise Exception("non_str_keys -> ØV! (implement proper errorhandling later)")
-
-# def callback(config):
-#     ... # Omitted
-
-# params = t.WorkspaceConfigurationParams(items=[
-#     t.ConfigurationItem(scope_uri='doc_uri_here', section='section')])
-# config = server.get_configuration(params, callback)
 
 
 
 
-    # "configuration": {
-    #   "type": "object",
-    #   "title": "My Awesome Extension Settings",
-    #   "properties": {
-    #     "myAwesomeExtension.enableFeature": {
-    #       "type": "boolean",
-    #       "default": true,
-    #       "description": "Enable or disable this feature."
-    #     },
-    #     "myAwesomeExtension.sampleText": {
-    #       "type": "string",
-    #       "default": "default value",
-    #       "description": "A sample text setting."
-    #     },
-    #     "myAwesomeExtension.numberSetting": {
-    #       "type": "number",
-    #       "default": 5,
-    #       "description": "A number setting for the extension."
-    #     }
-    #   }
-    # }
 

@@ -3,72 +3,50 @@ from functools import reduce
 from enum import IntFlag, auto
 from lsprotocol import types as t
 from tools.server import server, serverType
-# from tools import data_model
-import sapi
 from sapi import _editor_tok
-from sqlglot import TokenType # temp
-# from sqlglot.tokens import _ALL_TOKEN_TYPES # temp
-from sapi._internals import tokenizer # temp
-
 from dataclasses import dataclass
 from tools.log import log
-# token_type_names = [name for name, type in TokenType.__members__.items()] # temp
-_keyword_str = 'keyword' # sql_keyword
-# if 'TOKEN_TREE' not in token_type_names:
-#     token_type_names.append('TOKEN_TREE')
-#     token_type_names.append(_keyword_str)
-# log(token_type_names)
-# log(_ALL_TOKEN_TYPES)
-token_type_names = _editor_tok.token_type_names()
+from tools.settings import Settings
+from tools.error import handle_error
 
-class TokenModifier(IntFlag):
-    # deprecated = auto()
-    # readonly = auto()
-    # defaultLibrary = auto()
+class _TokenModifier(IntFlag):
     definition = auto()
-modifier_names = [m.name for m in TokenModifier]
-# get TokenTypes as list[str] from sapi parser
-# also contruct modifier information in parser e.g. via optional out flag
-
 
 @dataclass
-class EditorToken:
+class _EditorToken:
     delta_line: int
     delta_offset: int
     text: str
-    tok_type_str: str #= ""
-    tok_modifiers: list[TokenModifier] # = field(default_factory=list)
+    type_str: str
+    modifiers: list[_TokenModifier]
 
 
 @server.feature(
     t.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    t.SemanticTokensLegend(token_types=token_type_names, token_modifiers=modifier_names)
+    t.SemanticTokensLegend(token_types=_editor_tok.token_type_names(), 
+                           token_modifiers=[m.name for m in _TokenModifier])
     )
-def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens:
+def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens | None:
     """Return the semantic tokens for the entire document"""
     # repeated code
     document_uri = params.text_document.uri
     if not document_uri.endswith('.sapi'):
-        return []
+        return None
     document = server.workspace.get_text_document(document_uri)
     # repeated code
-    # fal_dataModel = data_model.make_datamodel()
-    # if fal_dataModel.is_err():
-    #     server.show_message(fal_dataModel.err, t.MessageType.Error)
-    #     return []
-    
-    sapi_code = ''.join([line for line in document.lines])  # .strip('\n\r')
-    # line_lengths = [len(line.strip('\n\r')) for line in document.lines]
-    line_start_indices: list[int] = []
-    last_line_length = 0
-    current_line_start_index = 0
-    for line in document.lines:
-        current_line_start_index += last_line_length
-        line_start_indices.append(current_line_start_index)
-        last_line_length = len(line)#.strip('\n\r'))# + 1
+    fal_settings = Settings.try_load()
+    if handle_error(fal_settings):
+        return None
+    database_name = fal_settings.current_database
+    database = fal_settings.databases[database_name]
+    dialect = database.dialect
 
-    tokens = sapi.dialect.postgres().sqlglot_dialect().tokenize(sapi_code) # temp
-    tokens_: list[EditorToken] = []
+    sapi_code = document.source
+    
+    line_start_indices = _line_start_indices(document.lines)
+
+    tokens = dialect.sqlglot_dialect().tokenize(sapi_code)
+    tokens_: list[_EditorToken] = []
     last_line = 0
     last_offset = 0
     log([' '.join([f"{t.text}" for t in tokens])])
@@ -79,68 +57,54 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
         
         line_start_index = line_start_indices[line] if line > 0 else 0
         offset = (tok.start - 0) - line_start_index
-        # offset = (tok.col - len(tok.text)) # tok.col seems to be tok.end.offset - indention_of_line
-        # log(f"offset: {tok.text}, {offset}, {old_offset}")
         if offset < 0:
             log(tok.start, line_start_index, line, line_start_indices)
             raise Exception("offset < 0")
-        # if tok.token_type in tokenizer._keywords:
-        #     log(f"{tok.token_type.name}: {tok.text}, {line}, {tok.start - 1}, {offset}")
-        # start
-        # line_length = line_lengths[i]
+
         _delta_line = line - last_line
         _delta_offset = offset - last_offset if _delta_line == 0 else offset
         if _delta_line < 0:
             raise Exception("_delta_line < 0")
         if _delta_offset < 0:
             raise Exception("_delta_offset < 0")
-        # log(f"{type(tok.line)}, {type(last_line)}, {type(_delta_line)}, {type(_delta_offset)}")
 
-        tok_ = EditorToken(
+        tok_ = _EditorToken(
             delta_line = _delta_line,
             delta_offset = _delta_offset,
             text = sapi_code[tok.start : tok.end + 1], # tok.text,
-            # tok_type_str = _keyword_str if tok.token_type.name == 'WITH' else tok.token_type.name,
-            # tok_type_str = _keyword_str if tok.token_type in _editor_tok.keywords() else tok.token_type.name,
-            tok_type_str = _editor_tok.get_group_names(tok.token_type),
-            tok_modifiers = [], # no modifiers to begin with
+            type_str = _editor_tok.get_group_names(tok.token_type),
+            modifiers = [], # no modifiers to begin with
             )
         tokens_.append(tok_)
-        if last_line > line:# or last_offset > offset:
+        if last_line > line:
             raise Exception(f"{last_line} > {line}")# or {last_offset} > {offset}")
         last_line = line
         last_offset = offset
 
     data = []
     for tok_ in tokens_:
-        if tok_.tok_type_str  == _keyword_str:
-            a = (
-                tok_.delta_line,
-                tok_.delta_offset,
-                len(tok_.text),
-                token_type_names.index(tok_.tok_type_str), # returns index into token_type_names
-                reduce(operator.or_, tok_.tok_modifiers, 0), # returns bitmap into modifier_names)}, {tok.line}, {tok.start}")
-            )
-            log(f"{tok_.tok_type_str}: {tok_.text}, {a}")
-        # log(f"{tok_.tok_type}: {tok_.tok_type in token_type_names} "
-        #     f"{tok_.tok_type.lower() in token_type_names} {tok_.tok_type.upper() in token_type_names}")
-        data.extend(
-            [
-                tok_.delta_line,
-                tok_.delta_offset,
-                len(tok_.text),
-                token_type_names.index(tok_.tok_type_str), # returns index into token_type_names
-                reduce(operator.or_, tok_.tok_modifiers, 0), # returns bitmap into modifier_names
-            ]
-        )
+        data.extend([
+            tok_.delta_line,
+            tok_.delta_offset,
+            len(tok_.text),
+            _editor_tok.token_type_names().index(tok_.type_str), # returns index into token_type_names
+            reduce(operator.or_, tok_.modifiers, 0), # returns bitmap into modifier_names
+        ])
     log('\n')
 
     return t.SemanticTokens(data=data)
 
 
 
-
-
+def _line_start_indices(lines: list[str]) -> list[int]:
+    line_start_indices = []
+    last_line_length = 0
+    current_line_start_index = 0
+    for line in lines:
+        current_line_start_index += last_line_length
+        line_start_indices.append(current_line_start_index)
+        last_line_length = len(line)#.strip('\n\r'))# + 1
+    return line_start_indices
 
 
 
@@ -236,3 +200,14 @@ Variable:         #9876AA (light purple)
                         #     offset=current_offset - prev_offset,
                         #     text=match.group(0),
                         #     tok_
+                                # if tok_.tok_type_str  == _keyword_str:
+        #     a = (
+        #         tok_.delta_line,
+        #         tok_.delta_offset,
+        #         len(tok_.text),
+        #         token_type_names.index(tok_.tok_type_str), # returns index into token_type_names
+        #         reduce(operator.or_, tok_.tok_modifiers, 0), # returns bitmap into modifier_names)}, {tok.line}, {tok.start}")
+        #     )
+        #     log(f"{tok_.tok_type_str}: {tok_.text}, {a}")
+        # # log(f"{tok_.tok_type}: {tok_.tok_type in token_type_names} "
+        # #     f"{tok_.tok_type.lower() in token_type_names} {tok_.tok_type.upper() in token_type_names}")

@@ -1,7 +1,6 @@
 from __future__ import annotations
 import sqlglot
 from typing import Callable
-
 import sqlglot.dialects
 import sqlglot.dialects.postgres
 from sapi._internals.token_tree import TokenType
