@@ -7,7 +7,7 @@ from sapi import _editor_tok
 from dataclasses import dataclass
 from tools.log import log
 from tools.settings import Settings
-from tools.error import handle_error
+from tools import error
 
 class _TokenModifier(IntFlag):
     definition = auto()
@@ -26,6 +26,7 @@ class _EditorToken:
     t.SemanticTokensLegend(token_types=_editor_tok.token_type_names(), 
                            token_modifiers=[m.name for m in _TokenModifier])
     )
+@error.as_popup
 def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens | None:
     """Return the semantic tokens for the entire document"""
     # repeated code
@@ -34,9 +35,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
         return None
     document = server.workspace.get_text_document(document_uri)
     # repeated code
-    fal_settings = Settings.try_load()
-    if handle_error(fal_settings):
-        return None
+    fal_settings = Settings.load()
     database_name = fal_settings.current_database
     database = fal_settings.databases[database_name]
     dialect = database.dialect

@@ -1,11 +1,8 @@
 from typing import Any
-# from attempt import Attempt
-# from fallible import fallible
 
 _max_size = 100000 # const
 _has_logged = False
 
-# @fallible
 def log(*msg: Any):
     """
     Append to log, but clear content from previous run of the program.

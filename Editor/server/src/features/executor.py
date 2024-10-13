@@ -4,8 +4,8 @@ import sapi
 from tools.server import server
 from tools import data_model
 from tools.settings import Settings
-from tools.error import handle_error
 from tools.command import command
+from tools import error
 
 # register code action ideally by ctrl-enter-enter. 
 # first connect, then execute or parse (you choose)
@@ -18,6 +18,7 @@ from tools.command import command
 @server.feature(
     t.TEXT_DOCUMENT_CODE_ACTION,
     t.CodeActionOptions(code_action_kinds=[t.CodeActionKind.QuickFix]))
+@error.as_popup
 def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     # log("\n--- code_actions ---\n")
     document_uri = params.text_document.uri
@@ -27,8 +28,6 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     
 
     fal_dataModel = data_model.make_datamodel()
-    if handle_error(fal_dataModel): 
-        return []
 
     sapi_query = '\n'.join([line.strip('\n\r') for line in document.lines]) # assumes the document only contains one query
     sql_query = sapi.parse(sapi_query, fal_dataModel, str) # try-parse
@@ -58,18 +57,18 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
 
 
 @command
+@error.as_popup
 def _execute(sql_query: str) -> Sequence[Sequence]:
-    fal_database = Settings.try_load_database()
-    if handle_error(fal_database, 
-        f"Failed to execute query, due to error in sapi_settings file:\n{fal_database}"
-        ): return None
-
-    con = fal_database.dialect.connect(**fal_database.connection_info) # can raise
+    fal_database = Settings.load_database()
+    
+    con = fal_database.dialect.connect(**fal_database.connection_info)
     cur = con.cursor()
     cur.execute("set search_path to sapi_demo") # temp
-    cur.execute(sql_query) # can raise
+    cur.execute(sql_query)
     data = cur.fetchall()
     con.commit()
     con.close()
     return data
+
+
 

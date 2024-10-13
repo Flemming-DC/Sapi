@@ -2,32 +2,25 @@ from typing import TypeVar, Callable
 from functools import wraps
 from tools.server import server
 from lsprotocol import types as t
+from .log import log
+import traceback
 
 OK = TypeVar('OK')
 
-def handle_error(fallible: OK|Exception, message: str = None) -> bool:
-    if not isinstance(fallible, Exception): 
-        return False
-    server.show_message(message if message else str(fallible), t.MessageType.Error)
-    return True
-
-def handle_condition(condition: bool, message: str) -> bool:
-    if not condition: 
-        return False
-    server.show_message(message, t.MessageType.Error)
-    return True
-
-
-
-def is_err(fallible: OK|Exception): return isinstance(fallible, Exception)
-
-
-def fallible(old_func: Callable[..., OK]):
+def try_(old_func: Callable[[], OK], message: str) -> OK: #, *args, **kwargs):
+    try:
+        return old_func()
+    except Exception as e:
+        e.args = (message, )
+        raise 
+    
+def as_popup(old_func: Callable[..., OK]):
     @wraps(old_func)
-    def new_func(*args, **kwargs) -> OK | Exception:
+    def new_func(*args, **kwargs) -> OK:
         try:
             return old_func(*args, **kwargs)
         except Exception as e:
-            return e
+            log(traceback.format_exc())
+            server.show_message(e.args[0], t.MessageType.Error)
+            return None
     return new_func
-

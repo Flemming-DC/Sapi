@@ -8,7 +8,6 @@ class SapiLanguageServer(LanguageServer):
 
 
 
-
 server = SapiLanguageServer("sapi-server", "v1")
 serverType = SapiLanguageServer
 

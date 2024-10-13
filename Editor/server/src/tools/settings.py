@@ -1,9 +1,10 @@
 import yaml
 import json
+from textwrap import dedent
 from pathlib import Path
 from pydantic import BaseModel
-from .error import fallible, is_err
 from sapi import dialect
+from .error import try_
 
 _primitive = None | bool | int | float | str
 # _JsonishValue =      _primitive | list[_primitive] | list['_Jsonish'] | dict[str, '_JsonishValue']
@@ -11,20 +12,20 @@ _primitive = None | bool | int | float | str
 
 class Database(BaseModel):
     connection_info: dict[str, _primitive]
-    dialect: str|dialect.Dialect # starts out as a str, then it gets processed into a Dialect
+    # dialect starts out as a str, then it gets processed into a Dialect. 
+    dialect: str|dialect.Dialect 
 
 class Settings(BaseModel):
-    databases: dict[str, Database]
     current_database: str
+    databases: dict[str, Database]
 
     @staticmethod
-    def try_load(): return _try_load()
-        
+    def load(): return _load()
 
     @staticmethod
-    def try_load_database(database_name: str = None) -> Database | Exception:
-        fal_settings = _try_load()
-        if is_err(fal_settings): return fal_settings
+    def load_database(database_name: str = None) -> Database:# | Exception:
+        fal_settings = _load()
+        # if is_err(fal_settings): return fal_settings
         # if isinstance(fal_settings, Exception): return fal_settings
 
         if database_name is None:
@@ -33,8 +34,8 @@ class Settings(BaseModel):
 
 
 
-@fallible
-def _try_load() -> Settings:
+# @fallible
+def _load() -> Settings:
     setting_files = [
         '.vscode/sapi_settings.yml',  'sapi_settings.yml',
         '.vscode/sapi_settings.yaml', 'sapi_settings.yaml',
@@ -53,7 +54,8 @@ def _try_load() -> Settings:
     with open(setting_file) as f: # can raise
         setting_data: dict = json.load(f) if setting_file.endswith('json') else yaml.safe_load(f) # can raise
     
-    settings = Settings(**setting_data) # can raise
+    settings = try_(lambda: Settings(**setting_data), 
+        "The sapi settings file lacks required variables.") # can raise
     _resolve_file_reference_and_dialect(settings) # can raise
     return settings
 
@@ -65,7 +67,7 @@ def _resolve_file_reference_and_dialect(settings: Settings):
         settings.databases[name].connection_info['password'] = password
         settings.databases[name].connection_info.pop('password_file', None) # the seconds argument, prevents a raise
 
-        dialect_str = settings.databases[name].dialect
+        dialect_str: str = settings.databases[name].dialect
         settings.databases[name].dialect = dialect.get_or_raise(dialect_str) # can raise
 
 
@@ -91,8 +93,6 @@ def _read_password_from_file(connection_info: dict[str, _primitive]):
             raise Exception(F"Password should not have leading or trailing whitespace (i.e.).")
         password = password.strip('\r') # fck carriage return. We won't hold the user responsible for that windows BS.
     return password
-
-
 
 
 
