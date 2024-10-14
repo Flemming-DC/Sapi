@@ -40,7 +40,8 @@ sql = """
 WITH cte AS (
     SELECT col0_1, col0_2, col00_2 FROM tree
 )
-SELECT /* hegr */
+SELECT /* hegr 
+*/
     'vervre',
     $$ multi
     line $$,
@@ -59,7 +60,8 @@ required_token_texts = [
     'WITH', 'cte', 'AS', '(',
         'SELECT', 'col0_1', ',', 'col0_2', ',', 'col00_2', 'FROM', 'tree',
     ')',
-    'SELECT', '/* hegr */',
+    'SELECT', '/* hegr ',
+    '*/',
         "'vervre'", ',',
         "$$ multi",
     "    line $$", ',',
@@ -89,32 +91,33 @@ required_tokens = [
     _EditorAbsToken(line=2, offset=40, text='tree', type_str='variable', modifiers=[]),
     _EditorAbsToken(line=3, offset=0, text=')', type_str='other', modifiers=[]),
     _EditorAbsToken(line=4, offset=0, text='SELECT', type_str='keyword', modifiers=[]),
-    _EditorAbsToken(line=4, offset=7, text='/* hegr */', type_str='comment', modifiers=[]),
-    _EditorAbsToken(line=5, offset=4, text="'vervre'", type_str='string', modifiers=[]),
-    _EditorAbsToken(line=5, offset=12, text=',', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=6, offset=4, text='$$ multi', type_str='string', modifiers=[]),
-    _EditorAbsToken(line=7, offset=0, text='    line $$', type_str='string', modifiers=[]),
+    _EditorAbsToken(line=4, offset=7, text='/* hegr', type_str='comment', modifiers=[]),
+    _EditorAbsToken(line=4+1, offset=0, text='*/', type_str='comment', modifiers=[]),
+    _EditorAbsToken(line=5+1, offset=4, text="'vervre'", type_str='string', modifiers=[]),
+    _EditorAbsToken(line=5+1, offset=12, text=',', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=6+1, offset=4, text='$$ multi', type_str='string', modifiers=[]),
+    _EditorAbsToken(line=7+1, offset=0, text='    line $$', type_str='string', modifiers=[]),
     
-    _EditorAbsToken(line=7, offset=11, text=',', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=8, offset=4, text='123', type_str='number', modifiers=[]),
-    _EditorAbsToken(line=8, offset=7, text=',', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=9, offset=4, text='cte', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=9, offset=7, text='.', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=9, offset=8, text='col00_2', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=9, offset=15, text=',', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=10, offset=4, text='col10_2', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=10, offset=11, text=',', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=11, offset=4, text='(', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=11, offset=5, text='SELECT', type_str='keyword', modifiers=[]),
-    _EditorAbsToken(line=11, offset=12, text='count', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=11, offset=17, text='(', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=11, offset=18, text='col20_2', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=11, offset=25, text=')', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=11, offset=27, text='FROM', type_str='keyword', modifiers=[]),
-    _EditorAbsToken(line=11, offset=32, text='tree', type_str='variable', modifiers=[]),
-    _EditorAbsToken(line=11, offset=36, text=')', type_str='other', modifiers=[]),
-    _EditorAbsToken(line=12, offset=0, text='--FROM tree', type_str='comment', modifiers=[]),
-    _EditorAbsToken(line=13, offset=0, text='--join cte ON tree.col_1 = cte.col0_1', type_str='comment', modifiers=[]),
+    _EditorAbsToken(line=7+1, offset=11, text=',', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=8+1, offset=4, text='123', type_str='number', modifiers=[]),
+    _EditorAbsToken(line=8+1, offset=7, text=',', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=9+1, offset=4, text='cte', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=9+1, offset=7, text='.', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=9+1, offset=8, text='col00_2', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=9+1, offset=15, text=',', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=10+1, offset=4, text='col10_2', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=10+1, offset=11, text=',', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=4, text='(', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=5, text='SELECT', type_str='keyword', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=12, text='count', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=17, text='(', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=18, text='col20_2', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=25, text=')', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=27, text='FROM', type_str='keyword', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=32, text='tree', type_str='variable', modifiers=[]),
+    _EditorAbsToken(line=11+1, offset=36, text=')', type_str='other', modifiers=[]),
+    _EditorAbsToken(line=12+1, offset=0, text='--FROM tree', type_str='comment', modifiers=[]),
+    _EditorAbsToken(line=13+1, offset=0, text='--join cte ON tree.col_1 = cte.col0_1', type_str='comment', modifiers=[]),
 
     # _EditorAbsToken(line=12, offset=50, text='FROM', type_str='keyword', modifiers=[]),
     # _EditorAbsToken(line=12, offset=55, text='cte', type_str='variable', modifiers=[]),
@@ -145,7 +148,7 @@ if __name__ == '__main__':
         print(req)
         assert act.text == req, f"expected {req}, found {act.text}"
         req = req.strip()
-        if req.startswith('--') or req.startswith('/*'):
+        if req.startswith('--') or req.startswith('/*') or req.startswith('*/'):
             assert act.type_str == 'comment', f"expected comment, found {act.type_str}"
         if req.startswith("'") or req.startswith("$$") or req.endswith("'") or req.endswith("$$"):
             assert act.type_str == 'string', f"expected string, found {act.type_str}"
@@ -153,5 +156,7 @@ if __name__ == '__main__':
     print('--------')
     for req, act in zip(required_tokens, editor_abs_tokens):
         print(req.text)
+        req.text = req.text.strip()
+        act.text = act.text.strip()
         assert act == req, f"expected {req}\nfound {act}"
         

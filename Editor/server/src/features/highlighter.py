@@ -49,6 +49,9 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
     # log(server.client_capabilities)
     # log('----')
 
+    
+    # editor_abs_tokens = _little_tokenize(sapi_code)
+    # return _semantic_tokens([])
     editor_abs_tokens = _tokenize(sapi_code)
     editor_rel_tokens = _editor_rel_tokens(editor_abs_tokens)
     return _semantic_tokens(editor_rel_tokens)
@@ -59,6 +62,7 @@ def semantic_tokens_full(_: serverType, params: t.SemanticTokensParams) -> t.Sem
     # line_start_indices = _line_start_indices(document.lines)
     # editor_tokens = _editor_tokens(glot_tokens, sapi_code, line_start_indices)
     # return _semantic_tokens(editor_tokens)
+    
 
 
 
@@ -109,11 +113,6 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
     def char(i: int): return sapi_code[i]
     def two_char(i: int): return sapi_code[i] + (sapi_code[i + 1] if i + 1 < count else '')
     while i < count:
-        if i >= 98:
-            print(i)
-            ...
-        # char = sapi_code[i]
-        # two_char = char + sapi_code[i + 1]
         next_glot_tok: GlotToken = glot_tokens[next_glot_tok_idx] if next_glot_tok_idx < len(glot_tokens) else None
         editor_tok = editor_tokens[-1] if editor_tokens != [] else None
 
@@ -126,7 +125,6 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
                 if char(i) == '\n':
                     stuff_end = i, line_nr, line_start_index
                     editor_tok = _make_editor_token(sapi_code, next_glot_tok.token_type, stuff_start, stuff_end, editor_tok)
-                    print(i, editor_tok)
                     editor_tokens.append(editor_tok)
                     line_nr += 1
                     line_start_index = i + 1
@@ -135,7 +133,6 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             # if i > stuff_start[0]:
             stuff_end = i, line_nr, line_start_index
             editor_tok = _make_editor_token(sapi_code, next_glot_tok.token_type, stuff_start, stuff_end, editor_tok)
-            print(i, editor_tok)
             editor_tokens.append(editor_tok)
         elif char(i) in single_line_1_char_comment_markers or two_char(i) in single_line_2_char_comment_markers:
             # eat to end of line and collect comment_token
@@ -144,7 +141,6 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
                 i += 1
             stuff_end = i, line_nr, line_start_index
             editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
-            print(i, editor_tok)
             editor_tokens.append(editor_tok)
 
             line_nr += 1
@@ -158,8 +154,7 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
                 i += 1
                 if char(i) == '\n':
                     stuff_end = i, line_nr, line_start_index
-                    editor_tok = _make_editor_token(sapi_code, next_glot_tok.token_type, stuff_start, stuff_end, editor_tok)
-                    print(i, editor_tok)
+                    editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
                     editor_tokens.append(editor_tok)
                     line_nr += 1
                     line_start_index = i + 1
@@ -169,7 +164,6 @@ def _tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             # if i > stuff_start[0]:
             stuff_end = i, line_nr, line_start_index
             editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
-            print(i, editor_tok)
             editor_tokens.append(editor_tok)
         elif char(i) == '\n':
             line_nr += 1
@@ -202,11 +196,11 @@ def _make_editor_token(sapi_code: str, glot_type: GlotType|None,
     tok = _EditorAbsToken(
         line = line_nr,
         offset = offset,
-        text = sapi_code[index_start : index_end + 1].strip('\r\n'), # + 1 ???
+        text = sapi_code[index_start : index_end + 1].strip('\r\n'), 
         type_str = _editor_tok.get_group_names(glot_type if glot_type else _COMMENT),
         modifiers = [], # no modifiers to begin with
-        )
-    return tok
+        ) # ok
+    return tok # bad
 
 
 def _editor_rel_tokens(editor_abs_tokens: list[_EditorAbsToken]) -> list[_EditorToken]:
