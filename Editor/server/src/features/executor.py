@@ -21,10 +21,10 @@ from tools import error
 @error.as_popup
 def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     # log("\n--- code_actions ---\n")
-    document_uri = params.text_document.uri
-    if not document_uri.endswith('.sapi'):
+    uri = params.text_document.uri
+    if not uri.endswith('.sapi'):
         return []
-    document = server.workspace.get_text_document(document_uri)
+    document = server.workspace.get_text_document(uri)
     
 
     fal_dataModel = data_model.make_datamodel()
@@ -42,7 +42,7 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     Cast_to_SQL = t.CodeAction(
         title=f"Cast to SQL",
         kind=t.CodeActionKind.Empty,
-        edit=t.WorkspaceEdit(changes={document_uri: [text_edit]}),
+        edit=t.WorkspaceEdit(changes={uri: [text_edit]}),
         )
     Execute = t.CodeAction(
         title=f"Execute",

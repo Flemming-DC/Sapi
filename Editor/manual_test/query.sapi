@@ -2,8 +2,11 @@
 WITH cte AS (
     SELECT col0_1, col0_2, col00_2 FROM tree
 )
-SELECT 
+SELECT /* hegr 
+*/
     'vervre',
+    $$ multi
+    line $$,
     123,
     cte.col00_2,
     col10_2,

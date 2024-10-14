@@ -25,3 +25,6 @@ def command(old_func: Callable[..., T]):
 
     return new_func
 
+
+# evt. introduce a decorator for features. 
+# e.g. include error.as_popup and file_extension_check

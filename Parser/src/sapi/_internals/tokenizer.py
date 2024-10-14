@@ -1,4 +1,5 @@
 # from sqlglot import Dialect
+from sqlglot.tokens import Token as glotToken
 from .token_tree import TokenTree, TokenType, ParserError, Token
 from sapi._internals.externals.database_py import data_model
 
@@ -6,9 +7,9 @@ from sapi._internals.externals.database_py import data_model
 
 def tokenize(sapi_stmt: str) -> TokenTree:
     # tokens is a list of builtins.token, which seems to behave like sqlglot-Token, except for type checks.
-    raw_tokens = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
+    glot_tokens: list[glotToken] = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
     # cast to our own Token class and drop useless and / or unreliable data from raw_tokens
-    tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.start, t.end) for t in raw_tokens]
+    tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.start, t.end) for t in glot_tokens]
     _cut_leading_junk(tokens)
     tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
     return tree

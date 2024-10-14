@@ -10,7 +10,7 @@ class Token:
     text: str
     line: int # The line that the token ends on. (used by editor, not by parser. could in principle be recalculated)
     start: int # start index (used in parser and editor)
-    end: int = None # start + len(text) + 2 * len(string_boundary) # careful!!!
+    end: int = None # start + len(text) + 2 * len(string_boundary) 
 
     def __str__(_): return f"{_.type.name}: {_.text}" # at {_.start} on {_.line}
     # def end(_): return _.start + len(_.text)

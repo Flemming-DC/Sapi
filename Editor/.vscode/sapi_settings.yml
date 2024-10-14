@@ -1,4 +1,4 @@
-current_databasesss: demo_database
+current_database: demo_database
 databases: 
     demo_database:
         dialect: postgres

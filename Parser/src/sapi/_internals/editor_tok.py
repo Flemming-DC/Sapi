@@ -11,9 +11,12 @@ class _TokTypeGroup(Enum):
     Type = auto() # DataType
     Keyword = auto() # Keyword or SemiColon
     Other = auto()
+    Comment = auto()
 
 _group_set_by_grouptype: dict[_TokTypeGroup, GlotType] = {}
 
+_COMMENT = 'COMMENT' # a fake glotType
+_group_set_by_grouptype[_TokTypeGroup.Comment] = {_COMMENT} # there is no glotToken for comments
 # _group_set_by_grouptype[_TokTypeGroup.SemiColon] = {GlotType.SEMICOLON}
 _group_set_by_grouptype[_TokTypeGroup.EmbededVariableStart] = {GlotType.COLON}
 _group_set_by_grouptype[_TokTypeGroup.Number] = {GlotType.NUMBER}

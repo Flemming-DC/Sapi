@@ -2,11 +2,19 @@
 {
   "version": "0.2.0",
   "configurations": [
+
     {
-      "name":"CurrentFile.py",
+      "name":"CurrentFile",
       "type":"debugpy",
       "request":"launch",
       "program":"${file}",
+      "console":"integratedTerminal"
+    },
+    {
+      "name":"ManualTest",
+      "type":"debugpy",
+      "request":"launch",
+      "program":"${workspaceFolder}/server/src/manual_test.py",
       "console":"integratedTerminal"
     },
     {
