@@ -14,7 +14,7 @@ def try_(old_func: Callable[[], OK], message: str) -> OK: #, *args, **kwargs):
         e.args = (message, )
         raise 
     
-def as_popup(old_func: Callable[..., OK]):
+def as_log_and_popup(old_func: Callable[..., OK]):
     @wraps(old_func)
     def new_func(*args, **kwargs) -> OK:
         try:

@@ -1,2 +1,11 @@
-adding TOKEN_TREE
-True
+Traceback (most recent call last):
+  File "C:\Mine\Python\Sapi\Editor/server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "C:\Mine\Python\Sapi\Editor/server\features\highlighter.py", line 45, in semantic_tokens_full
+    document = server.workspace.get_text_document(uri)
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\pygls\server.py", line 616, in workspace
+    return self.lsp.workspace
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\pygls\protocol\language_server.py", line 151, in workspace
+    raise RuntimeError(
+RuntimeError: The workspace is not available - has the server been initialized?
+

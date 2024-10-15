@@ -24,7 +24,7 @@ export function activate(context: ExtensionContext) {
 
 
   const pythonInterpreter = context.asAbsolutePath(path.join("local_editor_env", "Scripts", "python.exe"));
-  const serverModule = context.asAbsolutePath(path.join("server", "src", "main.py"));
+  const serverModule = context.asAbsolutePath(path.join("server", "main.py"));
 
   const serverOptions: ServerOptions = {
     run: { command: pythonInterpreter, args: [serverModule], transport: TransportKind.stdio },

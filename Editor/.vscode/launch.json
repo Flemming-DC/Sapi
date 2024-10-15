@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "configurations": [
 
+
     {
       "name":"CurrentFile",
       "type":"debugpy",
@@ -11,17 +12,24 @@
       "console":"integratedTerminal"
     },
     {
-      "name":"ManualTest",
+      "name":"Sandbox",
       "type":"debugpy",
       "request":"launch",
-      "program":"${workspaceFolder}/server/src/manual_test.py",
+      "program":"${workspaceFolder}/server/sandbox.py",
+      "console":"integratedTerminal"
+    },
+    {
+      "name":"Test",
+      "type":"debugpy",
+      "request":"launch",
+      "program":"${workspaceFolder}/server/test.py",
       "console":"integratedTerminal"
     },
     {
       "name":"Server",
       "type":"debugpy",
       "request":"launch",
-      "program": "${workspaceFolder}/server/src/main.py",
+      "program": "${workspaceFolder}/server/main.py",
       "console":"integratedTerminal"
     },
     {
