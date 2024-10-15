@@ -26,7 +26,7 @@ class _StrReplacement:
     new_tokens: list[Token]
 
 
-common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
+_common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
     TokenType.OUTER, TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
 
 @dataclass
@@ -139,7 +139,7 @@ class TokenTree:
         no_space_prefix = [')', ']', '}', '.', ',']
         no_space_suffix = ['(', '[', '{', '.'     ]
 
-        if tok.type in common_select_clauses:
+        if tok.type in _common_select_clauses:
             so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
             so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
             return so_far + tok.text
@@ -164,7 +164,7 @@ class TokenTree:
         if sql_str[-1] == '\n':
             return False
         remainder = _._sapi_str[str_index_from_:].upper()
-        common_select_clauses_str = [str(t).lstrip('TokenType.') for t in common_select_clauses]
+        common_select_clauses_str = [str(t).lstrip('TokenType.') for t in _common_select_clauses]
         for clause in common_select_clauses_str:
             if remainder.startswith(clause):
                 return True

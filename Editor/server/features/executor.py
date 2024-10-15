@@ -25,13 +25,15 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     if not uri.endswith('.sapi'):
         return []
     document = server.workspace.get_text_document(uri)
-    return code_actions_work(document.lines, uri)
+    r = params.range
+    lines = document.lines[r.start.line : r.end.line + 1]
+    return code_actions_work(lines, uri)
 
     
 def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
-    fal_dataModel = data_model.make_datamodel()
-    sapi_query = '\n'.join([line.strip('\n\r') for line in lines]) # assumes the document only contains one query
-    sql_query = sapi.parse(sapi_query, fal_dataModel, str) # try-parse
+    dataModel = data_model.make_datamodel()
+    sapi_query = '\n'.join([line.strip('\n\r') for line in lines]) # does this work for multiple queries?
+    sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
 
 
     range_ = t.Range(
@@ -48,8 +50,6 @@ def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
         kind=t.CodeActionKind.Empty,
         command=t.Command(title=_execute.__name__, command=_execute.__name__, arguments=[sql_query]))
 
-    # start_line = params.range.start.line
-    # end_line = params.range.end.line
 
     return [execute, cast_to_sql]
 

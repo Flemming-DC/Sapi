@@ -1,16 +1,14 @@
-from copy import copy
 import operator
-from typing import Type
+from copy import copy
 from functools import reduce
+from dataclasses import dataclass
 from enum import IntFlag, auto
 from lsprotocol import types as t
-from tools.server import server, serverType
-from sapi import _editor_tok
-from dataclasses import dataclass
-from tools.log import log
-from tools.settings import Settings
-from tools import error, event
 from sqlglot.tokens import Token as GlotToken, TokenType as GlotType
+from sapi._editor import editor_tok
+from tools.server import server, serverType
+from tools.settings import Settings
+from tools import error
 
 
 class _TokenModifier(IntFlag):
@@ -46,7 +44,7 @@ class _Location:
 
 @server.feature(
     t.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    t.SemanticTokensLegend(token_types=_editor_tok.token_type_names(), 
+    t.SemanticTokensLegend(token_types=editor_tok.token_type_names(), 
                            token_modifiers=[m.name for m in _TokenModifier]))
 @error.as_log_and_popup
 def highlight(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens | None:
@@ -100,17 +98,17 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             while loc.i < next_glot_tok.end and loc.i < count: 
                 loc.i += 1
                 if char(loc.i) == '\n':
-                    editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+                    editor_tokens.append(_makeeditor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
                     loc.new_line()
                     loc_start = copy(loc)
-            editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+            editor_tokens.append(_makeeditor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
             loc.i += 1
         elif char(loc.i) in single_line_1_char_comment_markers or two_char(loc.i) in single_line_2_char_comment_markers:
             # eat to end of line and collect comment_token
             loc_start = copy(loc)
             while char(loc.i) != '\n' and loc.i < count: 
                 loc.i += 1
-            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+            editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
         elif two_char(loc.i) in multi_line_comment_end_by_start_markers.keys():
             # eat to end marker and collect comment_token, seperately for each line
             end_marker = multi_line_comment_end_by_start_markers[two_char(loc.i)]
@@ -118,11 +116,11 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             while two_char(loc.i) != end_marker and loc.i < count: 
                 loc.i += 1
                 if char(loc.i) == '\n':
-                    editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+                    editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
                     loc.new_line()
                     loc_start = copy(loc)
             loc.i += 2 # end_marker is two characters long, so we make a double step
-            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+            editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
         elif char(loc.i) == '\n':
             loc.new_line()
         else:
@@ -131,7 +129,7 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
     return editor_tokens
 
 
-def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
+def _makeeditor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
 
     line_start_index = loc_start.line_start_index
     offset = loc_start.i - line_start_index
@@ -141,7 +139,7 @@ def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Loc
         line = loc_start.line_nr,
         offset = offset,
         text = sapi_code[loc_start.i : index_end + 1].strip('\r\n'), 
-        type_str = _editor_tok.get_group_names(glot_type if glot_type else _editor_tok.fake_glot_type_comment()),
+        type_str = editor_tok.get_group_names(glot_type if glot_type else editor_tok.fake_glot_type_comment()),
         modifiers = [], # no modifiers to begin with
         )
     return tok
@@ -177,7 +175,7 @@ def _semantic_tokens(editor_tokens: list[_EditorRelToken]) -> t.SemanticTokens:
             tok.delta_line,
             tok.delta_offset,
             len(tok.text),
-            _editor_tok.token_type_names().index(tok.type_str), # returns index into token_type_names
+            editor_tok.token_type_names().index(tok.type_str), # returns index into token_type_names
             reduce(operator.or_, tok.modifiers, 0), # returns bitmap into modifier_names
         ])
     return t.SemanticTokens(data=data)

@@ -21,10 +21,11 @@ def parse(sapi_str: str, model: data_model.DataModel, return_type: Type[T] = str
     elif return_type == list[str]:
         return [str(t) for t in sql_token_trees]
     elif return_type == str:
-        return '\n;\n'.join(str(t) for t in sql_token_trees) 
+        return '\n;\n'.join(str(t) for t in sql_token_trees)
     else:
         # evt. allow out = abstrakt syntax tree
         raise TypeError("Unrecognized out_type")
+
 
 def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
     "Parse sapi TokenTree to sql TokenTree."
