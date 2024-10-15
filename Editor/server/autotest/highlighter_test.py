@@ -2,7 +2,7 @@ from textwrap import dedent
 from features import highlighter
 from features.highlighter import _EditorAbsToken
 from lsprotocol import types as t
-
+from tools.settings import Settings
 
 
 def test_tokenize():
@@ -89,5 +89,30 @@ def test_tokenize():
     for req, act in zip(required_tokens, editor_abs_tokens):
         req.text = req.text.strip()
         act.text = act.text.strip()
-        assert act == req, f"expected {req}\nfound {act}"
+        assert act == req, f"\nExpected: {req}\nFound: {act}"
         
+
+def sqlglot_comment_format_test():
+    "This doesn't test our own code, but instead our assumptions about sqlglot."
+    glot_dialect = Settings.load_database().dialect.sqlglot_dialect()
+    comment_markers: list[str | tuple[str, str]] = glot_dialect.tokenizer.COMMENTS
+
+    # '--', '#', '#!', '//'
+    # ('/*', '*/')
+    error_message = """
+    Expected glot_dialect.tokenizer.COMMENTS to contain only str and tuple[str, str],
+    where str is of length 1 or 2 and tuple[str, str] contains str of length exactly 2.
+    """
+
+    for marker in comment_markers:
+        if isinstance(marker, str):
+            assert len(marker) in [1, 2], error_message
+        elif isinstance(marker, tuple):
+            assert len(marker) == 2, error_message
+            start, stop = marker
+            assert isinstance(start, str) and len(start) == 2, error_message
+            assert isinstance(stop, str) and len(stop) == 2, error_message
+
+
+
+    

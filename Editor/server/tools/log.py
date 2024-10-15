@@ -20,7 +20,8 @@ def log(*msg: Any):
             elif len(text) > _max_size:
                 msg = '...'
 
-    with open('log.txt', 'a' if _has_logged else 'w') as f:
+    mode = 'a' if _has_logged else 'w'
+    with open('log.txt', mode) as f:
         msg = str(msg) + '\n'
         f.write(msg)
         

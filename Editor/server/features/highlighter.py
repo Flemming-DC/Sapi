@@ -1,3 +1,4 @@
+from copy import copy
 import operator
 from typing import Type
 from functools import reduce
@@ -8,14 +9,15 @@ from sapi import _editor_tok
 from dataclasses import dataclass
 from tools.log import log
 from tools.settings import Settings
-from tools import error
+from tools import error, event
 from sqlglot.tokens import Token as GlotToken, TokenType as GlotType
+
 
 class _TokenModifier(IntFlag):
     definition = auto()
 
 @dataclass
-class _EditorToken:
+class _EditorRelToken:
     delta_line: int
     delta_offset: int
     text: str
@@ -24,13 +26,23 @@ class _EditorToken:
 
 @dataclass
 class _EditorAbsToken:
+    "Output of tokenizer. Must be converted to _EditorRelToken."
     line: int
     offset: int
     text: str
     type_str: str
     modifiers: list[_TokenModifier]
 
-_COMMENT = 'COMMENT'
+@dataclass
+class _Location:
+    "Used in tokenizer and its helper function"
+    line_nr: int = 0
+    line_start_index: int = 0
+    i: int = 0
+    def new_line(_): 
+        _.line_nr += 1
+        _.line_start_index = _.i + 1
+        _.i += 1
 
 @server.feature(
     t.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
@@ -53,134 +65,97 @@ def _highlight_work(sapi_code) -> t.SemanticTokens | None:
     return _semantic_tokens(editor_rel_tokens)
 
 
-
 def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
+    """
+    match next_tok start_index: eat to end_index and collect glot_token, seperately for each line
+    match single_line_comment_markers: eat to end of line and collect comment_token
+    match multi_line_comment_start_markers: eat to end marker and collect comment_token, seperately for each line
+    match \n: eat \n and update line_nr, line_start_index
+    """
     glot_dialect = Settings.load_database().dialect.sqlglot_dialect()
     glot_tokens = glot_dialect.tokenize(sapi_code)
     comment_markers: list[str | tuple[str, str]] = glot_dialect.tokenizer.COMMENTS
     if len(glot_tokens) == 0: 
         return
-
     next_glot_tok_idx: int = 0
+      
+    single_line_1_char_comment_markers = [m for m in comment_markers if isinstance(m, str) and len(m) == 1] # subset of ['--']
+    single_line_2_char_comment_markers = [m for m in comment_markers if isinstance(m, str) and len(m) == 2] # subset of ['--', '#!', '//']
+    multi_line_comment_end_by_start_markers = {mp[0]: mp[1] for mp in comment_markers if isinstance(mp, tuple)} # = {'/*': '*/'}
     
-    
-    # check that comment_markers are in [1_char_single_line, 2_char_single_line, 2_char_multi_line ]
-    
-    # '--', '#', '#!', '//'
-    # ('/*', '*/')
-    single_line_1_char_comment_markers = [m for m in comment_markers if isinstance(m, str) and len(m) == 1]
-    single_line_2_char_comment_markers = [m for m in comment_markers if isinstance(m, str) and len(m) == 2]
-    # multi_line_comment_marker_pairs = [mp for mp in comment_markers if isinstance(mp, tuple)]
-    # multi_line_comment_start_markers = [mp[0] for mp in multi_line_comment_marker_pairs]
-    multi_line_comment_end_by_start_markers = {mp[0]: mp[1] for mp in comment_markers if isinstance(mp, tuple)}
-    line_nr = 0
-    line_start_index = 0
-    editor_tokens: list[_EditorAbsToken] = [] # just go directly to editor tokens, since you anyway have to recalculate. 
-    i = 0
+
+    loc = _Location(0, 0, 0)
+    editor_tokens: list[_EditorAbsToken] = []
     count = len(sapi_code)
     def char(i: int): return sapi_code[i]
     def two_char(i: int): return sapi_code[i] + (sapi_code[i + 1] if i + 1 < count else '')
-    while i < count:
+    
+    while loc.i < count:
         next_glot_tok: GlotToken = glot_tokens[next_glot_tok_idx] if next_glot_tok_idx < len(glot_tokens) else None
-        editor_tok = editor_tokens[-1] if editor_tokens != [] else None
 
-        if next_glot_tok and i == next_glot_tok.start:
+        if next_glot_tok and loc.i == next_glot_tok.start:
             # eat to end_index and collect glot_token, seperately for each line
             next_glot_tok_idx += 1
-            stuff_start = i, line_nr, line_start_index
-            while i < next_glot_tok.end and i < count: 
-                i += 1
-                if char(i) == '\n':
-                    stuff_end = i, line_nr, line_start_index
-                    editor_tok = _make_editor_token(sapi_code, next_glot_tok.token_type, stuff_start, stuff_end, editor_tok)
-                    editor_tokens.append(editor_tok)
-                    line_nr += 1
-                    line_start_index = i + 1
-                    i += 1
-                    stuff_start = i, line_nr, line_start_index
-            # if i > stuff_start[0]:
-            stuff_end = i, line_nr, line_start_index
-            editor_tok = _make_editor_token(sapi_code, next_glot_tok.token_type, stuff_start, stuff_end, editor_tok)
-            editor_tokens.append(editor_tok)
-        elif char(i) in single_line_1_char_comment_markers or two_char(i) in single_line_2_char_comment_markers:
+            loc_start = copy(loc)
+            while loc.i < next_glot_tok.end and loc.i < count: 
+                loc.i += 1
+                if char(loc.i) == '\n':
+                    editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+                    loc.new_line()
+                    loc_start = copy(loc)
+            editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+            loc.i += 1
+        elif char(loc.i) in single_line_1_char_comment_markers or two_char(loc.i) in single_line_2_char_comment_markers:
             # eat to end of line and collect comment_token
-            stuff_start = i, line_nr, line_start_index
-            while char(i) != '\n' and i < count: 
-                i += 1
-            stuff_end = i, line_nr, line_start_index
-            editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
-            editor_tokens.append(editor_tok)
-
-            line_nr += 1
-            line_start_index = i + 1
-            # i += 1
-        elif two_char(i) in multi_line_comment_end_by_start_markers.keys():
+            loc_start = copy(loc)
+            while char(loc.i) != '\n' and loc.i < count: 
+                loc.i += 1
+            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+        elif two_char(loc.i) in multi_line_comment_end_by_start_markers.keys():
             # eat to end marker and collect comment_token, seperately for each line
-            stuff_start = i, line_nr, line_start_index
-            end_marker = multi_line_comment_end_by_start_markers[two_char(i)]
-            while two_char(i) != end_marker and i < count: 
-                i += 1
-                if char(i) == '\n':
-                    stuff_end = i, line_nr, line_start_index
-                    editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
-                    editor_tokens.append(editor_tok)
-                    line_nr += 1
-                    line_start_index = i + 1
-                    i += 1
-                    stuff_start = i, line_nr, line_start_index
-            i += 1 # end_marker is two characters long, so we make an extra step
-            # if i > stuff_start[0]:
-            stuff_end = i, line_nr, line_start_index
-            editor_tok = _make_editor_token(sapi_code, None, stuff_start, stuff_end, editor_tok)
-            editor_tokens.append(editor_tok)
-        elif char(i) == '\n':
-            line_nr += 1
-            line_start_index = i + 1
+            end_marker = multi_line_comment_end_by_start_markers[two_char(loc.i)]
+            loc_start = copy(loc)
+            while two_char(loc.i) != end_marker and loc.i < count: 
+                loc.i += 1
+                if char(loc.i) == '\n':
+                    editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+                    loc.new_line()
+                    loc_start = copy(loc)
+            loc.i += 2 # end_marker is two characters long, so we make a double step
+            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
+        elif char(loc.i) == '\n':
+            loc.new_line()
+        else:
+            loc.i += 1
         
-        i += 1
-        
-        
-        # match next_tok start_index: eat to end_index and collect glot_token, seperately for each line
-        # match single_line_comment_markers: eat to end of line and collect comment_token
-        # match multi_line_comment_start_markers: eat to end marker and collect comment_token, seperately for each line
-        # match \n: eat \n and update line_nr, line_start_index
-    
     return editor_tokens
 
 
-def _make_editor_token(sapi_code: str, glot_type: GlotType|None,
-                       stuff_start: tuple[int, int, int], stuff_end: tuple[int, int, int],
-                       last_line, 
-        ) -> _EditorAbsToken:
-    index_start, line_nr_start, line_start_index_start = stuff_start
-    index_end, line_nr_end, line_start_index_end = stuff_end
-    if line_nr_end != line_nr_start or line_start_index_start != line_start_index_end:
-        raise Exception("differences in line_nr should have been resolved by now")
-    line_nr = line_nr_start
-    line_start_index = line_start_index_start
-    offset = index_start - line_start_index
-    if offset < 0:
-        raise Exception(f"offset < 0: {offset} = {index_start} - {line_start_index}")
+def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
+
+    line_start_index = loc_start.line_start_index
+    offset = loc_start.i - line_start_index
+    error.dev_assert(offset >= 0, f"offset = {offset} = {loc_start.i} - {line_start_index}")
 
     tok = _EditorAbsToken(
-        line = line_nr,
+        line = loc_start.line_nr,
         offset = offset,
-        text = sapi_code[index_start : index_end + 1].strip('\r\n'), 
-        type_str = _editor_tok.get_group_names(glot_type if glot_type else _COMMENT),
+        text = sapi_code[loc_start.i : index_end + 1].strip('\r\n'), 
+        type_str = _editor_tok.get_group_names(glot_type if glot_type else _editor_tok.fake_comment_glot_type()),
         modifiers = [], # no modifiers to begin with
-        ) # ok
-    return tok # bad
+        )
+    return tok
 
 
-def _editor_rel_tokens(editor_abs_tokens: list[_EditorAbsToken]) -> list[_EditorToken]:
-    editor_rel_tokens: list[_EditorToken] = []
+def _editor_rel_tokens(editor_abs_tokens: list[_EditorAbsToken]) -> list[_EditorRelToken]:
+    editor_rel_tokens: list[_EditorRelToken] = []
     last_line = 0
     last_offset = 0
     for abs_tok in editor_abs_tokens:
         delta_line = abs_tok.line - last_line
         delta_offset = abs_tok.offset - last_offset if delta_line == 0 else abs_tok.offset
 
-        rel_tok = _EditorToken(
+        rel_tok = _EditorRelToken(
             delta_line = delta_line,
             delta_offset = delta_offset,
             text = abs_tok.text,
@@ -195,7 +170,7 @@ def _editor_rel_tokens(editor_abs_tokens: list[_EditorAbsToken]) -> list[_Editor
     return editor_rel_tokens
 
 
-def _semantic_tokens(editor_tokens: list[_EditorToken]) -> t.SemanticTokens:
+def _semantic_tokens(editor_tokens: list[_EditorRelToken]) -> t.SemanticTokens:
     data = []
     for tok in editor_tokens:
         data.extend([

@@ -24,3 +24,9 @@ def as_log_and_popup(old_func: Callable[..., OK]):
             server.show_message(e.args[0], t.MessageType.Error)
             return None
     return new_func
+
+_release_mode = False
+def dev_assert(requirement: bool, message: str):
+    if not requirement and not _release_mode:
+        raise Exception(message)
+
