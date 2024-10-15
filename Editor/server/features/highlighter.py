@@ -141,7 +141,7 @@ def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Loc
         line = loc_start.line_nr,
         offset = offset,
         text = sapi_code[loc_start.i : index_end + 1].strip('\r\n'), 
-        type_str = _editor_tok.get_group_names(glot_type if glot_type else _editor_tok.fake_comment_glot_type()),
+        type_str = _editor_tok.get_group_names(glot_type if glot_type else _editor_tok.fake_glot_type_comment()),
         modifiers = [], # no modifiers to begin with
         )
     return tok
