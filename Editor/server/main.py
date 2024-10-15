@@ -6,7 +6,7 @@ from tools import event
 def main():
     try:
         # features are initialized on import
-        from features import executor, highlighter, hinting #, hinting #, demo_features, document
+        from features import executor, highlighter, hinting
         server.start_io()
         event.on_server_start.occur()
     except Exception as e:

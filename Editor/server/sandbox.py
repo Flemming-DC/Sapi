@@ -1,15 +1,10 @@
 from tools import settings
-from features import highlighter, executor
+from features import highlighter, executor, hinting
 from autotest.highlighter_test import test_tokenize
 from lsprotocol import types as t
 
 
 if __name__ == '__main__':
-    _semanticTokensParams = t.SemanticTokensParams(
-        text_document = t.TextDocumentIdentifier(uri="C:\Mine\Python\Sapi\Editor\manual_test\query.sapi"),
-        work_done_token = None,
-        partial_result_token = None,
-    )
     sapi = """
 
 WITH cte AS (
@@ -34,9 +29,8 @@ join tree ON tree.col_1 = cte.col0_1
     lines = sapi.split('\n')
     uri="C:\Mine\Python\Sapi\Editor\manual_test\query.sapi"
 
-    out_h = highlighter._highlight_work(sapi)
-    # print(out_h)
-    out_e = executor.code_actions_work(lines, uri)
-    print(out_e)
+    hints = hinting.inlay_hints_work(lines)
+    for hint in hints:
+        print(hint.label)
 
     print("done")        

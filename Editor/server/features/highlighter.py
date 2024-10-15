@@ -98,17 +98,17 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             while loc.i < next_glot_tok.end and loc.i < count: 
                 loc.i += 1
                 if char(loc.i) == '\n':
-                    editor_tokens.append(_makeeditor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+                    editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
                     loc.new_line()
                     loc_start = copy(loc)
-            editor_tokens.append(_makeeditor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
+            editor_tokens.append(_make_editor_token(sapi_code, next_glot_tok.token_type, loc_start, loc.i))
             loc.i += 1
         elif char(loc.i) in single_line_1_char_comment_markers or two_char(loc.i) in single_line_2_char_comment_markers:
             # eat to end of line and collect comment_token
             loc_start = copy(loc)
             while char(loc.i) != '\n' and loc.i < count: 
                 loc.i += 1
-            editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
+            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
         elif two_char(loc.i) in multi_line_comment_end_by_start_markers.keys():
             # eat to end marker and collect comment_token, seperately for each line
             end_marker = multi_line_comment_end_by_start_markers[two_char(loc.i)]
@@ -116,11 +116,11 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
             while two_char(loc.i) != end_marker and loc.i < count: 
                 loc.i += 1
                 if char(loc.i) == '\n':
-                    editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
+                    editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
                     loc.new_line()
                     loc_start = copy(loc)
             loc.i += 2 # end_marker is two characters long, so we make a double step
-            editor_tokens.append(_makeeditor_token(sapi_code, None, loc_start, loc.i))
+            editor_tokens.append(_make_editor_token(sapi_code, None, loc_start, loc.i))
         elif char(loc.i) == '\n':
             loc.new_line()
         else:
@@ -129,7 +129,7 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
     return editor_tokens
 
 
-def _makeeditor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
+def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
 
     line_start_index = loc_start.line_start_index
     offset = loc_start.i - line_start_index
@@ -195,6 +195,23 @@ def _semantic_tokens(editor_tokens: list[_EditorRelToken]) -> t.SemanticTokens:
 # comma, brackets, operators, functions, errors, default for unrecognized
 # evt. give separate colors to schema, tree, table, column, view, aliases
 # 
+
+"""
+
+Traceback (most recent call last):
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 993, in tokenize
+    self._scan()
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1026, in _scan
+    self._scan_keywords()
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1159, in _scan_keywords
+    if self._scan_comment(word):
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1206, in _scan_comment
+    self._advance(comment_end_size - 1)
+  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1054, in _advance
+    self._char = self.sql[self._current - 1]
+IndexError: string index out of range
+
+"""
 
 
 
