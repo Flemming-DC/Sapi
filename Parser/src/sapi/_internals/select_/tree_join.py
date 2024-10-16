@@ -3,7 +3,7 @@ from sapi._internals.token_tree import Token
 
 
 @dataclass
-class TreeJoin: # data for a single join. evt. restrict this to a tree-join
+class TreeJoin:
     tree_tok: Token
     tree_tok_index: int
     on_clause_end_index: int

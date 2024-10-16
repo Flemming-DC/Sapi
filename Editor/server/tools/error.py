@@ -20,8 +20,10 @@ def as_log_and_popup(old_func: Callable[..., OK]):
         try:
             return old_func(*args, **kwargs)
         except Exception as e:
-            log(traceback.format_exc())
             server.show_message(e.args[0], t.MessageType.Error)
+            log("--- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)")
+            log(args, kwargs, '\n')
+            log(traceback.format_exc())
             return None
     return new_func
 

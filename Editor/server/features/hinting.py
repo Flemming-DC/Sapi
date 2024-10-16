@@ -4,7 +4,7 @@ from tools.log import log
 from tools import error
 from lsprotocol import types as t
 import sapi
-from sapi._editor import TokenTree
+from sapi._editor import TokenTree, _common_select_clauses
 from tools.server import server
 from tools import data_model
 from tools import error
@@ -20,6 +20,11 @@ def inlay_hints(params: t.InlayHintParams) -> list[t.InlayHint]:
     document = server.workspace.get_text_document(uri)
     r = params.range
     lines = document.lines[r.start.line : r.end.line + 1]
+    
+    a = _line_start_indices(document.lines)
+    b = _line_start_indices(lines)
+    error.dev_assert(a==b, f"a: {a}\n b: {b}")
+
     return inlay_hints_work(lines)
 
 
@@ -64,14 +69,18 @@ def get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inla
     for rep in str_replacements:
         # last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
         # sql_str += tok_tree._sapi_str[last_rep_to:rep.str_from_]            # appending a sapi-segment
-        hint_text = ' '.join([t.text for t in rep.new_tokens]) # probably too simplified. you need something like _add_token_str2
+        put_on_new_line =  rep.new_tokens and rep.new_tokens[0].type not in _common_select_clauses
+        prefix = '' if put_on_new_line else ' '
+        hint_text = prefix + ' '.join([t.text for t in rep.new_tokens]) # probably too simplified. you need something like _add_token_str2
+     
+
         # for tok in rep.new_tokens:
             # sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
         # if tok_tree._if_new_clause_add_newline(sql_str, rep.str_from_):
         #     ... # hints can't be multipline. So perhaps you need to handle each line seperately
         
         index = rep.str_to # hints goes after replaced code. This is relevant for "join tree on ..." followed by hint.
-        line_nr, line_start_index = _round_down(line_start_indices, index)
+        line_nr, line_start_index = _round_down_to_nearest_element(index, line_start_indices)
         offset = index - line_start_index
         error.dev_assert(offset >= 0, f"offset = {offset} = {index} - {line_start_index}")
         char = offset
@@ -79,7 +88,7 @@ def get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inla
         hint = t.InlayHint(
             label=hint_text,
             kind=t.InlayHintKind.Type,
-            padding_left=False,
+            padding_left=True,
             padding_right=True,
             position=t.Position(line=line_nr, character=char),
             )
@@ -98,12 +107,12 @@ def _line_start_indices(lines: list[str]) -> list[int]:
     for line in lines:
         current_line_start_index += last_line_length
         line_start_indices.append(current_line_start_index)
-        last_line_length = len(line)#.strip('\n\r'))# + 1
+        last_line_length = len(line) #.strip('\n\r'))# + 1
     return line_start_indices
 
 
 
-def _round_down(sorted_list: list[int], target: int) -> tuple[int, int] | tuple[None, None]:
+def _round_down_to_nearest_element(target: int, sorted_list: list[int]) -> tuple[int, int] | tuple[None, None]:
     """
     Found target down to the nearest element in the list in log time.
     Returns None if target < sorted_list[0]
@@ -112,15 +121,22 @@ def _round_down(sorted_list: list[int], target: int) -> tuple[int, int] | tuple[
     left = 0 
     right = len(sorted_list) - 1
     result = None  # This will hold the nearest lower value
+    idx = None
     mid = None # resulting index
     while left <= right:
         mid = left + (right - left) // 2
         if sorted_list[mid] <= target:
-            result = sorted_list[mid]  # Update the result
+            result = sorted_list[mid] # Update the result
+            idx = mid
             left = mid + 1  # Search in the right half
         else:
             right = mid - 1  # Search in the left half
-    return mid, result
+    error.dev_assert(idx != None and result != None, f"idx: {idx}\n : result{result}")
+    error.dev_assert(result == sorted_list[idx], 
+        f"idx: {idx}\n : result: {result}, sorted_list[idx]: {sorted_list[idx]}, sorted_list: {sorted_list}, target: {target}")
+    return idx, result
+
+
 
 # def token_str(so_far: str, tok: Token) -> str:
 #     no_space_prefix = [')', ']', '}', '.', ',']

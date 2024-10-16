@@ -14,13 +14,13 @@ class DynLoop:
     def tok(_): 
         return _._tokens[_._i]
 
-    def insert(_, new: list[tuple[TokenType, str]], distance: int = 0):
-        at = _._i + distance
-        _._token_tree.replace(at, at, new)
-        growth = len(new)
-        _._count += growth
-        if distance <= 0:
-            _._i += growth
+    # def insert(_, new: list[tuple[TokenType, str]], distance: int = 0):
+    #     at = _._i + distance
+    #     _._token_tree.replace(at, at, new)
+    #     growth = len(new)
+    #     _._count += growth
+    #     if distance <= 0:
+    #         _._i += growth
 
     def replace(_, new: tuple[TokenType, str], distance = 0):
         at = _._i + distance

@@ -25,8 +25,8 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     if not uri.endswith('.sapi'):
         return []
     document = server.workspace.get_text_document(uri)
-    r = params.range
-    lines = document.lines[r.start.line : r.end.line + 1]
+    r = params.range # range is selected range.
+    lines = document.lines #[r.start.line : r.end.line + 1]
     return code_actions_work(lines, uri)
 
     
