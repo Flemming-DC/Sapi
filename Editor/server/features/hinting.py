@@ -1,14 +1,10 @@
 from lsprotocol import types as t
 from tools.server import server
 from tools.log import log
-from tools import error
-from lsprotocol import types as t
-import sapi
-from sapi._editor import TokenTree, _common_select_clauses
-from tools.server import server
+from sapi._editor import TokenTree, common_select_clauses
 from tools import data_model
 from tools import error
-from dataclasses import dataclass
+import sapi
 
 
 @server.feature(t.TEXT_DOCUMENT_INLAY_HINT)
@@ -20,70 +16,40 @@ def inlay_hints(params: t.InlayHintParams) -> list[t.InlayHint]:
     document = server.workspace.get_text_document(uri)
     r = params.range
     lines = document.lines[r.start.line : r.end.line + 1]
-    
-    a = _line_start_indices(document.lines)
-    b = _line_start_indices(lines)
-    error.dev_assert(a==b, f"a: {a}\n b: {b}")
-
-    return inlay_hints_work(lines)
+    return _inlay_hints_work(lines)
 
 
-def inlay_hints_work(lines: list[str]) -> list[t.InlayHint]:
-    
+def _inlay_hints_work(lines: list[str]) -> list[t.InlayHint]:
     sapi_code = '\r\n'.join([line.strip('\n\r') for line in lines]) # does this work for multiple queries?
     dataModel = data_model.make_datamodel()
     sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
-    # sql_query = '\n;\n'.join(str(t) for t in sql_token_trees)
-    # sql_lines = sql_query.split('\n')
-    # hints = []
-    # for i, line in enumerate(sql_lines):
-    #     hint = t.InlayHint(
-    #         label=line.strip(),
-    #         kind=t.InlayHintKind.Type,
-    #         padding_left=False,
-    #         padding_right=True,
-    #         position=t.Position(line=i, character=0),
-    #     )
-    #     hints.append(hint)
     line_start_indices = _line_start_indices(lines)
     hints = []
     for tok_tree in sql_token_trees:
-        hints.extend(get_hints(tok_tree, line_start_indices))
+        hints.extend(_get_hints(tok_tree, line_start_indices))
     return hints
 
 
-
-def get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.InlayHint]:
-    # collect replacements in subtrees
-    str_replacements = tok_tree._str_replacements
-    for tok in tok_tree.tokens:
-        if isinstance(tok, TokenTree):
-            str_replacements += tok._str_replacements
-    # handle the None case
+def _get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.InlayHint]:
+    str_replacements = tok_tree.recursive_str_replacements() # collect replacements in subtrees
     if not str_replacements:
-        return tok_tree._sapi_str
-
+        return [] # handle the None case
     
     hints = []
-    str_replacements.sort(key = lambda r: r.str_from_) # is this used ??
+    put_on_new_line_sequence_len = 0 # used to put join_clauses on seperate lines.
+    str_replacements.sort(key = lambda r: r.str_from_)
     for rep in str_replacements:
-        # last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
-        # sql_str += tok_tree._sapi_str[last_rep_to:rep.str_from_]            # appending a sapi-segment
-        put_on_new_line =  rep.new_tokens and rep.new_tokens[0].type not in _common_select_clauses
+        if not rep.new_tokens:
+            continue
+        put_on_new_line = rep.new_tokens[0].type in common_select_clauses()
         prefix = '' if put_on_new_line else ' '
-        hint_text = prefix + ' '.join([t.text for t in rep.new_tokens]) # probably too simplified. you need something like _add_token_str2
-     
+        hint_text = prefix + ' '.join([t.text for t in rep.new_tokens])
 
-        # for tok in rep.new_tokens:
-            # sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
-        # if tok_tree._if_new_clause_add_newline(sql_str, rep.str_from_):
-        #     ... # hints can't be multipline. So perhaps you need to handle each line seperately
-        
         index = rep.str_to # hints goes after replaced code. This is relevant for "join tree on ..." followed by hint.
         line_nr, line_start_index = _round_down_to_nearest_element(index, line_start_indices)
-        offset = index - line_start_index
-        error.dev_assert(offset >= 0, f"offset = {offset} = {index} - {line_start_index}")
-        char = offset
+        char = index - line_start_index
+        error.dev_assert(char >= 0, f"char = {char} = {index} - {line_start_index}")
+        line_nr += put_on_new_line_sequence_len
 
         hint = t.InlayHint(
             label=hint_text,
@@ -94,8 +60,8 @@ def get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inla
             )
         hints.append(hint)
 
-    # last_rep_to = str_replacements[-1].str_to
-    # sql_str += tok_tree._sapi_str[last_rep_to:]
+        put_on_new_line_sequence_len = put_on_new_line_sequence_len + 1 if put_on_new_line else 0
+
     return hints
 
 
@@ -107,12 +73,12 @@ def _line_start_indices(lines: list[str]) -> list[int]:
     for line in lines:
         current_line_start_index += last_line_length
         line_start_indices.append(current_line_start_index)
-        last_line_length = len(line) #.strip('\n\r'))# + 1
+        last_line_length = len(line)
     return line_start_indices
 
 
 
-def _round_down_to_nearest_element(target: int, sorted_list: list[int]) -> tuple[int, int] | tuple[None, None]:
+def _round_down_to_nearest_element(number: int, sorted_list: list[int]) -> tuple[int, int] | tuple[None, None]:
     """
     Found target down to the nearest element in the list in log time.
     Returns None if target < sorted_list[0]
@@ -120,38 +86,21 @@ def _round_down_to_nearest_element(target: int, sorted_list: list[int]) -> tuple
     """
     left = 0 
     right = len(sorted_list) - 1
-    result = None  # This will hold the nearest lower value
+    nearest_lower_value = None
     idx = None
     mid = None # resulting index
     while left <= right:
         mid = left + (right - left) // 2
-        if sorted_list[mid] <= target:
-            result = sorted_list[mid] # Update the result
+        if sorted_list[mid] <= number:
+            nearest_lower_value = sorted_list[mid] # update the result
             idx = mid
-            left = mid + 1  # Search in the right half
+            left = mid + 1  # search in the right half
         else:
-            right = mid - 1  # Search in the left half
-    error.dev_assert(idx != None and result != None, f"idx: {idx}\n : result{result}")
-    error.dev_assert(result == sorted_list[idx], 
-        f"idx: {idx}\n : result: {result}, sorted_list[idx]: {sorted_list[idx]}, sorted_list: {sorted_list}, target: {target}")
-    return idx, result
-
-
-
-# def token_str(so_far: str, tok: Token) -> str:
-#     no_space_prefix = [')', ']', '}', '.', ',']
-#     no_space_suffix = ['(', '[', '{', '.'     ]
-
-#     if tok.type in _common_select_clauses:
-#         so_far = so_far.rstrip(' \n') # remove uncontrolled whitespace and newline
-#         so_far += '\n' + TokenTree._last_indention(so_far) # add newline and preserve indention
-#         return so_far + tok.text
+            right = mid - 1  # search in the left half
     
-#     elif so_far != "" and so_far[-1] in no_space_suffix: # previous has have no space suffix
-#         return so_far.rstrip(' ') + tok.text
-#     elif tok.text in no_space_prefix:
-#         return so_far.rstrip(' ') + tok.text
-#     else:
-#         return (so_far if so_far.endswith(' ') else so_far + ' ') + tok.text
+    return idx, nearest_lower_value
+
+
+
 
 

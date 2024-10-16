@@ -28,6 +28,7 @@ class _StrReplacement:
 
 _common_select_clauses = [TokenType.SELECT, TokenType.FROM, TokenType.JOIN, TokenType.LEFT, TokenType.RIGHT, 
     TokenType.OUTER, TokenType.WHERE, TokenType.GROUP_BY, TokenType.HAVING, TokenType.ORDER_BY, TokenType.LIMIT]
+def common_select_clauses(): return _common_select_clauses # used by editor
 
 @dataclass
 class TokenTree:
@@ -104,7 +105,7 @@ class TokenTree:
 #region -------------- cast to str --------------
 
     def __str__(_) -> str:
-        str_replacements = _._recursive_str_replacements() # collect replacements in subtrees
+        str_replacements = _.recursive_str_replacements() # collect replacements in subtrees
         if not str_replacements:
             return _._sapi_str # handle the None case
 
@@ -128,12 +129,13 @@ class TokenTree:
         sql_str += _._sapi_str[last_rep_to:]
         return sql_str
     
-    def _recursive_str_replacements(_) -> list[_StrReplacement]:
+    def recursive_str_replacements(_) -> list[_StrReplacement]:
+        "used by editor, but not by other parts of parser."
         str_replacements: list[_StrReplacement] = []
         str_replacements += _._str_replacements
         for tok in _.tokens:
             if isinstance(tok, TokenTree):
-                str_replacements += tok._recursive_str_replacements()
+                str_replacements += tok.recursive_str_replacements()
         return str_replacements
 
     @staticmethod

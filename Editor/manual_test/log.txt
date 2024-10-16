@@ -1,19 +1,10 @@
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi'), range=0:0-18:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 28, in inlay_hints
-    return inlay_hints_work(lines)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 51, in inlay_hints_work
-    hints.extend(get_hints(tok_tree, line_start_indices))
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 83, in get_hints
-    line_nr, line_start_index = _round_down_to_nearest_element(index, line_start_indices)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 136, in _round_down_to_nearest_element
-    error.dev_assert(result == sorted_list[mid],
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 33, in dev_assert
-    raise Exception(message)
-Exception: mid: 4
- : result: 55, sorted_list[mid]: 58, sorted_list: [0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305], target: 55
-
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]

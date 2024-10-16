@@ -2,7 +2,7 @@ from tools import settings
 from features import highlighter, executor, hinting
 from autotest.highlighter_test import test_tokenize
 from lsprotocol import types as t
-
+from sandbox import dummy
 
 if __name__ == '__main__':
     sapi = """
@@ -29,8 +29,9 @@ join tree ON tree.col_1 = cte.col0_1
     lines = sapi.split('\n')
     uri="C:\Mine\Python\Sapi\Editor\manual_test\query.sapi"
 
-    hints = hinting.inlay_hints_work(lines)
-    for hint in hints:
-        print(hint.label)
+    # hints = hinting.inlay_hints_work(lines)
+    # for hint in hints:
+    #     print(hint.label)
+    dummy
 
     print("done")        
