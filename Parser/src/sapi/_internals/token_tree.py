@@ -104,14 +104,9 @@ class TokenTree:
 #region -------------- cast to str --------------
 
     def __str__(_) -> str:
-        # collect replacements in subtrees
-        str_replacements = _._str_replacements
-        for tok in _.tokens:
-            if isinstance(tok, TokenTree):
-                str_replacements += tok._str_replacements
-        # handle the None case
+        str_replacements = _._recursive_str_replacements() # collect replacements in subtrees
         if not str_replacements:
-            return _._sapi_str
+            return _._sapi_str # handle the None case
 
         # make string
         # sql_str is on the form: 
@@ -133,7 +128,14 @@ class TokenTree:
         sql_str += _._sapi_str[last_rep_to:]
         return sql_str
     
-    
+    def _recursive_str_replacements(_) -> list[_StrReplacement]:
+        str_replacements: list[_StrReplacement] = []
+        str_replacements += _._str_replacements
+        for tok in _.tokens:
+            if isinstance(tok, TokenTree):
+                str_replacements += tok._recursive_str_replacements()
+        return str_replacements
+
     @staticmethod
     def _add_token_str2(so_far: str, tok: Token) -> str:
         no_space_prefix = [')', ']', '}', '.', ',']

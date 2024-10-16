@@ -8,6 +8,7 @@ from sapi._internals.externals.database_py import data_model
 T = TypeVar('T')
 def parse(sapi_str: str, model: data_model.DataModel, return_type: Type[T] = str) -> T:
     # print(sapi_str)
+    # trailing_semicolon = ';' if sapi_str.strip().endswith(';') else ''
     data_model.set_current(model)
     statements: list[str] = [stmt for stmt in sapi_str.split(';') if stmt.strip() != '']
 
@@ -51,5 +52,20 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
             break
 
     return token_tree
+
+
+
+def _trailing_semicolon(stmt_str: str) -> str:
+    if not stmt_str.strip().endswith(';'):
+        return ''
+    semicolon_idx = len(stmt_str.strip()) - 1
+    previous_newline_idx = stmt_str.rfind('\n', 0, semicolon_idx)
+    if previous_newline_idx == -1:
+        return ';' # No newline found, so no indentation, only ;
+    indented_semicolon = stmt_str[previous_newline_idx : semicolon_idx + 1]
+    if any(c != ' ' and c != ';' for c in indented_semicolon):
+        raise Exception(indented_semicolon)
+    return indented_semicolon
+    
 
 

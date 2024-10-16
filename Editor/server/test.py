@@ -6,5 +6,5 @@ if __name__ == '__main__':
     sqlglot_comment_format_test()
     test_tokenize()
     test_code_actions()
-    print("passed")
+    print("All Tests Passed")
         

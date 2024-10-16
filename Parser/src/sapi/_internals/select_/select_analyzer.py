@@ -115,9 +115,9 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
         raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
     if data_model.is_table(tab) and tab not in ref_tables:
         ref_tables.append(tab)
-    loop.insert([
-        (TokenType.VAR, tab), 
-        (TokenType.DOT, '.')])
+    # loop.insert([
+    #     (TokenType.VAR, tab), 
+    #     (TokenType.DOT, '.')])
 
 def _get_table_from_var_and_tree(var: str, tree: str) -> str:
     tabs = data_model.tables_by_var_and_tree(var, tree)

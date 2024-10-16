@@ -21,12 +21,12 @@ case1 = Case( # cte, subquery and comments
     """,
     expected_sql = """
         WITH cte AS (
-            SELECT tab0.col0_1, tab0.col0_2, tab00.col00_2 FROM tab0
+            SELECT col0_1, col0_2, col00_2 FROM tab0
             JOIN tab00 USING (tab0_id))
         SELECT
             cte.col00_2,
-            tab10.col10_2,
-            (SELECT count(tab20.col20_2) FROM tab20)
+            col10_2,
+            (SELECT count(col20_2) FROM tab20)
         --FROM tree
         --join cte ON tree.col_1 = cte.col0_1
         FROM cte
@@ -53,9 +53,9 @@ join tree_ on tree_.col_1_ = tree.col_1
     """,
     expected_sql = """
 select 
-    tab1_.col1_1_, 
-    tab_.col_2_, 
-    tab.col_2
+    col1_1_, 
+    col_2_, 
+    col_2
 from tab
 join tab_ on tab_.col_1_ = tab.col_1
 join tab1_ using (tab__id)
@@ -72,7 +72,7 @@ from tree_
     """,
     expected_sql = """
 select
-    tab1_.col1_1_,
+    col1_1_,
     tab0_.col0_1_,
     tab1_.col1_2_
 from tab0_
@@ -96,8 +96,8 @@ join tab1_ using (tab__id)
     """,
     expected_sql = """
 select
-    tab1_.col1_1_,
-    tab0_.col0_1_,
+    col1_1_,
+    col0_1_,
     tab1_.col1_2_
 from tab0_
 join tab_ using (tab__id)
@@ -118,9 +118,9 @@ join some_view on some_view.col0_1_ = tab0_.col0_1_
     """,
     expected_sql = """
 select
-    tab1_.col1_1_,
-    tab0_.col0_1_,
-    tab1.col1_1,
+    col1_1_,
+    col0_1_,
+    col1_1,
     some_view.col0_1_,
     x
 from tab0_
@@ -140,7 +140,7 @@ order by tab0_.shc_
     """,
     expected_sql = """
 select
-    sht__.col_1__
+    col_1__
 from sht__
 join tab_ using (tab__id)
 join tab0_ using (tab__id)
@@ -229,12 +229,12 @@ Case = namedtuple('Case', ['sapi', 'expected_sql'])
 case1 = Case( # cte, subquery and comments
     
         WITH cte AS (
-            SELECT tab0.col0_1, tab0.col0_2, tab00.col00_2 FROM tab0
+            SELECT col0_1, col0_2, col00_2 FROM tab0
             JOIN tab00 USING (tab0_id))
         SELECT
             cte.col00_2,
-            tab10.col10_2,
-            (SELECT count(tab20.col20_2) FROM tab20)
+            col10_2,
+            (SELECT count(col20_2) FROM tab20)
         --FROM tree
         --join cte ON tree.col_1 = cte.col0_1
         FROM cte
@@ -252,11 +252,13 @@ case1 = Case( # cte, subquery and comments
 #     expected_sql = """
 #     """)
 
-# select_cases = [case1, case2, case3, case4, case5, case6, case7]
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12] # case11
+select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12] 
 select_error_cases = [case8, case9]
-select_cases = [case10] # [case10] case2
-select_error_cases = []
+non_executable_selects = [case12]
+
+# select_cases = [] 
+# select_error_cases = []
+# non_executable_selects = []
 
 
 
