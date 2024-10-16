@@ -60,7 +60,7 @@ def get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inla
 
     
     hints = []
-    # str_replacements.sort(key = lambda r: r.str_from_)
+    str_replacements.sort(key = lambda r: r.str_from_) # is this used ??
     for rep in str_replacements:
         # last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
         # sql_str += tok_tree._sapi_str[last_rep_to:rep.str_from_]            # appending a sapi-segment

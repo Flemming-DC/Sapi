@@ -1,17 +1,17 @@
 Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 993, in tokenize
-    self._scan()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1026, in _scan
-    self._scan_keywords()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1159, in _scan_keywords
-    if self._scan_comment(word):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1206, in _scan_comment
-    self._advance(comment_end_size - 1)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1054, in _advance
-    self._char = self.sql[self._current - 1]
-IndexError: string index out of range
-
-The above exception was the direct cause of the following exception:
+  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 30, in code_actions
+    return code_actions_work(lines, uri)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 36, in code_actions_work
+    sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
+    sapi_tok_tree = tokenizer.tokenize(stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
 
 Traceback (most recent call last):
   File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
@@ -22,28 +22,11 @@ Traceback (most recent call last):
     sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
   File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
     sapi_tok_tree = tokenizer.tokenize(stmt)
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 10, in tokenize
-    glot_tokens: list[glotToken] = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\dialects\dialect.py", line 936, in tokenize
-    return self.tokenizer.tokenize(sql)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 998, in tokenize
-    raise TokenError(f"Error tokenizing '{context}'") from e
-sqlglot.errors.TokenError: Error tokenizing 'SELECT /* hegr'
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 993, in tokenize
-    self._scan()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1026, in _scan
-    self._scan_keywords()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1159, in _scan_keywords
-    if self._scan_comment(word):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1206, in _scan_comment
-    self._advance(comment_end_size - 1)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1054, in _advance
-    self._char = self.sql[self._current - 1]
-IndexError: string index out of range
-
-The above exception was the direct cause of the following exception:
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
 
 Traceback (most recent call last):
   File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
@@ -54,13 +37,56 @@ Traceback (most recent call last):
     sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
   File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
     sapi_tok_tree = tokenizer.tokenize(stmt)
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 10, in tokenize
-    glot_tokens: list[glotToken] = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\dialects\dialect.py", line 936, in tokenize
-    return self.tokenizer.tokenize(sql)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 998, in tokenize
-    raise TokenError(f"Error tokenizing '{context}'") from e
-sqlglot.errors.TokenError: Error tokenizing 'SELECT /* hegr'
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
+
+Traceback (most recent call last):
+  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 30, in code_actions
+    return code_actions_work(lines, uri)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 36, in code_actions_work
+    sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
+    sapi_tok_tree = tokenizer.tokenize(stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
+
+Traceback (most recent call last):
+  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 30, in code_actions
+    return code_actions_work(lines, uri)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 36, in code_actions_work
+    sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
+    sapi_tok_tree = tokenizer.tokenize(stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
+
+Traceback (most recent call last):
+  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 30, in code_actions
+    return code_actions_work(lines, uri)
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 36, in code_actions_work
+    sql_query = sapi.parse(sapi_query, dataModel, str) # try-parse
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 16, in parse
+    sapi_tok_tree = tokenizer.tokenize(stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 14, in tokenize
+    tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
+  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\tokenizer.py", line 21, in _make_nested_tok_tree
+    if all_tokens[i].type == TokenType.L_PAREN:
+IndexError: list index out of range
 
 Traceback (most recent call last):
   File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func

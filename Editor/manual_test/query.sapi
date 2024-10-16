@@ -1,6 +1,7 @@
 
 WITH cte AS (
     SELECT col0_1, col00_2 FROM tree
+
 )
 
 SELECT /* hegr */
