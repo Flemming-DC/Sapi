@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from anytree import walker, Node
-from sapi._internals.externals.database_py import data_model
+from sapi._internals.db_contact import data_model
 
 pathType = list[tuple[Node, Node]]
 @dataclass

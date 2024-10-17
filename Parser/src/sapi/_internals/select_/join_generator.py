@@ -1,5 +1,5 @@
 from sapi._internals.token_tree import TokenType, TokenTree
-from sapi._internals.externals.database_py import data_model
+from sapi._internals.db_contact import data_model
 from .path_finder import pathType, Node
 from .tree_join import TreeJoin
 

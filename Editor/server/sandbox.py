@@ -1,5 +1,6 @@
+from server.features.highlighter import highlighter
 from tools import settings
-from features import highlighter, executor, hinting
+from features import executor, hinting
 from autotest.highlighter_test import test_tokenize
 from lsprotocol import types as t
 from sandbox import dummy

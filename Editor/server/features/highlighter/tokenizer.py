@@ -1,35 +1,22 @@
-import operator
 from copy import copy
-from functools import reduce
 from dataclasses import dataclass
 from enum import IntFlag, auto
-from lsprotocol import types as t
 from sqlglot.tokens import Token as GlotToken, TokenType as GlotType
-from sapi._editor import editor_tok
-from tools.server import server, serverType
 from tools.settings import Settings
 from tools import error
 
-
-class _TokenModifier(IntFlag):
+class TokenModifier(IntFlag):
     definition = auto()
 
 @dataclass
-class _EditorRelToken:
-    delta_line: int
-    delta_offset: int
-    text: str
-    type_str: str
-    modifiers: list[_TokenModifier]
-
-@dataclass
-class _EditorAbsToken:
+class EditorAbsToken:
     "Output of tokenizer. Must be converted to _EditorRelToken."
     line: int
     offset: int
     text: str
-    type_str: str
-    modifiers: list[_TokenModifier]
+    type: GlotType | None
+    modifiers: list[TokenModifier]
+
 
 @dataclass
 class _Location:
@@ -42,28 +29,9 @@ class _Location:
         _.line_start_index = _.i + 1
         _.i += 1
 
-@server.feature(
-    t.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-    t.SemanticTokensLegend(token_types=editor_tok.token_type_names(), 
-                           token_modifiers=[m.name for m in _TokenModifier]))
-@error.as_log_and_popup
-def highlight(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens | None:
-    uri = params.text_document.uri
-    if not uri.endswith('.sapi'):
-        return None
-    document = server.workspace.get_text_document(uri)
-    sapi_code = document.source
-    return _highlight_work(sapi_code)
 
 
-def _highlight_work(sapi_code) -> t.SemanticTokens | None:
-    """Return the semantic tokens for the entire document"""
-    editor_abs_tokens = tokenize(sapi_code)
-    editor_rel_tokens = _editor_rel_tokens(editor_abs_tokens)
-    return _semantic_tokens(editor_rel_tokens)
-
-
-def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
+def tokenize(sapi_code: str) -> list[EditorAbsToken]:
     """
     match next_tok start_index: eat to end_index and collect glot_token, seperately for each line
     match single_line_comment_markers: eat to end of line and collect comment_token
@@ -83,7 +51,7 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
     
 
     loc = _Location(0, 0, 0)
-    editor_tokens: list[_EditorAbsToken] = []
+    editor_tokens: list[EditorAbsToken] = []
     count = len(sapi_code)
     def char(i: int): return sapi_code[i]
     def two_char(i: int): return sapi_code[i] + (sapi_code[i + 1] if i + 1 < count else '')
@@ -129,89 +97,19 @@ def tokenize(sapi_code: str) -> list[_EditorAbsToken]:
     return editor_tokens
 
 
-def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> _EditorAbsToken:
+def _make_editor_token(sapi_code: str, glot_type: GlotType|None, loc_start: _Location, index_end: int) -> EditorAbsToken:
 
     line_start_index = loc_start.line_start_index
     offset = loc_start.i - line_start_index
     error.dev_assert(offset >= 0, f"offset = {offset} = {loc_start.i} - {line_start_index}")
 
-    tok = _EditorAbsToken(
+    tok = EditorAbsToken(
         line = loc_start.line_nr,
         offset = offset,
         text = sapi_code[loc_start.i : index_end + 1].strip('\r\n'), 
-        type_str = editor_tok.get_group_names(glot_type if glot_type else editor_tok.fake_glot_type_comment()),
+        type = glot_type, # editor_tok.get_group_names(glot_type if glot_type else editor_tok.fake_glot_type_comment()),
         modifiers = [], # no modifiers to begin with
         )
     return tok
-
-
-def _editor_rel_tokens(editor_abs_tokens: list[_EditorAbsToken]) -> list[_EditorRelToken]:
-    editor_rel_tokens: list[_EditorRelToken] = []
-    last_line = 0
-    last_offset = 0
-    for abs_tok in editor_abs_tokens:
-        delta_line = abs_tok.line - last_line
-        delta_offset = abs_tok.offset - last_offset if delta_line == 0 else abs_tok.offset
-
-        rel_tok = _EditorRelToken(
-            delta_line = delta_line,
-            delta_offset = delta_offset,
-            text = abs_tok.text,
-            type_str = abs_tok.type_str,
-            modifiers = abs_tok.modifiers,
-            )
-        editor_rel_tokens.append(rel_tok)
-
-        last_line = abs_tok.line
-        last_offset = abs_tok.offset
-
-    return editor_rel_tokens
-
-
-def _semantic_tokens(editor_tokens: list[_EditorRelToken]) -> t.SemanticTokens:
-    data = []
-    for tok in editor_tokens:
-        data.extend([
-            tok.delta_line,
-            tok.delta_offset,
-            len(tok.text),
-            editor_tok.token_type_names().index(tok.type_str), # returns index into token_type_names
-            reduce(operator.or_, tok.modifiers, 0), # returns bitmap into modifier_names
-        ])
-    return t.SemanticTokens(data=data)
-
-
-
-
-# get tokens
-# loop over tokens and color by TokenType
-# indications of nullability, triggers, checks and no-access comes later and elsewhere.
-# autocompletion is later and elsewhere.
-# embddedment is also later and elsewhere.
-# hinting autogenerated text is in another file. it can also be toggled on/off in settings
-
-# ----------- colors -------------
-# keywords, identifiers, parameter (e.g. var), literals, strings, comments, types, 
-# comma, brackets, operators, functions, errors, default for unrecognized
-# evt. give separate colors to schema, tree, table, column, view, aliases
-# 
-
-"""
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 993, in tokenize
-    self._scan()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1026, in _scan
-    self._scan_keywords()
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1159, in _scan_keywords
-    if self._scan_comment(word):
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1206, in _scan_comment
-    self._advance(comment_end_size - 1)
-  File "c:\Mine\Python\Sapi\Editor\local_editor_env\lib\site-packages\sqlglot\tokens.py", line 1054, in _advance
-    self._char = self.sql[self._current - 1]
-IndexError: string index out of range
-
-"""
-
 
 

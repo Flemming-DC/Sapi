@@ -13,9 +13,9 @@ class Dialect:
     blank_from_clause: str
     columns_query: str
     foreign_keys_query: str
-    connect: Connect
+    connect: Connect 
     sapi_deploy_folder: str # ehh... ugly
-    _set_to_read_only: Callable[[Connection], None] = lambda: None # optional parameter
+    set_to_read_only: Callable[[Connection], None] = lambda: None # optional parameter
 
     def __post_init__(_):
         _._glot_dialect = sqlglot.Dialect.get_or_raise(_._name)
@@ -27,7 +27,6 @@ class Dialect:
     def blank_from_clause_tokens(_): return _._blank_from_clause
 
 
-# 'VARCHAR, VARCHAR2, NVARCHAR, NVARCHAR2, LONGVARCHAR'
 
 
 def _fix_sqlglot_oversights(glot_dialect: sqlglot.Dialect):
@@ -52,7 +51,8 @@ def get_or_raise(dialect_name: str):
 
 def postgres():
     import psycopg
-    def set_to_read_only(con: psycopg.Connection): con.read_only = True
+    def _set_to_read_only(con: psycopg.Connection): con.read_only = True
+
     return Dialect(
         _name = "postgres",
         blank_from_clause = "",
@@ -92,9 +92,9 @@ def postgres():
                 and not col.attisdropped 
                 and not fcol.attisdropped 
             """,
-        sapi_deploy_folder = "./engine/externals/database_sql",
+        sapi_deploy_folder = "./engine/db_contact/deployment_sql",
         connect = psycopg.Connection.connect,
-        _set_to_read_only = set_to_read_only,
+        set_to_read_only = _set_to_read_only,
     )
 
 # def oracle():

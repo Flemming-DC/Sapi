@@ -6,7 +6,7 @@ class _TokTypeGroup(Enum):
     # SemiColon = auto() # goes into keyword
     EmbededVariableStart = auto()
     Number = auto()
-    Variable = auto() # Identifier
+    Variable = auto() # Identifier Or Trash
     String = auto()
     Type = auto() # DataType
     Keyword = auto() # Keyword or SemiColon
@@ -16,7 +16,7 @@ class _TokTypeGroup(Enum):
 _group_type_by_glot_type: dict[GlotType, _TokTypeGroup] = {} # init in _setup_dict
 
 
-def get_group_names(glotType: GlotType) -> str:
+def get_group_name(glotType: GlotType) -> str:
     _setup_dict()
     return _group_type_by_glot_type[glotType].name.lower()
 

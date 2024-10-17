@@ -34,7 +34,7 @@ class DataModel:
         _._tables_by_var_and_tree: dict[tuple[str, str], list[str]] = {}
         _._node_by_tab_and_tree: dict[tuple[str, str], Node] = {}
         _._all_tables: list[str] = []
-        _._dialect = dialect
+        _._dialect = dialect # used due to get sqlglot_dialect and black_from_clause
 
         for tree in trees:
             if tree.name in _._table_tree_names:
@@ -71,7 +71,7 @@ class DataModel:
     @staticmethod
     def from_database(dialect: Dialect, **connection_info) -> DataModel:
         con = dialect.connect(**connection_info)
-        dialect._set_to_read_only(con)
+        dialect.set_to_read_only(con)
         cur = con.cursor()
         if not deployment.is_deployed(cur, dialect):
             raise Exception("You must call deployment.setup, before calling this function.")

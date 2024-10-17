@@ -1,5 +1,5 @@
 from textwrap import dedent
-from sapi._internals.externals.database_py import data_model
+from sapi._internals.db_contact import data_model
 from sapi._internals.token_tree import Token, TokenTree, TokenType, ParserError
 from sapi._internals.dyn_loop import DynLoop
 from .tree_join import TreeJoin

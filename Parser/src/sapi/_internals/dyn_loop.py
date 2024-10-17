@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sapi._internals.token_tree import TokenTree, Token, TokenType, ParserError
+from sapi._internals.token_tree import TokenTree, Token, TokenType
 
 
 class DynLoop:

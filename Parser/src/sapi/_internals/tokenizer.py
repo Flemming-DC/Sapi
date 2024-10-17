@@ -1,7 +1,7 @@
 # from sqlglot import Dialect
 from sqlglot.tokens import Token as glotToken
 from .token_tree import TokenTree, TokenType, ParserError, Token
-from sapi._internals.externals.database_py import data_model
+from .db_contact import data_model
 
 
 

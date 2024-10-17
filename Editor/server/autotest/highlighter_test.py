@@ -1,7 +1,7 @@
 from textwrap import dedent
-from features import highlighter
-from features.highlighter import _EditorAbsToken
-from lsprotocol import types as t
+from sqlglot.tokens import TokenType as GlotType
+from features.highlighter import tokenizer
+from features.highlighter.tokenizer import EditorAbsToken
 from tools.settings import Settings
 
 
@@ -27,64 +27,62 @@ def test_tokenize():
     """)
 
     required_tokens = [
-        _EditorAbsToken(line=1, offset=0, text='WITH', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=1, offset=5, text='cte', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=1, offset=9, text='AS', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=1, offset=12, text='(', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=2, offset=4, text='SELECT', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=2, offset=11, text='col0_1', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=2, offset=17, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=2, offset=19, text='col0_2', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=2, offset=25, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=2, offset=27, text='col00_2', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=2, offset=35, text='FROM', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=2, offset=40, text='tree', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=3, offset=0, text=')', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=4, offset=0, text='SELECT', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=4, offset=7, text='/* hegr', type_str='comment', modifiers=[]),
-        _EditorAbsToken(line=4+1, offset=0, text='*/', type_str='comment', modifiers=[]),
-        _EditorAbsToken(line=5+1, offset=4, text="'vervre'", type_str='string', modifiers=[]),
-        _EditorAbsToken(line=5+1, offset=12, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=6+1, offset=4, text='$$ multi', type_str='string', modifiers=[]),
-        _EditorAbsToken(line=7+1, offset=0, text='    line $$', type_str='string', modifiers=[]),
-        
-        _EditorAbsToken(line=7+1, offset=11, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=8+1, offset=4, text='123', type_str='number', modifiers=[]),
-        _EditorAbsToken(line=8+1, offset=7, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=9+1, offset=4, text='cte', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=9+1, offset=7, text='.', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=9+1, offset=8, text='col00_2', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=9+1, offset=15, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=10+1, offset=4, text='col10_2', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=10+1, offset=11, text=',', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=4, text='(', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=5, text='SELECT', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=12, text='count', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=17, text='(', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=18, text='col20_2', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=25, text=')', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=27, text='FROM', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=32, text='tree', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=11+1, offset=36, text=')', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=12+1, offset=0, text='--FROM tree', type_str='comment', modifiers=[]),
-        _EditorAbsToken(line=13+1, offset=0, text='--join cte ON tree.col_1 = cte.col0_1', type_str='comment', modifiers=[]),
-        _EditorAbsToken(line=15, offset=0, text='FROM', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=15, offset=5, text='cte', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=16, offset=0, text='join', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=16, offset=5, text='tree', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=16, offset=10, text='ON', type_str='keyword', modifiers=[]),
-        _EditorAbsToken(line=16, offset=13, text='tree', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=16, offset=17, text='.', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=16, offset=18, text='col_1', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=16, offset=24, text='=', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=16, offset=26, text='cte', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=16, offset=29, text='.', type_str='other', modifiers=[]),
-        _EditorAbsToken(line=16, offset=30, text='col0_1', type_str='variable', modifiers=[]),
-        _EditorAbsToken(line=17, offset=0, text=';', type_str='keyword', modifiers=[]),
-
+        EditorAbsToken(line=1,    offset=0,  text='WITH',        type=GlotType.WITH,           modifiers=[]),
+        EditorAbsToken(line=1,    offset=5,  text='cte',         type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=1,    offset=9,  text='AS',          type=GlotType.ALIAS,          modifiers=[]),
+        EditorAbsToken(line=1,    offset=12, text='(',           type=GlotType.L_PAREN,        modifiers=[]),
+        EditorAbsToken(line=2,    offset=4,  text='SELECT',      type=GlotType.SELECT,         modifiers=[]),
+        EditorAbsToken(line=2,    offset=11, text='col0_1',      type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=2,    offset=17, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=2,    offset=19, text='col0_2',      type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=2,    offset=25, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=2,    offset=27, text='col00_2',     type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=2,    offset=35, text='FROM',        type=GlotType.FROM,           modifiers=[]),
+        EditorAbsToken(line=2,    offset=40, text='tree',        type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=3,    offset=0,  text=')',           type=GlotType.R_PAREN,        modifiers=[]),
+        EditorAbsToken(line=4,    offset=0,  text='SELECT',      type=GlotType.SELECT,         modifiers=[]),
+        EditorAbsToken(line=4,    offset=7,  text='/* hegr',     type=None,                    modifiers=[]),
+        EditorAbsToken(line=4+1,  offset=0,  text='*/',          type=None,                    modifiers=[]),
+        EditorAbsToken(line=5+1,  offset=4,  text="'vervre'",    type=GlotType.STRING,         modifiers=[]),
+        EditorAbsToken(line=5+1,  offset=12, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=6+1,  offset=4,  text='$$ multi',    type=GlotType.HEREDOC_STRING, modifiers=[]),
+        EditorAbsToken(line=7+1,  offset=0,  text='    line $$', type=GlotType.HEREDOC_STRING, modifiers=[]),
+        EditorAbsToken(line=7+1,  offset=11, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=8+1,  offset=4,  text='123',         type=GlotType.NUMBER,         modifiers=[]),
+        EditorAbsToken(line=8+1,  offset=7,  text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=9+1,  offset=4,  text='cte',         type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=9+1,  offset=7,  text='.',           type=GlotType.DOT,            modifiers=[]),
+        EditorAbsToken(line=9+1,  offset=8,  text='col00_2',     type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=9+1,  offset=15, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=10+1, offset=4,  text='col10_2',     type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=10+1, offset=11, text=',',           type=GlotType.COMMA,          modifiers=[]),
+        EditorAbsToken(line=11+1, offset=4,  text='(',           type=GlotType.L_PAREN,        modifiers=[]),
+        EditorAbsToken(line=11+1, offset=5,  text='SELECT',      type=GlotType.SELECT,         modifiers=[]),
+        EditorAbsToken(line=11+1, offset=12, text='count',       type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=11+1, offset=17, text='(',           type=GlotType.L_PAREN,        modifiers=[]),
+        EditorAbsToken(line=11+1, offset=18, text='col20_2',     type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=11+1, offset=25, text=')',           type=GlotType.R_PAREN,        modifiers=[]),
+        EditorAbsToken(line=11+1, offset=27, text='FROM',        type=GlotType.FROM,           modifiers=[]),
+        EditorAbsToken(line=11+1, offset=32, text='tree',        type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=11+1, offset=36, text=')',           type=GlotType.R_PAREN,        modifiers=[]),
+        EditorAbsToken(line=12+1, offset=0,  text='--FROM tree', type=None,                    modifiers=[]),
+        EditorAbsToken(line=13+1, offset=0,  text='--join cte ON tree.col_1 = cte.col0_1', type=None, modifiers=[]),
+        EditorAbsToken(line=15,   offset=0,  text='FROM',        type=GlotType.FROM,           modifiers=[]),
+        EditorAbsToken(line=15,   offset=5,  text='cte',         type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=0,  text='join',        type=GlotType.JOIN,           modifiers=[]),
+        EditorAbsToken(line=16,   offset=5,  text='tree',        type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=10, text='ON',          type=GlotType.ON,             modifiers=[]),
+        EditorAbsToken(line=16,   offset=13, text='tree',        type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=17, text='.',           type=GlotType.DOT,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=18, text='col_1',       type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=24, text='=',           type=GlotType.EQ,             modifiers=[]),
+        EditorAbsToken(line=16,   offset=26, text='cte',         type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=29, text='.',           type=GlotType.DOT,            modifiers=[]),
+        EditorAbsToken(line=16,   offset=30, text='col0_1',      type=GlotType.VAR,            modifiers=[]),
+        EditorAbsToken(line=17,   offset=0,  text=';',           type=GlotType.SEMICOLON,      modifiers=[]),
     ]
 
-    editor_abs_tokens = highlighter.tokenize(sapi)
+    editor_abs_tokens = tokenizer.tokenize(sapi)
 
     for req, act in zip(required_tokens, editor_abs_tokens):
         req.text = req.text.strip()
@@ -112,6 +110,58 @@ def sqlglot_comment_format_test():
             start, stop = marker
             assert isinstance(start, str) and len(start) == 2, error_message
             assert isinstance(stop, str) and len(stop) == 2, error_message
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

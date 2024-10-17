@@ -1,5 +1,5 @@
-from typing import Any, Protocol, Sequence, Tuple, Callable
-
+from typing import Any, Protocol, Sequence, Tuple #, Callable
+from collections.abc import Callable
 
 class Cursor(Protocol):
     def execute(self, operation: str, parameters: Sequence|dict|None = None) -> Any: ...
@@ -24,9 +24,14 @@ class Connection(Protocol):
     def commit(self) -> None: ...
     # def rollback(self) -> None: ...
 
+class Connect(Protocol):
+    def __call__(self, *args, **kwargs) -> Connection: ...
 
-Connect = Callable[..., Connection] # is this really any input, or might it be restricted to int's and str's ?
+# from typing import ParamSpec
+# P = ParamSpec('P')
+# Connect = Callable[[*P], Connection] # is this really any input, or might it be restricted to int's and str's ?
 
+# Connect = Callable[..., Connection] # is this really any input, or might it be restricted to int's and str's ?
 
 
 

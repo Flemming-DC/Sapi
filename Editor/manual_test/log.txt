@@ -1,10 +1,16 @@
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
-[0, 2, 17, 55, 58, 77, 92, 106, 120, 130, 148, 162, 201, 214, 253, 264, 302, 305, 307, 309, 311]
+--- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
+(<tools.server.SapiLanguageServer object at 0x0000025CA047A770>, SemanticTokensParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi'), work_done_token=None, partial_result_token=None)) {} 
+
+Traceback (most recent call last):
+  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
+    return old_func(*args, **kwargs)
+  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\highlighter.py", line 19, in highlight
+    return _highlight_work(sapi_code)
+  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\highlighter.py", line 25, in _highlight_work
+    return reformatter.abs_to_semantic_tokens(editor_abs_tokens)
+  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\reformatter.py", line 20, in abs_to_semantic_tokens
+    editor_rel_tokens = _abs_to_rel_tokens(editor_abs_tokens)
+  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\reformatter.py", line 31, in _abs_to_rel_tokens
+    type_str = editor_tok.get_group_names(abs_tok.type if abs_tok.type else editor_tok.fake_glot_type_comment())
+AttributeError: module 'sapi._internals.editor_tok' has no attribute 'get_group_names'. Did you mean: 'get_group_name'?
+
