@@ -2,7 +2,7 @@ from textwrap import dedent
 from sqlglot.tokens import TokenType as GlotType
 from features.highlighter import tokenizer
 from features.highlighter.tokenizer import EditorAbsToken
-from tools.settings import Settings
+from tools import settings
 
 
 def test_tokenize():
@@ -92,7 +92,7 @@ def test_tokenize():
 
 def sqlglot_comment_format_test():
     "This doesn't test our own code, but instead our assumptions about sqlglot."
-    glot_dialect = Settings.load_database().dialect.sqlglot_dialect()
+    glot_dialect = settings.load_database().dialect.sqlglot_dialect()
     comment_markers: list[str | tuple[str, str]] = glot_dialect.tokenizer.COMMENTS
 
     # '--', '#', '#!', '//'

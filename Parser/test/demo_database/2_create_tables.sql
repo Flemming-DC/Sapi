@@ -1,12 +1,10 @@
 --------- header ---------
 drop schema if exists sapi_demo cascade;
-set client_min_messages to warning;
+set search_path to sapi_demo;
 drop table if exists 
 	tab, tab0, tab1, tab2, tab00, tab01, tab10, tab20, tab21, tab_, tab0_, tab1_, sht3__
 ;
-set client_min_messages to notice;
 create schema if not exists sapi_demo;
-set search_path to sapi_demo;
 
 
 --------- tree ---------

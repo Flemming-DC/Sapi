@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sapi-lib"
-version = "0.0.46"
+version = "0.0.73"
 authors = [
   { name="fch", email="flem1431@hotmail.com" },
 ]
@@ -17,11 +17,11 @@ classifiers = [
     # "Operating System :: OS Independent",
 ]
 dependencies = [
-  "anytree>=2.12.1",
-  "pydantic>=2.8.2",
   "sqlglot>=25.10.0",
-  "psycopg-binary>=3.2.1",
-  "psycopg-pool>=3.2.2",
+  "anytree>=2.12.1",
+  # "pydantic>=2.8.2",
+  # "psycopg-binary>=3.2.1",
+  # "psycopg-pool>=3.2.2",
   # "oracledb>=2.4.1",
 ]
 

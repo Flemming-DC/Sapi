@@ -1,16 +1,4026 @@
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(<tools.server.SapiLanguageServer object at 0x0000025CA047A770>, SemanticTokensParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi'), work_done_token=None, partial_result_token=None)) {} 
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 21, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\highlighter.py", line 19, in highlight
-    return _highlight_work(sapi_code)
-  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\highlighter.py", line 25, in _highlight_work
-    return reformatter.abs_to_semantic_tokens(editor_abs_tokens)
-  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\reformatter.py", line 20, in abs_to_semantic_tokens
-    editor_rel_tokens = _abs_to_rel_tokens(editor_abs_tokens)
-  File "c:\Mine\Python\Sapi\Editor\server\features\highlighter\reformatter.py", line 31, in _abs_to_rel_tokens
-    type_str = editor_tok.get_group_names(abs_tok.type if abs_tok.type else editor_tok.fake_glot_type_comment())
-AttributeError: module 'sapi._internals.editor_tok' has no attribute 'get_group_names'. Did you mean: 'get_group_name'?
+line:  import sqlglot
 
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+line:      )
+
+line:      SELECT /* hegr */
+
+line:          'hejsa',
+
+line:          $$ multi
+
+line:          line $$,
+
+line:          123, true and false,
+
+line:          cte.col00_2,  
+
+line:          col10_2,
+
+line:          (SELECT count(col20_2) FROM tree)
+
+line:      --FROM tree
+
+line:      --join cte ON tree.col_1 = cte.col0_1
+
+line:      FROM cte
+
+line:      join tree ON tree.col_1 = cte.col0_1
+
+line:      ;
+
+line:  
+
+line:      alter table xx;
+
+line:      """
+
+line:  
+
+line:  import os
+
+line:  
+
+line:  print('hi')
+
+line:  
+
+line:  def foo():
+
+line:      return 5 + 5
+
+out lines length:  80
+out lines:  ['           ', '                ', '  ', '                  ', '             ', '                                      ', '  ', '          ', '                ', '  ', '             ', '       ', '  ', '             ', '  ', '              ', '              ', '                 ', '  ', '                                     ', '                                         ', '\r\n', 'import sapi\r\n', '# class pg: ...\r\n', 'pg = "select 1 from a"\r\n', 'sapi.read(pg + " select 1 from a ").rows()\r\n', '# sapi.read(pg + " select 1 from a ").rows()\r\n', '\r\n', '# class PG: ...\r\n', 'PG = str\r\n', 'query = pg + """\r\n', '    select 1 \r\n', '    from a;\r\n', '     ', '                               ', 'query = PG("select 1 from a")\r\n', 'query.lower()\r\n', '\r\n', '\r\n', 'with sapi.Transaction() as tr:\r\n', '    tr.pg.execute("select 1 from a").rows() #pg\r\n', '    tr.execute_pg("select 1 from a").rows()\r\n', '    tr.pg("select 1 from a").rows()\r\n', '\r\n', '\r\n', '_sapi.pg("select 1 from a").read().rows()\r\n', '_sapi.read_pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '_sapi.read.pg("select 1 from a").rows()\r\n', '_sapi.pg.read("select 1 from a").rows()\r\n', '\r\n', '# pg (=|\\(|\\+|,) whitespace string\r\n', '\r\n', 's: PG = f"""\r\n', '    WITH cte AS (\r\n', '        select col0_1, col00_2 FROM tree\r\n', '    )\r\n', '    SELECT /* hegr */\r\n', "        'hejsa',\r\n", '        $$ multi\r\n', '        line $$,\r\n', '        123, true and false,\r\n', '        cte.col00_2,  \r\n', '        col10_2,\r\n', '        (SELECT count(col20_2) FROM tree)\r\n', '    --FROM tree\r\n', '    --join cte ON tree.col_1 = cte.col0_1\r\n', '    FROM cte\r\n', '    join tree ON tree.col_1 = cte.col0_1\r\n', '    ;\r\n', '\r\n', '    alter table xx;\r\n', '    """\r\n', '\r\n', 'import os\r\n', '\r\n', "print('hi')\r\n", '\r\n', 'def foo():\r\n', '    return 5 + 5\r\n']
+Failed to parse ['''          ...''']:
+Error: Error tokenizing '= str
+query = pg + """
+    select 1 
+    from '
+--- sapi_lines ---
+not in .sapi
+in lines length:  80
+line:  import os
+
+line:  import sqlglot
+
+line:  
+
+line:  class Query: ...
+
+line:  Query = str
+
+line:  # todo bvedbre TODO efwew MOO geerge
+
+line:  
+
+line:  class A:
+
+line:      v: int = 1
+
+line:  
+
+line:  print('hi')
+
+line:  x = 1
+
+line:  
+
+line:  a = "%s $s"
+
+line:  
+
+line:  class _sapi:
+
+line:      pg = str
+
+line:  # pg = _sapi.pg
+
+line:  
+
+line:  # pg.read("select 1 from a").rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  
+
+line:  import sapi
+
+line:  # class pg: ...
+
+line:  pg = "select 1 from a"
+
+line:  sapi.read(pg + " select 1 from a ").rows()
+
+line:  # sapi.read(pg + " select 1 from a ").rows()
+
+line:  
+
+line:  # class PG: ...
+
+line:  PG = str
+
+line:  query = pg + """
+
+line:      select 1 
+
+line:      from a;
+
+line:  """
+
+line:  query: PG = "select 1 from a"
+
+line:  query = PG("select 1 from a")
+
+line:  query.lower()
+
+line:  
+
+line:  
+
+line:  with sapi.Transaction() as tr:
+
+line:      tr.pg.execute("select 1 from a").rows() #pg
+
+line:      tr.execute_pg("select 1 from a").rows()
+
+line:      tr.pg("select 1 from a").rows()
+
+line:  
+
+line:  
+
+line:  _sapi.pg("select 1 from a").read().rows()
+
+line:  _sapi.read_pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  _sapi.read.pg("select 1 from a").rows()
+
+line:  _sapi.pg.read("select 1 from a").rows()
+
+line:  
+
+line:  # pg (=|\(|\+|,) whitespace string
+
+line:  
+
+line:  s: PG = f"""
+
+line:      WITH cte AS (
+
+line:          select col0_1, col00_2 FROM tree
+
+...

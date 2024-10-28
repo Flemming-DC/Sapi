@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from sapi._editor import editor_tok
 from .tokenizer import EditorAbsToken
-from tools import data_model
+from tools import settings
 from sapi import DataModel
 
 
@@ -29,7 +29,7 @@ class _ColorType(Enum): # evt. replace auto with color literal
 # violating interface with editor_tok. Find out what to do with it later.
 def _verv(abs_tok: EditorAbsToken) -> _ColorType:
     glot_type_group = editor_tok._group_type_by_glot_type[abs_tok.type]
-    dataModel = data_model.make_datamodel()
+    dataModel = settings.load_datamodel()
 
     # Routine, Trigger, Schema, View
     # Tree, Table, Column

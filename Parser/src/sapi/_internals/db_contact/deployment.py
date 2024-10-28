@@ -1,27 +1,25 @@
 from pathlib import Path
-from .pep249_database_api_spec_v2 import Cursor
+from .pep249_database_api_spec_v2 import Connection, Cursor
 from .dialect import Dialect
 
 
-def setup_sapi(dialect: Dialect, **connection_info):
-    con = dialect.connect(**connection_info)
-    cur = con.cursor()
-    if is_deployed(cur, dialect):
+def setup_sapi(dialect: Dialect, cur: Cursor, sapi_sys_schema: str):
+    if is_deployed(cur, dialect, sapi_sys_schema):
         return
     
     print("setting up sapi system tables")
     builtin_deploy_scripts = sorted([str(f) for f in Path(dialect.sapi_deploy_folder).iterdir() if f.name.endswith('.sql')])
     for sql_script in builtin_deploy_scripts:
         with open(sql_script) as f:
-            cur.execute(f.read())
-    con.commit()
-    con.close()
+            cur.execute(f.read().replace('sapi_sys', sapi_sys_schema))
 
 
-def is_deployed(cur: Cursor, dialect: Dialect) -> bool:
+def is_deployed(cur: Cursor, dialect: Dialect, sapi_sys_schema: str) -> bool:
+    cur.execute("savepoint deployment_is_deployed")
     cur.execute(f"with columns as ({dialect.columns_query})"
-        + "select distinct table_name from columns where schema_name = 'sapi_sys'")
+        + f"select distinct table_name from columns where schema_name = '{sapi_sys_schema}'")
     actual_sapi_sys_tables = {row[0] for row in cur.fetchall()}
+    cur.execute("rollback to savepoint deployment_is_deployed")
     expected_sapi_sys_tables = {'sapi_trees', 'sapi_tables'}
 
     if actual_sapi_sys_tables == expected_sapi_sys_tables:

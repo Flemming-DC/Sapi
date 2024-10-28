@@ -1,25 +1,31 @@
 import psycopg
 from pathlib import Path
-from sapi import setup_sapi, dialect, DataModel
+from sapi import setup_sapi, dialect, DataModel, Transaction, Database
+
 
 def setup_db_and_make_datamodel():
-    connection_info = get_connection_info()
+    database = Database(
+        dialect = dialect.postgres(),
+        startup_script = "",
+        connect_kwargs = get_connection_info(),
+        )
+    sapi_sys_schema = 'sapi_sys'
     # these three calls must happen in this order
-    setup_sapi(dialect.postgres(), **connection_info)
-    setup_test_datamodel(**connection_info)
-    return DataModel.from_database(dialect.postgres(), **connection_info)
+    with Transaction(database) as tr:
+        setup_sapi(dialect.postgres(), tr.cursor(), sapi_sys_schema)
+        setup_test_datamodel(tr.cursor(), sapi_sys_schema)
+        datamodel = DataModel.from_database(database.dialect, tr.cursor(), sapi_sys_schema)
+        tr.connection().commit()
+    return datamodel
 
 
-def setup_test_datamodel(**connection_info):
+def setup_test_datamodel(cursor: psycopg.Cursor, sapi_sys_schema: str):
     deploy_scripts = sorted([str(f) for f in Path('./test/demo_database').iterdir() if f.name.endswith('.sql')])
-    with psycopg.Connection.connect(**connection_info) as con:
-        with con.cursor() as cur:
-            cur.execute("set search_path to sapi_sys")
-            for sql_script in deploy_scripts:
-                with open(sql_script) as f:
-                    cur.execute(f.read())
+    # cursor.execute("set search_path to sapi_sys")
+    for sql_script in deploy_scripts:
+        with open(sql_script) as f:
+            cursor.execute(f.read().replace('sapi_sys', sapi_sys_schema))
     
-
 
 def get_connection_info() -> dict[str, str|int]:
     password_path = Path('sapi_secret/pg_password.txt')

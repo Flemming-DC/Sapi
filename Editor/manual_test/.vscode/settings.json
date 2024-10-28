@@ -1,0 +1,17 @@
+
+{
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+        {
+            "scope": "boundary.sapi",
+            "settings": { "foreground": "#99ff00" } // "fontStyle": "bold"
+        },
+        {
+            "scope": "keyword.other",
+            "settings": { "foreground": "#ffad14" } 
+        },
+        
+        { "scope": "sapi.no-traling-comma-error", "settings": { "foreground": "#000000" } }
+        ]
+    }
+}

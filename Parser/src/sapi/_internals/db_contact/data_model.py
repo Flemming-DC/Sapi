@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from anytree import Node
-from textwrap import dedent
 from . import deployment
 from .dialect import Dialect
 from .pep249_database_api_spec_v2 import Cursor
@@ -68,16 +67,17 @@ class DataModel:
                 if node and parent_node:
                     node.parent = parent_node
 
+
+
     @staticmethod
-    def from_database(dialect: Dialect, **connection_info) -> DataModel:
-        con = dialect.connect(**connection_info)
-        dialect.set_to_read_only(con)
-        cur = con.cursor()
-        if not deployment.is_deployed(cur, dialect):
+    def from_database(dialect: Dialect, cur: Cursor, sapi_sys_schema: str) -> DataModel:
+        cur.execute("savepoint DataModel_from_database")
+        if not deployment.is_deployed(cur, dialect, sapi_sys_schema):
             raise Exception("You must call deployment.setup, before calling this function.")
-        cur.execute("set search_path to sapi_sys")
+        cur.execute(f"set search_path to {sapi_sys_schema}")
         trees = _make_trees(dialect, cur)
-        con.close()
+        cur.execute("rollback to savepoint DataModel_from_database")
+        
         return DataModel(dialect, trees)
 
 

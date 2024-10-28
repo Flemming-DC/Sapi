@@ -1,18 +1,17 @@
-from server.features.highlighter import highlighter
-from tools import settings
-from features import executor, hinting
-from autotest.highlighter_test import test_tokenize
-from lsprotocol import types as t
-from sandbox import dummy
+from tools.embedding import sapi_lines
 
 if __name__ == '__main__':
-    sapi = """
+    py_sapi_1 = '''
+class A: ...
 
+pg = ""
+class B: ...
+
+pg + """
 WITH cte AS (
-    SELECT col0_1, col0_2, col00_2 FROM tree
+    SELECT col0_1, col00_2 FROM tree
 )
-SELECT /* hegr 
-*/
+SELECT /* hegr */
     'vervre',
     $$ multi
     line $$,
@@ -25,14 +24,99 @@ SELECT /* hegr
 FROM cte 
 join tree ON tree.col_1 = cte.col0_1
 ;
-
 """
-    lines = sapi.split('\n')
-    uri="C:\Mine\Python\Sapi\Editor\manual_test\query.sapi"
 
-    # hints = hinting.inlay_hints_work(lines)
-    # for hint in hints:
-    #     print(hint.label)
-    dummy
+x = 1
+class C: ...
+'''
+    
+    py_sapi_2 = '''
+import os
+import sqlglot
+
+class Query: ...
+Query = str
+# todo bvedbre TODO efwew MOO geerge
+
+class A:
+    v: int = 1
+
+print('hi')
+x = 1
+
+a = "%s $s"
+
+class _sapi:
+    pg = str
+# pg = _sapi.pg
+
+# pg.read("select 1 from a").rows()
+_sapi.read_pg("select 1 from a").rows()
+
+import sapi
+# class pg: ...
+pg = "select 1 from a"
+sapi.read(pg + " select 1 from a ").rows()
+# sapi.read(pg + " select 1 from a ").rows()
+
+# class PG: ...
+PG = str
+query = pg + """
+    select 1 
+    from a;
+"""
+query: PG = "select 1 from a"
+query = PG("select 1 from a")
+query.lower()
+
+
+with sapi.Transaction() as tr:
+    tr.pg.execute("select 1 from a").rows() #pg
+    tr.execute_pg("select 1 from a").rows()
+    tr.pg("select 1 from a").rows()
+
+
+_sapi.pg("select 1 from a").read().rows()
+_sapi.read_pg("select 1 from a").rows()
+_sapi.pg.read("select 1 from a").rows()
+_sapi.read.pg("select 1 from a").rows()
+_sapi.pg.read("select 1 from a").rows()
+
+# pg (=|\(|\+|,) whitespace string
+
+s: PG = f"""
+    WITH cte AS (
+        select col0_1, col00_2 FROM tree
+    )
+    SELECT /* hegr */
+        'hejsa',
+        $$ multi
+        line $$,
+        123, true and false,
+        cte.col00_2,  
+        col10_2,
+        (SELECT count(col20_2) FROM tree)
+    --FROM tree
+    --join cte ON tree.col_1 = cte.col0_1
+    FROM cte
+    join tree ON tree.col_1 = cte.col0_1
+    ;
+
+    alter table xx;
+    """
+
+import os
+
+print('hi')
+
+def foo():
+    return 5 + 5
+
+'''
+
+    py_sapi = py_sapi_2
+
+    _sapi_lines = sapi_lines(py_sapi.split('\n'))
+    print('\n'.join(_sapi_lines))
 
     print("done")        

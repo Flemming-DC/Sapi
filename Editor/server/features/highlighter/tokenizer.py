@@ -2,8 +2,7 @@ from copy import copy
 from dataclasses import dataclass
 from enum import IntFlag, auto
 from sqlglot.tokens import Token as GlotToken, TokenType as GlotType
-from tools.settings import Settings
-from tools import error
+from tools import error, settings, log
 
 class TokenModifier(IntFlag):
     definition = auto()
@@ -38,11 +37,17 @@ def tokenize(sapi_code: str) -> list[EditorAbsToken]:
     match multi_line_comment_start_markers: eat to end marker and collect comment_token, seperately for each line
     match \n: eat \n and update line_nr, line_start_index
     """
-    glot_dialect = Settings.load_database().dialect.sqlglot_dialect()
-    glot_tokens = glot_dialect.tokenize(sapi_code)
-    comment_markers: list[str | tuple[str, str]] = glot_dialect.tokenizer.COMMENTS
+    glot_dialect = settings.load_database().dialect.sqlglot_dialect()
+    try: 
+        glot_tokens = glot_dialect.tokenize(sapi_code)
+    except Exception as e: 
+        code_start = sapi_code if len(sapi_code) < 10 else sapi_code[:10] + '...'
+        log.log(f"Failed to tokenize ['''{code_start}''']:\nError: {e}")
+        return []
+
     if len(glot_tokens) == 0: 
-        return
+        return []
+    comment_markers: list[str | tuple[str, str]] = glot_dialect.tokenizer.COMMENTS
     next_glot_tok_idx: int = 0
       
     single_line_1_char_comment_markers = [m for m in comment_markers if isinstance(m, str) and len(m) == 1] # subset of ['--']

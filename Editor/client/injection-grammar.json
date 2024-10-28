@@ -1,0 +1,20 @@
+{
+"scopeName": "sapi-py",
+"injectionSelector": "L:source - (meta.embedded), L:text - (meta.embedded)",
+"patterns": [
+    { "include": "#embedded-sapi" }
+],
+
+"repository": {
+    "embedded-sapi": {"patterns": [
+    {
+        "begin": "(?i)(?<!#).*(?<=pg)\\s*\\W?\\s*f?r?((?<!')'''|(?<!\")\"\"\"|(?<!\")\")",
+        "end": "('''(?!')|\"\"\"(?!\")|\"(?!\"))",
+        "beginCaptures": { "1": { "name": "meta.embedded.sapi boundary.sapi" }},
+        "endCaptures":   { "1": { "name": "meta.embedded.sapi boundary.sapi" }},
+        "contentName": "meta.embedded.sapi",
+        "patterns": [{ "include": "source.pgsql" }]
+    }
+    ]}
+}
+}  

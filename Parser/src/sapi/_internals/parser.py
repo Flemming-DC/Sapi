@@ -2,19 +2,23 @@ import warnings
 from typing import TypeVar, Type
 from . import tokenizer
 from .select_ import select_parser
-from .token_tree import TokenTree, ParserError, TokenType
+from .token_tree import TokenTree, TokenType
 from .db_contact import data_model
 from .db_contact.data_model import DataModel
-from .execution import dependencies
 
-# class dependencies:
-#     default_data_model = None
+
+
+# def try_parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T | Exception:
+#     try: 
+#         return parse(sapi_str, model, return_type)
+#     except Exception as e: # create a user error class for the parser and filter by it
+#         # code_start = sapi_str if len(sapi_str) < 10 else sapi_str[:10] + '...'
+#         message = f"Failed to parse '''{sapi_str}'''\nError: {e}\n"
+#         return Exception(message) # cuts off traceback
 
 T = TypeVar('T')
-def parse(sapi_str: str, model: DataModel = None, return_type: Type[T] = str) -> T:
+def parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T:
     # setup
-    if model is None:
-        model = dependencies.default_data_model
     if not (isinstance(sapi_str, str) and isinstance(model, DataModel) and isinstance(return_type, type)):
         expected = str.__name__, DataModel.__name__, type.__name__
         actual = sapi_str.__class__.__name__, model.__class__.__name__, return_type.__class__.__name__

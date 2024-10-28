@@ -11,11 +11,10 @@ SELECT /* hegr */
     col10_2,
     (SELECT count(col20_2) FROM tree)
 --FROM tree
---join cte ON tree.col_1 = cte.col0_1
+--join cte ON tree.col_1 = cte.col0_1 
 FROM cte 
 join tree ON tree.col_1 = cte.col0_1
 ;
-
 
 
 

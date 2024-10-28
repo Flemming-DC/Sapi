@@ -1,13 +1,9 @@
 --------- header ---------
 
-drop schema if exists sapi_sys cascade;
-set client_min_messages to warning;
-drop table if exists 
-	sapi_trees, sapi_tables
-;
-set client_min_messages to notice;
-create schema if not exists sapi_sys;
-set search_path to sapi_sys;
+-- drop schema if exists sapi_sys cascade;
+drop table if exists sapi_tables;
+drop table if exists sapi_trees;
+-- create schema if not exists sapi_sys;
 
 --------- sys tables ---------
 

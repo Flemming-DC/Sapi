@@ -6,7 +6,7 @@ class _TokTypeGroup(Enum):
     # SemiColon = auto() # goes into keyword
     EmbededVariableStart = auto()
     Number = auto()
-    Variable = auto() # Identifier Or Trash
+    IdentifierOrTrash = auto() # Identifier Or Trash
     String = auto()
     Type = auto() # DataType
     Keyword = auto() # Keyword or SemiColon
@@ -18,10 +18,10 @@ _group_type_by_glot_type: dict[GlotType, _TokTypeGroup] = {} # init in _setup_di
 
 def get_group_name(glotType: GlotType) -> str:
     _setup_dict()
-    return _group_type_by_glot_type[glotType].name.lower()
+    return _group_type_by_glot_type[glotType].name #.lower()
 
 def token_type_names() -> list[str]: 
-    return [name.lower() for name, type in _TokTypeGroup.__members__.items()]
+    return [name for name, type in _TokTypeGroup.__members__.items()]
 
 def fake_glot_type_comment(): return -1
 
@@ -36,7 +36,7 @@ def _setup_dict():
     _group_set_by_grouptype[_TokTypeGroup.EmbededVariableStart] = {GlotType.COLON}
     _group_set_by_grouptype[_TokTypeGroup.Number] = {GlotType.NUMBER}
 
-    _group_set_by_grouptype[_TokTypeGroup.Variable] = {
+    _group_set_by_grouptype[_TokTypeGroup.IdentifierOrTrash] = {
         GlotType.IDENTIFIER,
         GlotType.VAR,
         GlotType.PARAMETER,

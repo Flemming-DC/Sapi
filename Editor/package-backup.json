@@ -1,0 +1,58 @@
+{
+  "name": "sapi",
+  "description": "Provides syntax highlighting and other editor support for the sapi query language.",
+  "author": "fch",
+  "bugs": { "url": "https://github.com/Flemming-DC/Sapi/issues" },
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/Flemming-DC/Sapi"
+  },
+  "license": "MIT",
+  "version": "0.0.0",
+  "publisher": "fch",
+  "categories": [],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "main": "./client/out/extension",
+  "activationEvents": [
+    "onLanguage"
+  ],
+
+  "contributes": {
+    "languages": [
+      {
+        "id": "sapi",
+        "aliases": ["sapi"],
+        "extensions": [".sapi", ".sapir", ".py"],
+        "configuration": "./client/comment-bracket.json"
+      }
+    ],
+    "semanticTokenTypes": [
+      { "id": "EmbededVariableStart", "superType": "variable", "description": "IGotNothingToSay" },
+      { "id": "String",               "superType": "string",   "description": "IGotNothingToSay" },
+      { "id": "Type",                 "superType": "type",     "description": "IGotNothingToSay" },
+      { "id": "Keyword",              "superType": "keyword",  "description": "IGotNothingToSay" },
+      { "id": "Comment",              "superType": "comment",  "description": "IGotNothingToSay" },
+      { "id": "IdentifierOrTrash"                            , "description": "IGotNothingToSay"},
+      { "id": "Other"                                        , "description": "IGotNothingToSay"},
+
+      { "id": "no-traling-comma-error"                       , "description": "IGotNothingToSay"}
+    ]
+
+  },
+  
+  
+
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "typescript": "^5.6.2"
+  }
+}
+

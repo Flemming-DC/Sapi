@@ -7,13 +7,14 @@ import traceback
 
 OK = TypeVar('OK')
 
-def try_(old_func: Callable[[], OK], message: str) -> OK: #, *args, **kwargs):
+def with_error_message(old_func: Callable[[], OK], message: str) -> OK: #, *args, **kwargs):
     try:
         return old_func()
     except Exception as e:
         e.args = (message, )
         raise 
-    
+
+
 def as_log_and_popup(old_func: Callable[..., OK]):
     @wraps(old_func)
     def new_func(*args, **kwargs) -> OK:

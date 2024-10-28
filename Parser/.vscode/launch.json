@@ -22,7 +22,7 @@
             "name": "Test",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/test/test_code.py",
+            "program": "${workspaceFolder}/test.py",
             "console": "integratedTerminal"
         },
 
