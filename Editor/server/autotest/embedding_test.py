@@ -1,8 +1,14 @@
-from tools.embedding import sapi_lines
+from tools import embedding
 from textwrap import dedent
 
-if __name__ == '__main__':
-    py_sapi_1 = '''
+def test_sapi_lines():
+    _test_1_sapi_lines()
+    _test_2_sapi_lines()
+
+
+def _test_1_sapi_lines():
+
+    py_sapi = '''
 class A: ...
 
 pg = ""
@@ -31,7 +37,43 @@ x = 1
 class C: ...
 '''
     
-    py_sapi_2 = '''
+    sapi_lines = embedding.sapi_lines(py_sapi.split('\n'))
+    actual_sapi_code = '\n'.join(sapi_lines)
+    expected_sapi_code = '''
+
+
+
+
+
+
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+
+
+
+
+'''
+
+    actual_sapi_code = '\n'.join(line.rstrip() for line in dedent(actual_sapi_code).split('\n'))
+    expected_sapi_code = '\n'.join(line.rstrip() for line in dedent(expected_sapi_code).split('\n'))
+    assert actual_sapi_code == expected_sapi_code, "BAD"
+
+def _test_2_sapi_lines():
+    py_sapi = '''
 import os
 import sqlglot
 
@@ -115,48 +157,9 @@ def foo():
 
 '''
 
-    _sapi_lines = sapi_lines(py_sapi_1.split('\n'))
-    sapi_code = '\n'.join(_sapi_lines)
-    # print(f"'''{sapi_code}'''")
-    sc = '''
-
-
-
-
-
-
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-;
-
-
-
-
-'''
-
-    a, b = dedent(sapi_code), dedent(sc)
-    A = '\n'.join(x.rstrip() for x in  a.split('\n'))
-    B = '\n'.join(x.rstrip() for x in  b.split('\n'))
-    assert A == B, ""
-
-
-    _sapi_lines = sapi_lines(py_sapi_2.split('\n'))
-    sapi_code = '\n'.join(_sapi_lines)
-    print(f"'''{sapi_code}'''")
-    sc = '''
+    sapi_lines = embedding.sapi_lines(py_sapi.split('\n'))
+    actual_sapi_code = '\n'.join(sapi_lines)
+    expected_sapi_code = '''
 
 
 
@@ -240,9 +243,10 @@ join tree ON tree.col_1 = cte.col0_1
 
 '''
 
-    a, b = dedent(sapi_code), dedent(sc)
+    a, b = dedent(actual_sapi_code), dedent(expected_sapi_code)
     A = '\n'.join(x.rstrip() for x in  a.split('\n'))
     B = '\n'.join(x.rstrip() for x in  b.split('\n'))
-    assert A == B, ""
+    assert A == B, "BAD"
 
-    print("done")        
+
+

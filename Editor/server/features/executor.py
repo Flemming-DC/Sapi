@@ -21,9 +21,7 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     uri = params.text_document.uri
     if not any(uri.endswith(file_type) for file_type in server.file_types()):
         return []
-    document = server.workspace.get_text_document(uri)
-    r = params.range # range is the selected range.
-    # lines = document.lines #[r.start.line : r.end.line + 1]
+    # r = params.range # range is the selected range.
     lines = server.sapi_lines(uri) #[r.start.line : r.end.line + 1]
     return code_actions_work(lines, uri)
 
@@ -42,7 +40,6 @@ def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
         return [] # produce error message in output rather than removing code actions
     
 
-
     range_ = t.Range(
         start=t.Position(line=0 + 0, character=0),
         end=t.Position(line=len(lines) - 1, character=len(sapi_code) - 1))
@@ -56,24 +53,19 @@ def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
         title=f"Execute",
         kind=t.CodeActionKind.Empty,
         command=t.Command(title=_execute.__name__, command=_execute.__name__, arguments=[sql_query]))
-    log_ = t.CodeAction(
-        title=f"Log",
-        kind=t.CodeActionKind.Empty,
-        command=t.Command(title=_log.__name__, command=_log.__name__, arguments=[sapi_code]))
+    
+    return [execute, cast_to_sql]
 
-
-    return [execute, cast_to_sql, log_]
-
-@command
-@error.as_log_and_popup
-def _log(msg: str) -> str:
-    return msg
+# @command
+# @error.as_log_and_popup
+# def _print_sapi(msg: str) -> str:
+#     return msg
 
 @command
 @error.as_log_and_popup
 def _execute(sql_query: str) -> Sequence[Sequence]:
     database = settings.load_database()
-    # error: multiple _execute calls can fit into the same transaction.
+    # error: multiple _execute calls can fit into the same transaction (unless you autocommit).
     # you need to keep a connection alive between transactions.
     with sapi.Transaction(database) as tr:
         return tr.execute_plain_sql(sql_query).rows()
@@ -88,18 +80,12 @@ def _execute(sql_query: str) -> Sequence[Sequence]:
     # return data
 
 
-def _clear_non_sapi_code(sapi_code: str) -> str:
-    sections = sapi_code.split('"""')
-    if len(sections) >= 2:
-        whitespace = ''.join(['\n' if char == '\n' else ' ' for char in sections[0]])
-        return whitespace + sections[1]
-    else:
-        return sections[0]
 
 """
 
 cast to sql removes the trailing semicolon
 -------
+cast to sql whipes out all the python code
 
 """
 
