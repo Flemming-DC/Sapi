@@ -1,4 +1,5 @@
 from tools import embedding
+from itertools import zip_longest
 from textwrap import dedent
 
 def test_sapi_lines():
@@ -37,8 +38,8 @@ x = 1
 class C: ...
 '''
     
-    sapi_lines = embedding.sapi_lines(py_sapi.split('\n'))
-    actual_sapi_code = '\n'.join(sapi_lines)
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'))
+    actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
 
@@ -70,7 +71,9 @@ join tree ON tree.col_1 = cte.col0_1
 
     actual_sapi_code = '\n'.join(line.rstrip() for line in dedent(actual_sapi_code).split('\n'))
     expected_sapi_code = '\n'.join(line.rstrip() for line in dedent(expected_sapi_code).split('\n'))
-    assert actual_sapi_code == expected_sapi_code, "BAD"
+    actual_sapi_code = actual_sapi_code.rstrip()
+    expected_sapi_code = expected_sapi_code.rstrip()
+    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
 
 def _test_2_sapi_lines():
     py_sapi = '''
@@ -157,8 +160,8 @@ def foo():
 
 '''
 
-    sapi_lines = embedding.sapi_lines(py_sapi.split('\n'))
-    actual_sapi_code = '\n'.join(sapi_lines)
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'))
+    actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
 
@@ -243,10 +246,22 @@ def foo():
 
 '''
 
-    a, b = dedent(actual_sapi_code), dedent(expected_sapi_code)
+    a, e = dedent(actual_sapi_code), dedent(expected_sapi_code)
     A = '\n'.join(x.rstrip() for x in  a.split('\n'))
-    B = '\n'.join(x.rstrip() for x in  b.split('\n'))
-    assert A == B, "BAD"
+    E = '\n'.join(x.rstrip() for x in  e.split('\n'))
+    A = A.rstrip()
+    E = E.rstrip()
+    assert A == E, _error_message(A, E)
 
 
 
+def _error_message(actual_sapi_code: str, expected_sapi_code: str) -> str:
+    actual_len, expected_len = len(actual_sapi_code), len(expected_sapi_code)
+    zip_ = zip_longest(actual_sapi_code.split('\n'), expected_sapi_code.split('\n'), fillvalue='')
+    differing_lines_messages = [
+        f"\nactual: '{a}'         expected: '{e}'" for a, e in zip_ if a != e]
+    
+    return f"""
+    len(actual_sapi_code) iff len(expected_sapi_code) = {actual_len} iff {expected_len} = {actual_len == expected_len}
+    """ + '\n'.join(differing_lines_messages)
+    

@@ -4,6 +4,7 @@ import sapi
 from tools.server import server
 from tools.command import command
 from tools import error, settings, log
+from tools.embedding import Section
 
 # register code action ideally by ctrl-enter-enter. 
 # first connect, then execute or parse (you choose)
@@ -22,15 +23,17 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     if not any(uri.endswith(file_type) for file_type in server.file_types()):
         return []
     # r = params.range # range is the selected range.
-    lines = server.sapi_lines(uri) #[r.start.line : r.end.line + 1]
-    return code_actions_work(lines, uri)
+    # evt use [r.start.line : r.end.line + 1]
+    sections = server.sapi_sections(uri)
+    return code_actions_work(sections, uri)
 
     
-def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
-    if lines == []: return []
-    sapi_code = '\n'.join([line.strip('\n\r') for line in lines]) # does this work for multiple queries?
-    # if not uri.endswith('.sapi'):
-    #     sapi_code = _clear_non_sapi_code(sapi_code)
+def code_actions_work(sections: list[Section], uri: str) -> list[t.CodeAction]:
+    if sections == []: return []
+    # sapi_code = '\n'.join([line.strip('\n\r') for line in lines]) # FAILS FOR EMBEDDED CODE
+    sapi_code = sections[0].leading_whitespace + sections[0].query # temp
+    line_len = len(sapi_code.split('\n'))
+
     dataModel = settings.load_datamodel()
     try:
         sql_query = sapi.parse(sapi_code, dataModel, str) # try-parse
@@ -42,7 +45,7 @@ def code_actions_work(lines: list[str], uri: str) -> list[t.CodeAction]:
 
     range_ = t.Range(
         start=t.Position(line=0 + 0, character=0),
-        end=t.Position(line=len(lines) - 1, character=len(sapi_code) - 1))
+        end=t.Position(line=line_len - 1, character=len(sapi_code) - 1))
     text_edit = t.TextEdit(range=range_, new_text=sql_query)
 
     cast_to_sql = t.CodeAction(

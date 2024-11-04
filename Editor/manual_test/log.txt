@@ -1,72 +1,12 @@
 --- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=11:0-80:0, work_done_token=None),) {} 
+(CodeActionParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi'), range=8:8-8:8, context=CodeActionContext(diagnostics=[], only=None, trigger_kind=<CodeActionTriggerKind.Automatic: 2>), work_done_token=None, partial_result_token=None),) {} 
 
 Traceback (most recent call last):
   File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
     return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    lines = server.sapi_lines(uri)[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=11:0-80:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    lines = server.sapi_lines(uri)[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=11:0-80:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    lines = server.sapi_lines(uri)[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py'), range=0:0-28:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    lines = server.sapi_lines(uri)[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(CodeActionParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py'), range=4:6-4:6, context=CodeActionContext(diagnostics=[], only=None, trigger_kind=<CodeActionTriggerKind.Automatic: 2>), work_done_token=None, partial_result_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 27, in code_actions
-    lines = server.sapi_lines(uri) #[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py'), range=0:0-28:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    lines = server.sapi_lines(uri)[r.start.line : r.end.line + 1]
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 13, in sapi_lines
-    return embedding.sapi_lines(server.workspace.get_text_document(uri), uri)
-TypeError: sapi_lines() takes 1 positional argument but 2 were given
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 29, in code_actions
+    return code_actions_work(sections, uri, len(lines))
+  File "c:\Mine\Python\Sapi\Editor\server\features\executor.py", line 50, in code_actions_work
+    end=t.Position(line=len(lines) - 1, character=len(sapi_code) - 1))
+NameError: name 'lines' is not defined
 

@@ -1,8 +1,10 @@
 from collections import namedtuple
 from textwrap import dedent
 from features import hinting
+from tools import embedding
 
 
+_PartialHint = namedtuple('Hint', ['position', 'label'])
 
 def test_inlay_hints():
     sapi = dedent("""
@@ -25,20 +27,31 @@ def test_inlay_hints():
     ;
     """)
     lines = sapi.split('\n')
-    
-    PartialHint = namedtuple('Hint', ['position', 'label'])
-    expected = {
-        PartialHint(position='4:3', label=' tab0'),
-        PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
-        PartialHint(position='15:12', label=' tab20'),
-        PartialHint(position='18:4', label=' tab'),
-        PartialHint(position='18:12', label=' tab'),
-        PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
-        PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
+    sections = embedding.freeform_single_section(lines)
+    # sapi_code = sections[0].leading_whitespace + sections[0].query # temp
+    # lines_2 = sapi_code.split('\n')
+
+    expected_hints = {
+        _PartialHint(position='4:3', label=' tab0'),
+        _PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position='15:12', label=' tab20'),
+        _PartialHint(position='18:4', label=' tab'),
+        _PartialHint(position='18:12', label=' tab'),
+        _PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
     }
 
-    actual_hints = hinting.inlay_hints_work(lines)
-    actual_hints = { PartialHint(repr(a.position), a.label) for a in actual_hints }
+    actual_hints = hinting.inlay_hints_work(sections)
+    actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
 
-    assert actual_hints == expected, "Error in Hinting"
+    assert actual_hints == expected_hints, _error_message(actual_hints, expected_hints)
 
+
+def _error_message(actual_hints: set[_PartialHint], expected_hints: set[_PartialHint]) -> str:
+    a_not_e = {a for a in actual_hints if a not in expected_hints}
+    e_not_a = {e for e in expected_hints if e not in actual_hints}
+    
+    return f"""
+    actual - expected = {a_not_e}
+    expected - actual = {e_not_a}
+    """

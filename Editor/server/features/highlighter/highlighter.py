@@ -1,7 +1,9 @@
+import os
 from lsprotocol import types as t
 from sapi._editor import editor_tok
 from tools.server import server, serverType
 from tools import error, log
+from tools.embedding import Section
 from . import tokenizer, reformatter
 
 
@@ -15,8 +17,11 @@ def highlight(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens
     # if not uri.endswith('.sapi'): return None
     if not any(uri.endswith(file_type) for file_type in server.file_types()): 
         return None
-    lines = server.sapi_lines(uri)
-    sapi_code = '\r\n'.join([line.strip('\n\r') for line in lines])
+    sections = server.sapi_sections(uri)
+    sapi_code = sections[0].leading_whitespace + sections[0].query # temp
+    lines = sapi_code.split('\n')
+    # lines = server.sapi_lines(uri)
+    sapi_code = os.linesep.join([line.strip('\n\r') for line in lines])
     return _highlight_work(sapi_code)
 
 

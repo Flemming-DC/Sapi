@@ -10,10 +10,14 @@ class SapiLanguageServer(LanguageServer):
 
     def file_types(_): return [".sapi", ".sapir", ".py"]
 
-    def sapi_lines(_, uri: str) -> list[str]:
-        all_lines = _.workspace.get_text_document(uri).lines
-        return all_lines if uri.endswith(".sapi") else embedding.sapi_lines(all_lines)
+    # def sapi_lines(_, uri: str) -> list[str]:
+    #     all_lines = _.workspace.get_text_document(uri).lines
+    #     return all_lines if uri.endswith(".sapi") else embedding.sapi_lines(all_lines)
 
+    def sapi_sections(_, uri: str) -> list[embedding.Section]:
+        lines = _.workspace.get_text_document(uri).lines
+        return (embedding.freeform_single_section(lines)
+            if uri.endswith(".sapi") else embedding.sapi_sections(lines))
 
 
 
