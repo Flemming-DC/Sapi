@@ -68,7 +68,6 @@ s: PG = f"""
     FROM cte
     join tree ON tree.col_1 = cte.col0_1
     ;
-
     alter table xx;
     """
 

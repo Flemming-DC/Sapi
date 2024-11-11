@@ -68,22 +68,17 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool) -> list[Sectio
         for hs in half_sections_within_line:
             hs.line_nr_start = line_nr
             hs.line_nr_end = line_nr
-            # hs.line_length = len(line)
 
         if half_sections and half_sections_within_line:
             # glue them together across lines
             if half_sections[-1].is_query == half_sections_within_line[0].is_query:
-                # if half_sections[-1].is_query:
-                #     query = half_sections_within_line[0].text
-                #     print(query)
                 half_section = half_sections_within_line.pop(0)
                 half_sections[-1].text += line_ending + half_section.text
                 half_sections[-1].line_nr_end = line_nr
                 half_sections[-1].end_char = half_section.end_char
 
-        for s in half_sections:
-            assert not s.is_query or 2 * line_ending not in s.text, repr(s.text)
-
+        # for s in half_sections:
+        #     assert not (s.is_query and 2 * line_ending in s.text), repr(s.text)
         half_sections += half_sections_within_line
     
     return _build_sections(half_sections)
@@ -147,8 +142,4 @@ def _build_sections(half_sections: list[_HalfSection]) -> list[Section]:
         i += 2
     return sections
 
-"""
-
-char calculation seems off
-"""
 

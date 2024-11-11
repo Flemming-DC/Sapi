@@ -17,8 +17,8 @@ def command(old_func: Callable[..., T]):
         valid_input = (len(params) == len(required_types)
             and all(isinstance(p, t) for p, t in zip(params, actual_types)))
         if not valid_input:
-            raise Exception(f"{old_func.__name__} expects {required_types} containing a single element, namely a query. Received: \n{params}")
-        # run function and return output
+            raise Exception(f"{old_func.__name__} expects {required_types}. Received: \n{params}")
+        # run function and send output to client
         output = old_func(*params)
         if output != None:
             server.send_output(output)
@@ -26,5 +26,3 @@ def command(old_func: Callable[..., T]):
     return new_func
 
 
-# evt. introduce a decorator for features. 
-# e.g. include error.as_popup and file_extension_check

@@ -75,6 +75,8 @@ join tree ON tree.col_1 = cte.col0_1
     expected_sapi_code = expected_sapi_code.rstrip()
     assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
 
+    _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
+
 def _test_2_sapi_lines():
     py_sapi = '''
 import os
@@ -269,6 +271,7 @@ def foo():
     ]
     assert actual_ranges == expected_ranges, _error_message_ranges(actual_ranges, expected_ranges)
 
+    _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
 
 def _error_message(actual_sapi_code: str, expected_sapi_code: str) -> str:
     actual_len, expected_len = len(actual_sapi_code), len(expected_sapi_code)
@@ -292,4 +295,17 @@ def _error_message_ranges(actual_ranges: list[tuple[int]], expected_ranges: list
     len(actual_ranges) iff len(expected_ranges) = {actual_len} iff {expected_len} = {actual_len == expected_len}
     \n""" + '\n'.join(differing_lines_messages)
     
+
+
+
+def _check_plings_around_sections(sections: list[embedding.Section], lines: list[str]):
+    for section in sections:
+        before_start = lines[section.line_nr_start][section.char_start - 3 : section.char_start]
+        assert '"' in before_start or "'''" in before_start, (
+            f"Expected \", \"\"\" or ''' before section. \nline: {lines[section.line_nr_start]}\nbefore_start: {before_start}"
+            f"\n{section.line_nr_start}, {section.char_start}")
+        after_end = lines[section.line_nr_end][section.char_end : section.char_end + 3]
+        assert '"' in after_end or "'''" in after_end, (
+            f"Expected \", \"\"\" or ''' after section. \nline: {lines[section.line_nr_end]}\nafter_end: {after_end}"
+            f"\n{section.line_nr_end}, {section.char_end}")
 
