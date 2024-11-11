@@ -1,58 +1,67 @@
-line:  
-in_sapi, processed_line:  False 
-line:  class A: ...
-in_sapi, processed_line:  False             
-line:  
-in_sapi, processed_line:  False 
-line:  pg = ""
-BEGIN: R(pg = ""), P()
-in_sapi, processed_line:  True        
-line:  class B: ...
-in_sapi, processed_line:  True class B: ...
-line:  
-in_sapi, processed_line:  True 
-line:  pg + """
-in_sapi, processed_line:  True pg + """
-line:  WITH cte AS (
-in_sapi, processed_line:  True WITH cte AS (
-line:      SELECT col0_1, col00_2 FROM tree
-in_sapi, processed_line:  True     SELECT col0_1, col00_2 FROM tree
-line:  )
-in_sapi, processed_line:  True )
-line:  SELECT /* hegr */
-in_sapi, processed_line:  True SELECT /* hegr */
-line:      'vervre',
-in_sapi, processed_line:  True     'vervre',
-line:      $$ multi
-in_sapi, processed_line:  True     $$ multi
-line:      line $$,
-in_sapi, processed_line:  True     line $$,
-line:      123,
-in_sapi, processed_line:  True     123,
-line:      cte.col00_2,
-in_sapi, processed_line:  True     cte.col00_2,
-line:      col10_2,
-in_sapi, processed_line:  True     col10_2,
-line:      (SELECT count(col20_2) FROM tree)
-in_sapi, processed_line:  True     (SELECT count(col20_2) FROM tree)
-line:  --FROM tree
-in_sapi, processed_line:  True --FROM tree
-line:  --join cte ON tree.col_1 = cte.col0_1
-in_sapi, processed_line:  True --join cte ON tree.col_1 = cte.col0_1
-line:  FROM cte 
-in_sapi, processed_line:  True FROM cte 
-line:  join tree ON tree.col_1 = cte.col0_1
-in_sapi, processed_line:  True join tree ON tree.col_1 = cte.col0_1
-line:  ;
-in_sapi, processed_line:  True ;
-line:  """
-END: R("""), P()
-in_sapi, processed_line:  False    
-line:  
-in_sapi, processed_line:  False 
-line:  x = 1
-in_sapi, processed_line:  False      
-line:  class C: ...
-in_sapi, processed_line:  False             
-line:  
-in_sapi, processed_line:  False 
+Section(query="\nWITH cte AS (\n    SELECT col0_1, col0_2, col00_2 FROM tree\n)\nSELECT /* hegr \n*/\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n;\n", leading_whitespace='', line_nr_start=0, line_nr_end=19, char_start=0, char_end=0)
+1
+2
+3
+4
+---
+
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 FROM tree
+)
+SELECT /* hegr 
+*/
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+
+--
+
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 FROM tab0
+    JOIN tab00 USING (tab0_id))
+SELECT /* hegr 
+*/
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tab20)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tab ON tab.col_1 = cte.col0_1
+JOIN tab1 USING (tab_id)
+JOIN tab10 USING (tab1_id)
+--
+
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 FROM tab0
+    JOIN tab00 USING (tab0_id))
+SELECT /* hegr 
+*/
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tab20)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tab ON tab.col_1 = cte.col0_1
+JOIN tab1 USING (tab_id)
+JOIN tab10 USING (tab1_id)
+;
+--

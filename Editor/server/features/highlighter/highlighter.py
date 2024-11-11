@@ -17,7 +17,7 @@ def highlight(_: serverType, params: t.SemanticTokensParams) -> t.SemanticTokens
     # if not uri.endswith('.sapi'): return None
     if not any(uri.endswith(file_type) for file_type in server.file_types()): 
         return None
-    sections = server.sapi_sections(uri)
+    sections = server.sapi_sections(uri, False)
     sapi_code = sections[0].leading_whitespace + sections[0].query # temp
     lines = sapi_code.split('\n')
     # lines = server.sapi_lines(uri)

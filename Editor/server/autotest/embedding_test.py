@@ -38,7 +38,7 @@ x = 1
 class C: ...
 '''
     
-    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'))
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
     actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
@@ -145,9 +145,7 @@ s: PG = f"""
     --FROM tree
     --join cte ON tree.col_1 = cte.col0_1
     FROM cte
-    join tree ON tree.col_1 = cte.col0_1
-    ;
-
+    join tree ON tree.col_1 = cte.col0_1;
     alter table xx;
     """
 
@@ -160,7 +158,7 @@ def foo():
 
 '''
 
-    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'))
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
     actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
@@ -231,9 +229,7 @@ def foo():
     --FROM tree
     --join cte ON tree.col_1 = cte.col0_1
     FROM cte
-    join tree ON tree.col_1 = cte.col0_1
-    ;
-
+    join tree ON tree.col_1 = cte.col0_1;
     alter table xx;
 
 
@@ -247,21 +243,53 @@ def foo():
 '''
 
     a, e = dedent(actual_sapi_code), dedent(expected_sapi_code)
-    A = '\n'.join(x.rstrip() for x in  a.split('\n'))
-    E = '\n'.join(x.rstrip() for x in  e.split('\n'))
+    A = '\n'.join(x.rstrip() for x in a.split('\n'))
+    E = '\n'.join(x.rstrip() for x in e.split('\n'))
     A = A.rstrip()
     E = E.rstrip()
     assert A == E, _error_message(A, E)
 
+    actual_ranges = [(s.line_nr_start, s.char_start, s.line_nr_end, s.char_end) for s in sapi_sections]
+    expected_ranges = [
+        (22-1, 15, 22-1, 30), #              "select 1 from a"
+        (26-1, 6,  26-1, 21), #     "select 1 from a"
+        (27-1, 16, 27-1, 33), #               " select 1 from a "
+        (28-1, 18, 28-1, 35), #                 " select 1 from a "
+        (32-1, 16, 35-1, 0 ), #query = pg + """
+        # (33-1, 4,  34-1, 11), #    select 1 
+        (36-1, 13, 36-1, 28), #          "select 1 from a"
+        (37-1, 12, 37-1, 27), #         "select 1 from a"
+        (43-1, 19, 43-1, 34), #                  "select 1 from a"
+        (44-1, 11, 44-1, 26), #          "select 1 from a"
+        (47-1, 10, 47-1, 25), #         "select 1 from a"
+        (48-1, 15, 48-1, 30), #              "select 1 from a"
+        (50-1, 15, 50-1, 30), #              "select 1 from a"
+        (55-1, 12, 72-1, 4 ), #s: PG = f"""
+        # (56-1, 4,  71-1, 19), #    WITH cte AS ( 
+    ]
+    assert actual_ranges == expected_ranges, _error_message_ranges(actual_ranges, expected_ranges)
 
 
 def _error_message(actual_sapi_code: str, expected_sapi_code: str) -> str:
     actual_len, expected_len = len(actual_sapi_code), len(expected_sapi_code)
     zip_ = zip_longest(actual_sapi_code.split('\n'), expected_sapi_code.split('\n'), fillvalue='')
     differing_lines_messages = [
-        f"\nactual: '{a}'         expected: '{e}'" for a, e in zip_ if a != e]
+        f"actual: '{a}'         expected: '{e}'" for a, e in zip_ if a != e]
     
     return f"""
     len(actual_sapi_code) iff len(expected_sapi_code) = {actual_len} iff {expected_len} = {actual_len == expected_len}
-    """ + '\n'.join(differing_lines_messages)
+    \n""" + '\n'.join(differing_lines_messages)
     
+
+
+def _error_message_ranges(actual_ranges: list[tuple[int]], expected_ranges: list[tuple[int]]) -> str:
+    actual_len, expected_len = len(actual_ranges), len(expected_ranges)
+    zip_ = zip_longest(actual_ranges, expected_ranges, fillvalue=(None, None, None, None))
+    differing_lines_messages = [
+        f"actual: {a}   expected: {e}   diff: {(a[0] - e[0], a[1] - e[1], a[2] - e[2], a[3] - e[3])}" for a, e in zip_ if a != e]
+    
+    return f"""
+    len(actual_ranges) iff len(expected_ranges) = {actual_len} iff {expected_len} = {actual_len == expected_len}
+    \n""" + '\n'.join(differing_lines_messages)
+    
+

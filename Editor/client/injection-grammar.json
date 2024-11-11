@@ -8,8 +8,8 @@
 "repository": {
     "embedded-sapi": {"patterns": [
     {
-        "begin": "(?i)(?<!#).*(?<=pg)\\s*\\W?\\s*f?r?((?<!')'''|(?<!\")\"\"\"|(?<!\")\")",
-        "end": "('''(?!')|\"\"\"(?!\")|\"(?!\"))",
+        "begin": "(?i)(?<!#).*(?<=pg)\\s*\\W?\\s*f?r?('{3}|\"{3}|\"{1})",
+        "end": "('{3}|\"{3}|\"{1})",
         "beginCaptures": { "1": { "name": "meta.embedded.sapi boundary.sapi" }},
         "endCaptures":   { "1": { "name": "meta.embedded.sapi boundary.sapi" }},
         "contentName": "meta.embedded.sapi",
