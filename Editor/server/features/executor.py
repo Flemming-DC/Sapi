@@ -48,10 +48,10 @@ def code_actions_work(sections: list[Section], uri: str, range: t.Range) -> list
     cast_to_sql = t.CodeAction(
         title = f"to SQL",
         kind  = t.CodeActionKind.Empty,
-        edit  = t.WorkspaceEdit(changes={uri: [t.TextEdit(
+        edit  = t.WorkspaceEdit(changes = {uri: [t.TextEdit(
             range = t.Range(
-                start = t.Position(line=section.line_nr_start, character=section.char_start),
-                end   = t.Position(line=section.line_nr_end,   character=section.char_end)), 
+                start = t.Position(line = section.line_nr_start, character = section.char_start),
+                end   = t.Position(line = section.line_nr_end,   character = section.char_end)), 
             new_text=sql_query)]}))
 
     execute = t.CodeAction(

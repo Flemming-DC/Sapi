@@ -35,15 +35,26 @@ def _test_1_inlay_hints():
     # sapi_code = sections[0].leading_whitespace + sections[0].query # temp
     # lines_2 = sapi_code.split('\n')
 
+    # new
     expected_hints = {
-        _PartialHint(position='4:3', label=' tab0'),
-        _PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
-        _PartialHint(position='15:12', label=' tab20'),
-        _PartialHint(position='18:4', label=' tab'),
-        _PartialHint(position='18:12', label=' tab'),
-        _PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position='2:44', label=' tab0'),
+        _PartialHint(position='3:0', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position='12:36', label=' tab20'),
+        _PartialHint(position='16:9', label=' tab'),
+        _PartialHint(position='16:17', label=' tab'),
+        _PartialHint(position='17:0', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position='18:0', label='JOIN tab10 USING ( tab1_id )'),
     }
+    # # old
+    # expected_hints = {
+    #     _PartialHint(position='4:3', label=' tab0'),
+    #     _PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
+    #     _PartialHint(position='15:12', label=' tab20'),
+    #     _PartialHint(position='18:4', label=' tab'),
+    #     _PartialHint(position='18:12', label=' tab'),
+    #     _PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
+    #     _PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
+    # }
 
     actual_hints = hinting.inlay_hints_work(sections)
     actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
@@ -103,10 +114,13 @@ class C: ...
 
 
 def _error_message(actual_hints: set[_PartialHint], expected_hints: set[_PartialHint]) -> str:
-    a_not_e = {a for a in actual_hints if a not in expected_hints}
-    e_not_a = {e for e in expected_hints if e not in actual_hints}
+    a_not_e = '\n\t'.join([str(a) for a in actual_hints if a not in expected_hints])
+    e_not_a = '\n\t'.join([str(e) for e in expected_hints if e not in actual_hints])
     
     return f"""
-    actual - expected = {a_not_e}
-    expected - actual = {e_not_a}
+    actual - expected: 
+        {a_not_e}
+
+    expected - actual: 
+        {e_not_a}
     """

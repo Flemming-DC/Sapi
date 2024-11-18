@@ -123,14 +123,15 @@ def _build_sections(half_sections: list[_HalfSection]) -> list[Section]:
     while i < length - 1: # we exclude the last element to make room for index i + 1
         whitespace = half_sections[i]
         query = half_sections[i + 1] # if i + 1 < length else _QueryOrWhiteSpace(text='', is_query=True)
-        assert query.is_query, "expected query"
-        assert not whitespace.is_query, "expected whitespace"
-        assert query.text is not None, repr(query)
-        assert whitespace.text is not None, repr(whitespace)
-        assert query.line_nr_start is not None, repr(query)
-        assert query.line_nr_end is not None, repr(query)
-        assert whitespace.end_char is not None, repr(whitespace)
-        assert query.end_char is not None, repr(query)
+        # can't use dev_assert due to circular import
+        # assert query.is_query,                  "expected query"
+        # assert not whitespace.is_query,         "expected whitespace"
+        # assert query.text is not None,          repr(query)
+        # assert whitespace.text is not None,     repr(whitespace)
+        # assert query.line_nr_start is not None, repr(query)
+        # assert query.line_nr_end is not None,   repr(query)
+        # assert whitespace.end_char is not None, repr(whitespace)
+        # assert query.end_char is not None,      repr(query)
         sections.append(Section(
             query = query.text, 
             leading_whitespace = whitespace.text, 

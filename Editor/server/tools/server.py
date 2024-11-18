@@ -1,4 +1,3 @@
-import re
 from typing import Any
 from pygls.server import LanguageServer
 from tools import embedding

@@ -1,4 +1,4 @@
----
+----
 
 WITH cte AS (
     SELECT col0_1, col0_2, col00_2 FROM tree
@@ -21,8 +21,8 @@ join tree ON tree.col_1 = cte.col0_1
 --
 
 WITH cte AS (
-    SELECT col0_1, col0_2, col00_2 FROM tab0
-    JOIN tab00 USING (tab0_id))
+    SELECT col0_1, col0_2, col00_2 FROM tree
+)
 SELECT /* hegr 
 */
     'vervre',
@@ -31,32 +31,43 @@ SELECT /* hegr
     123,
     cte.col00_2,
     col10_2,
-    (SELECT count(col20_2) FROM tab20)
+    (SELECT count(col20_2) FROM tree)
 --FROM tree
 --join cte ON tree.col_1 = cte.col0_1
 FROM cte 
-join tab ON tab.col_1 = cte.col0_1
-JOIN tab1 USING (tab_id)
-JOIN tab10 USING (tab1_id)
+join tree ON tree.col_1 = cte.col0_1
+;
+
+--
+----
+
+            
+
+       
 --
 
+            
+
+       
+
+            
+
+        
 WITH cte AS (
-    SELECT col0_1, col0_2, col00_2 FROM tab0
-    JOIN tab00 USING (tab0_id))
-SELECT /* hegr 
-*/
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
     'vervre',
     $$ multi
     line $$,
     123,
     cte.col00_2,
     col10_2,
-    (SELECT count(col20_2) FROM tab20)
+    (SELECT count(col20_2) FROM tree)
 --FROM tree
 --join cte ON tree.col_1 = cte.col0_1
 FROM cte 
-join tab ON tab.col_1 = cte.col0_1
-JOIN tab1 USING (tab_id)
-JOIN tab10 USING (tab1_id)
+join tree ON tree.col_1 = cte.col0_1
 ;
+   
 --
