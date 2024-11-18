@@ -7,7 +7,7 @@ from tools import embedding
 _PartialHint = namedtuple('Hint', ['position', 'label'])
 
 def test_inlay_hints():
-    _test_1_inlay_hints()
+    # _test_1_inlay_hints()
     _test_2_inlay_hints()
 
 def _test_1_inlay_hints():
@@ -35,7 +35,7 @@ def _test_1_inlay_hints():
     # sapi_code = sections[0].leading_whitespace + sections[0].query # temp
     # lines_2 = sapi_code.split('\n')
 
-    # new
+
     expected_hints = {
         _PartialHint(position='2:44', label=' tab0'),
         _PartialHint(position='3:0', label='JOIN tab00 USING ( tab0_id )'),
@@ -45,16 +45,6 @@ def _test_1_inlay_hints():
         _PartialHint(position='17:0', label='JOIN tab1 USING ( tab_id )'),
         _PartialHint(position='18:0', label='JOIN tab10 USING ( tab1_id )'),
     }
-    # # old
-    # expected_hints = {
-    #     _PartialHint(position='4:3', label=' tab0'),
-    #     _PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
-    #     _PartialHint(position='15:12', label=' tab20'),
-    #     _PartialHint(position='18:4', label=' tab'),
-    #     _PartialHint(position='18:12', label=' tab'),
-    #     _PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
-    #     _PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
-    # }
 
     actual_hints = hinting.inlay_hints_work(sections)
     actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
@@ -63,7 +53,7 @@ def _test_1_inlay_hints():
 
 
 def _test_2_inlay_hints():
-    sapi = dedent('''
+    code_with_embbeding_sapi = dedent('''
 class A: ...
 
 pg = ""
@@ -71,9 +61,10 @@ class B: ...
 
 pg + """
 WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
+    SELECT col0_1, col0_2, col00_2 FROM tree
 )
-SELECT /* hegr */
+SELECT /* hegr 
+*/
     'vervre',
     $$ multi
     line $$,
@@ -92,30 +83,40 @@ x = 1
 class C: ...
 
 ''')
-    lines = sapi.split('\n')
+    lines = code_with_embbeding_sapi.split('\n')
     sections = embedding.sapi_sections(lines, True)
-    # sapi_code = sections[0].leading_whitespace + sections[0].query # temp
-    # lines_2 = sapi_code.split('\n')
 
-    # expected_hints = {
-    #     _PartialHint(position='4:3', label=' tab0'),
-    #     _PartialHint(position='4:5', label='JOIN tab00 USING ( tab0_id )'),
-    #     _PartialHint(position='15:12', label=' tab20'),
-    #     _PartialHint(position='18:4', label=' tab'),
-    #     _PartialHint(position='18:12', label=' tab'),
-    #     _PartialHint(position='18:33', label='JOIN tab1 USING ( tab_id )'),
-    #     _PartialHint(position='19:33', label='JOIN tab10 USING ( tab1_id )'),
-    # }
+    expected_hints_1 = set() # first section is empty
+    
+    line_nr_offset = sections[1].line_nr_start
+
+    expected_hints_2 = {
+        _PartialHint(position=f'{2  + line_nr_offset}:{44 + 0}', label=' tab0'),
+        _PartialHint(position=f'{3  + line_nr_offset}:{0  + 0}', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position=f'{12 + line_nr_offset}:{36 + 0}', label=' tab20'),
+        _PartialHint(position=f'{16 + line_nr_offset}:{9  + 0}', label=' tab'),
+        _PartialHint(position=f'{16 + line_nr_offset}:{17 + 0}', label=' tab'),
+        _PartialHint(position=f'{17 + line_nr_offset}:{0  + 0}', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position=f'{18 + line_nr_offset}:{0  + 0}', label='JOIN tab10 USING ( tab1_id )'),
+    }
+    expected_hints = expected_hints_1.union(expected_hints_2)
 
     actual_hints = hinting.inlay_hints_work(sections)
-    # actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
+    actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
 
-    # assert actual_hints == expected_hints, _error_message(actual_hints, expected_hints)
+    assert actual_hints == expected_hints, _error_message(actual_hints, expected_hints)
 
 
 def _error_message(actual_hints: set[_PartialHint], expected_hints: set[_PartialHint]) -> str:
-    a_not_e = '\n\t'.join([str(a) for a in actual_hints if a not in expected_hints])
-    e_not_a = '\n\t'.join([str(e) for e in expected_hints if e not in actual_hints])
+
+    def difference_as_str(hints1: set[_PartialHint], hints2: set[_PartialHint]):
+        diff = [h for h in hints1 if h not in hints2]
+        diff.sort(key = lambda h: int(h.position.split(':')[0]) * 100 + int(h.position.split(':')[1]))
+        diff = '\n\t'.join([str(h) for h in diff])
+        return diff
+
+    a_not_e = difference_as_str(actual_hints, expected_hints)
+    e_not_a = difference_as_str(expected_hints, actual_hints)
     
     return f"""
     actual - expected: 

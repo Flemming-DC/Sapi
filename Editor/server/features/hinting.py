@@ -23,20 +23,8 @@ def inlay_hints(params: t.InlayHintParams) -> list[t.InlayHint]:
 
 def inlay_hints_work(sections: list[Section]) -> list[t.InlayHint]:
     if sections == []: return []
-    idx = 0
-    # assert 2 * os.linesep not in sections[idx].query, "sdv"
-    sapi_code_partial = sections[idx].leading_whitespace + sections[idx].query # TEMP
-    sapi_code_full = os.linesep.join([s.leading_whitespace + s.query for s in sections])
-    sapi_code = sapi_code_full
-    log('----')
-    log('\n'.join([line.strip('\r\n') for line in sapi_code_partial.split(os.linesep)]))
-    log('--')
-    log('\n'.join([line.strip('\r\n') for line in sapi_code_full.split(os.linesep)]))
-    log('--')
-
+    sapi_code = ''.join([s.leading_whitespace + s.query for s in sections])
     lines = [line for line in sapi_code.split(os.linesep)] 
-    sapi_code = os.linesep.join([line.strip('\r\n') for line in lines]) # does this work for multiple queries?
-    
 
     dataModel = settings.load_datamodel()
     try:
