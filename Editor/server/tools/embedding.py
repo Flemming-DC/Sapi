@@ -71,11 +71,12 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool) -> list[Sectio
 
         if half_sections and half_sections_within_line:
             # glue them together across lines
-            if half_sections[-1].is_query == half_sections_within_line[0].is_query:
+            previous = half_sections[-1]
+            if previous.is_query == half_sections_within_line[0].is_query:
                 half_section = half_sections_within_line.pop(0)
-                half_sections[-1].text += line_ending + half_section.text
-                half_sections[-1].line_nr_end = line_nr
-                half_sections[-1].end_char = half_section.end_char
+                previous.text += line_ending + half_section.text
+                previous.line_nr_end = line_nr
+                previous.end_char = half_section.end_char
 
         # for s in half_sections:
         #     assert not (s.is_query and 2 * line_ending in s.text), repr(s.text)
