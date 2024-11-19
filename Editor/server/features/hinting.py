@@ -1,4 +1,5 @@
 import os
+from textwrap import dedent
 from lsprotocol import types as t
 from tools.server import server
 from tools.log import log
@@ -21,12 +22,39 @@ def inlay_hints(params: t.InlayHintParams) -> list[t.InlayHint]:
     return inlay_hints_work(sections)
 
 
+
+# def inlay_hints_work(sections: list[Section]) -> list[t.InlayHint]:
+#     if sections == []: return []
+#     sapi_code = ''.join([s.leading_whitespace + s.query for s in sections])
+#     lines = [line for line in sapi_code.split(os.linesep)] 
+
+#     dataModel = settings.load_datamodel() # what if there are multiple datamodels in use ?
+#     try:
+#         sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
+#     except Exception as e: # create a user error class for the parser and filter by it
+#         code_start = sapi_code if len(sapi_code) < 10 else sapi_code[:10] + '...'
+#         log(f"Failed to parse ['''{code_start}''']:\nError: {e}")
+#         return []
+    
+#     line_start_indices = _line_start_indices(lines)
+#     hints = []
+#     for tok_tree in sql_token_trees:
+#         hints.extend(_hints_for_tok_tree(tok_tree, line_start_indices))
+#     return hints
+
 def inlay_hints_work(sections: list[Section]) -> list[t.InlayHint]:
     if sections == []: return []
-    sapi_code = ''.join([s.leading_whitespace + s.query for s in sections])
+    hints = []
+    for s in sections:
+        hints.extend(_hints_for_section(s))
+    return hints
+    
+
+def _hints_for_section(section: Section) -> list[t.InlayHint]:
+    sapi_code = os.linesep * section.line_nr_start + ' ' * section.char_start + dedent(section.query)
     lines = [line for line in sapi_code.split(os.linesep)] 
 
-    dataModel = settings.load_datamodel()
+    dataModel = settings.load_datamodel() # what if there are multiple datamodels in use ?
     try:
         sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
     except Exception as e: # create a user error class for the parser and filter by it
@@ -35,13 +63,15 @@ def inlay_hints_work(sections: list[Section]) -> list[t.InlayHint]:
         return []
     
     line_start_indices = _line_start_indices(lines)
+    # unindented_start_indices = _line_start_indices([line.lstrip(' ') for line in lines] )
+    # indentions = _indentions(lines)
     hints = []
     for tok_tree in sql_token_trees:
-        hints.extend(_get_hints(tok_tree, line_start_indices))
+        hints.extend(_hints_for_tok_tree(tok_tree, line_start_indices, lines))
     return hints
 
 
-def _get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.InlayHint]:
+def _hints_for_tok_tree(tok_tree: TokenTree, line_start_indices: list[int], lines: list[str]) -> list[t.InlayHint]:
     str_replacements = tok_tree.recursive_str_replacements() # collect replacements in subtrees
     if not str_replacements:
         return [] # handle the None case
@@ -54,18 +84,11 @@ def _get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inl
             continue
         put_on_new_line = rep.new_tokens[0].type in common_select_clauses()
         put_on_new_line_sequence_len = put_on_new_line_sequence_len + 1 if put_on_new_line else 0
+        line_nr, char = _line_nr_and_char(rep.str_to, lines, line_start_indices)
+        line_nr += put_on_new_line_sequence_len
+
         prefix = '' if put_on_new_line else ' '
         hint_text = prefix + ' '.join([t.text for t in rep.new_tokens])
-
-        index = rep.str_to # hints goes after replaced code. This is relevant for "join tree on ..." followed by hint.
-        if index in line_start_indices:
-            # decrement by 1 to fix the edge case, where a token at the end of a line
-            # incorrectly ends up on the next line
-            index -= 1 
-        line_nr, line_start_index = _round_down_to_nearest_element(index, line_start_indices)
-        char = index - line_start_index if not put_on_new_line else 0
-        error.dev_assert(char >= 0, f"char = {char} = {index} - {line_start_index}")
-        line_nr += put_on_new_line_sequence_len
 
         hint = t.InlayHint(
             label=hint_text,
@@ -79,17 +102,54 @@ def _get_hints(tok_tree: TokenTree, line_start_indices: list[int]) -> list[t.Inl
     return hints
 
 
+# this function looks slow. Evt. use something like binary search.
+def _line_nr_and_char(rep_str_to: int, lines: list[str], line_start_indices: list[int]) -> tuple[int, int]:
+        # This loop will find line_nr, char if the generated code goes at the beginning of a line (up to indention)
+        index = rep_str_to # index for end of generated code. It ends where it begins, since it is inserted 
+                           # into preexisting code, rather than replacing it.
+        for line_nr, line in enumerate(lines):
+            start_index = line_start_indices[line_nr]
+            if line_start_indices[line_nr + 1] < index: 
+                continue # skipping earlier lines
+            if index < start_index: 
+                break # skipping later lines
 
-def _line_start_indices(lines: list[str]) -> list[int]:
-    line_start_indices = []
-    last_line_length = 0
-    current_line_start_index = 0
-    for line in lines:
-        current_line_start_index += last_line_length
-        line_start_indices.append(current_line_start_index)
-        last_line_length = len(line) + len(os.linesep)
-    return line_start_indices
+            # Calculate indention
+            # This allows us to check, if the hint goes at the start of the unindented line.
+            # it is also used to set char = indention
+            indention = 0
+            for char in line: 
+                if char == ' ': indention += 1
+                if char == '\t': indention += 4
+                else: continue
 
+            if index < start_index or index > start_index + indention:
+                continue # 
+
+            # Calculate number of preceeding blank lines
+            # This is used to prevent join clauses from skipping newlines and 
+            # mix with the code, that should come after the from clause
+            prior_blank_line_count = 0
+            blank = False
+            i = 1
+            while i <= line_nr:
+                blank = (lines[line_nr - i].strip() == '')
+                if not blank: break
+                prior_blank_line_count += 1
+                i += 1
+            
+            # decrement by 1 to fix the fact that rep-str_to points to the token on the next line
+            # decrement by prior_blank_line_count to prevent join clauses from skipping newlines
+            line_nr -= (1 + prior_blank_line_count) # 
+            char = indention
+            return line_nr, char
+        
+        # if the generated code is not at the beginning of a line, then we round index
+        # down to nearest line_start_index to get line_nr
+        line_nr, line_start_index = _round_down_to_nearest_element(index, line_start_indices)
+        char = index - line_start_index #if not put_on_new_line else 0
+        error.dev_assert(char >= 0, f"char = {char} = {index} - {line_start_index} at line_nr = {line_nr}")
+        return line_nr, char
 
 
 def _round_down_to_nearest_element(number: int, sorted_list: list[int]) -> tuple[int, int] | tuple[None, None]:
@@ -116,42 +176,26 @@ def _round_down_to_nearest_element(number: int, sorted_list: list[int]) -> tuple
 
 
 
+def _line_start_indices(lines: list[str]) -> list[int]:
+    line_start_indices = []
+    last_line_length = 0
+    current_line_start_index = 0
+    for line in lines:
+        current_line_start_index += last_line_length
+        line_start_indices.append(current_line_start_index)
+        last_line_length = len(line) + len(os.linesep)
+    return line_start_indices
+
+
+
 
 # if possible, try to make room for hints by carefully adding / removing new lines 
 
 
 r"""
+what if there are multiple datamodels in use ?
 
-hints are placed incorrectly
-----
-
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/_Sandbox/dib.sapi'), range=0:0-5:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Users\flem1\.vscode\extensions\fch.sapi-0.0.0\server\tools\error.py", line 21, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Users\flem1\.vscode\extensions\fch.sapi-0.0.0\server\features\hinting.py", line 20, in inlay_hints
-    return inlay_hints_work(lines)
-  File "c:\Users\flem1\.vscode\extensions\fch.sapi-0.0.0\server\features\hinting.py", line 26, in inlay_hints_work
-    sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 25, in parse
-    sql_token_trees.append(_parse_token_tree(sapi_tok_tree))
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\parser.py", line 54, in _parse_token_tree
-    token_tree = select_parser.parse_select(token_tree) # this only changes the leaf tokens
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\select_\select_parser.py", line 7, in parse_select
-    tree_joins = select_analyzer.find_tree_joins(DynLoop(token_tree))
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\select_\select_analyzer.py", line 14, in find_tree_joins
-    tree_join, on_clause_tables_in_join = _make_tree_join(loop, [j.tree_tok for j in tree_joins])
-  File "C:\Mine\Python\Sapi\Parser\src\sapi\_internals\select_\select_analyzer.py", line 34, in _make_tree_join
-    raise ParserError("expected identifier or variable after from / join.")
-sapi._internals.token_tree.ParserError: expected identifier or variable after from / join.
-
-
-
-----
-error tree [hint(tab20)] is displayed incorrect. Hint is on newline
-
-
+sapi in different sections are mistanken treated as part of the same statement, du to 
+    sapi_code = ''.join([s.leading_whitespace + s.query for s in sections])
 """
 

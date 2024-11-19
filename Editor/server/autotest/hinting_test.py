@@ -7,8 +7,9 @@ from tools import embedding
 _PartialHint = namedtuple('Hint', ['position', 'label'])
 
 def test_inlay_hints():
-    # _test_1_inlay_hints()
+    _test_1_inlay_hints()
     _test_2_inlay_hints()
+    _test_3_inlay_hints()
 
 def _test_1_inlay_hints():
     sapi = dedent("""
@@ -37,13 +38,13 @@ def _test_1_inlay_hints():
 
 
     expected_hints = {
-        _PartialHint(position='2:44', label=' tab0'),
-        _PartialHint(position='3:0', label='JOIN tab00 USING ( tab0_id )'),
-        _PartialHint(position='12:36', label=' tab20'),
-        _PartialHint(position='16:9', label=' tab'),
-        _PartialHint(position='16:17', label=' tab'),
-        _PartialHint(position='17:0', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position='18:0', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position=f'2:44', label=' tab0'),
+        _PartialHint(position=f'3:{0 + 0}', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position=f'12:36', label=' tab20'),
+        _PartialHint(position=f'16:9', label=' tab'),
+        _PartialHint(position=f'16:17', label=' tab'),
+        _PartialHint(position=f'17:{0 + 0}', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position=f'18:{0 + 0}', label='JOIN tab10 USING ( tab1_id )'),
     }
 
     actual_hints = hinting.inlay_hints_work(sections)
@@ -53,51 +54,50 @@ def _test_1_inlay_hints():
 
 
 def _test_2_inlay_hints():
-    code_with_embbeding_sapi = dedent('''
+    python_with_sapi = dedent('''
 class A: ...
 
 pg = ""
 class B: ...
 
 pg + """
-WITH cte AS (
-    SELECT col0_1, col0_2, col00_2 FROM tree
-)
-SELECT /* hegr 
-*/
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-;
-"""
+    WITH cte AS (
+        SELECT col0_1, col0_2, col00_2 FROM tree
+    )
+    SELECT /* hegr 
+    */
+        'vervre',
+        $$ multi
+        line $$,
+        123,
+        cte.col00_2,
+        col10_2,
+        (SELECT count(col20_2) FROM tree)
+    --FROM tree
+    --join cte ON tree.col_1 = cte.col0_1
+    FROM cte 
+    join tree ON tree.col_1 = cte.col0_1
+
+    ;
+    """
 
 x = 1
 class C: ...
 
 ''')
-    lines = code_with_embbeding_sapi.split('\n')
+    lines = python_with_sapi.split('\n')
     sections = embedding.sapi_sections(lines, True)
 
     expected_hints_1 = set() # first section is empty
-    
     line_nr_offset = sections[1].line_nr_start
-
     expected_hints_2 = {
-        _PartialHint(position=f'{2  + line_nr_offset}:{44 + 0}', label=' tab0'),
-        _PartialHint(position=f'{3  + line_nr_offset}:{0  + 0}', label='JOIN tab00 USING ( tab0_id )'),
-        _PartialHint(position=f'{12 + line_nr_offset}:{36 + 0}', label=' tab20'),
-        _PartialHint(position=f'{16 + line_nr_offset}:{9  + 0}', label=' tab'),
-        _PartialHint(position=f'{16 + line_nr_offset}:{17 + 0}', label=' tab'),
-        _PartialHint(position=f'{17 + line_nr_offset}:{0  + 0}', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position=f'{18 + line_nr_offset}:{0  + 0}', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position=f'{2  + line_nr_offset}:{44 + 4}', label=' tab0'),
+        _PartialHint(position=f'{3  + line_nr_offset}:{0  + 4}', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position=f'{12 + line_nr_offset}:{36 + 4}', label=' tab20'),
+        _PartialHint(position=f'{16 + line_nr_offset}:{9  + 4}', label=' tab'),
+        _PartialHint(position=f'{16 + line_nr_offset}:{17 + 4}', label=' tab'),
+        _PartialHint(position=f'{17 + line_nr_offset}:{0  + 4}', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position=f'{18 + line_nr_offset}:{0  + 4}', label='JOIN tab10 USING ( tab1_id )'),
     }
     expected_hints = expected_hints_1.union(expected_hints_2)
 
@@ -105,6 +105,113 @@ class C: ...
     actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
 
     assert actual_hints == expected_hints, _error_message(actual_hints, expected_hints)
+
+
+def _test_3_inlay_hints():
+    python_with_sapi = dedent('''
+import os
+import sqlglot
+
+class Query: ...
+Query = str
+# todo bvedbre TODO efwew MOO geerge
+
+class A:
+    v: int = 1
+
+print('hi')
+x = 1
+
+a = "%s $s"
+
+class _sapi:
+    pg = str
+# pg = _sapi.pg
+
+# pg.read("select 1 from a").rows()
+_sapi.read_pg("select 1 from a").rows()
+
+import sapi
+# class pg: ...
+pg = "select 1 from a"
+sapi.read(pg + " select 1 from a ").rows()
+# sapi.read(pg + " select 1 from a ").rows()
+
+# class PG: ...
+PG = str
+query = pg + """
+    select 1 
+    from a;
+"""
+query: PG = "select 1 from a"
+query = PG("select 1 from a")
+query.lower()
+
+
+with sapi.Transaction() as tr:
+    tr.pg.execute("select 1 from a").rows() #pg
+    tr.execute_pg("select 1 from a").rows()
+    tr.pg("select 1 from a").rows()
+
+
+_sapi.pg("select 1 from a").read().rows()
+_sapi.read_pg("select 1 from a").rows()
+_sapi.pg.read("select 1 from a").rows()
+_sapi.read.pg("select 1 from a").rows()
+_sapi.pg.read("select 1 from a").rows()
+
+# pg (=|\(|\+|,) whitespace string
+
+s: PG = f"""
+    WITH cte AS (
+        select col0_1, col00_2 FROM tree
+    )
+    SELECT /* hegr */
+        'hejsa',
+        $$ multi
+        line $$,
+        123, true and false,
+        cte.col00_2,  
+        col10_2,
+        (SELECT count(col20_2) FROM tree)
+    --FROM tree
+    --join cte ON tree.col_1 = cte.col0_1
+    FROM cte
+    join tree ON tree.col_1 = cte.col0_1
+    ;
+    select 1 table tab0;
+    """
+
+import os
+
+print('hi')
+
+def foo():
+    return 5 + 5
+
+''')
+    lines = python_with_sapi.split('\n')
+    sections = embedding.sapi_sections(lines, True)
+
+    expected_hints = {
+        _PartialHint(position='56:40', label=' tab0'),
+        _PartialHint(position='57:4', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position='65:40', label=' tab20'),
+        _PartialHint(position='69:13', label=' tab'),
+        _PartialHint(position='69:21', label=' tab'),
+        _PartialHint(position='70:4', label='JOIN tab1 USING ( tab_id )'),
+        _PartialHint(position='71:4', label='JOIN tab10 USING ( tab1_id )'),
+    }
+
+    actual_hints = hinting.inlay_hints_work(sections)
+    actual_hints = { _PartialHint(repr(a.position), a.label) for a in actual_hints }
+
+    assert actual_hints == expected_hints, _error_message(actual_hints, expected_hints)
+
+
+
+
+
 
 
 def _error_message(actual_hints: set[_PartialHint], expected_hints: set[_PartialHint]) -> str:
