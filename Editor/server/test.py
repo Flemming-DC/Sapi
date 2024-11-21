@@ -7,6 +7,6 @@ if __name__ == '__main__':
     highlighter_test.test_tokenize()
     executor_test.test_code_actions()
     hinting_test.test_inlay_hints()
-    embedding_test.test_sapi_lines()
+    embedding_test.sapi_sections()
     print("All Tests Passed")
         

@@ -1,4 +1,3 @@
-import os
 from lsprotocol import types as t
 from typing import Sequence
 import sapi
@@ -20,24 +19,27 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     uri = params.text_document.uri
     if not any(uri.endswith(file_type) for file_type in server.file_types()):
         return []
-    sections = server.sapi_sections(uri, False)
-    return code_actions_work(sections, uri, params.range)
+    sections = server.sapi_sections(uri, False, params.range)
+    return code_actions_work(sections, uri)
 
 
     
-def code_actions_work(sections: list[Section], uri: str, range: t.Range) -> list[t.CodeAction]:
-    sections = _selected_sections(sections, range)
+def code_actions_work(sections: list[Section], uri: str) -> list[t.CodeAction]:
+    # sections = _selected_sections(sections, range)
     if sections == []: return []
-    if len(sections) != 1: return [] # this only allows handling queries one at a time.
+    if len(sections) != 1: return [] # this only allows handling sections one at a time (including all queries in the section). TEMP
     section = sections[0]
     sapi_code = section.query
 
     dataModel = settings.load_datamodel()
     try:
         sql_query = sapi.parse(sapi_code, dataModel, str) # try-parse
+    except IndexError as e: # temp
+        log(sapi_code)
+        raise e 
     except Exception as e: # create a user error class for the parser and filter by it
         code_start = sapi_code if len(sapi_code) < 10 else sapi_code[:10] + '...'
-        log(f"Failed to parse ['''{code_start}''']:\nError: {e}")
+        log(f"executor.code_actions_work: Failed to parse ['''{code_start}''']:\nError: {e}")
         return [] # produce error message in output rather than removing code actions
     if not sql_query.rstrip().endswith(';'):
         if not sql_query.rstrip(' ').endswith('\n'):
@@ -62,22 +64,6 @@ def code_actions_work(sections: list[Section], uri: str, range: t.Range) -> list
     return [execute, cast_to_sql]
 
 
-def _selected_sections(sections: list[Section], range: t.Range) -> list[Section]:
-    "Includes partially selected sections and section at current mouse position."
-    out = []
-    for section in sections:
-        # skip sections before range
-        if section.line_nr_end < range.start.line:
-            continue
-        if section.line_nr_end == range.start.line and section.char_end < range.start.character:
-            continue
-        # skip sections after range
-        if section.line_nr_start > range.end.line:
-            continue
-        if section.line_nr_start == range.end.line and section.char_start > range.end.character:
-            continue
-        out.append(section)
-    return out
 
 # @command
 # @error.as_log_and_popup
@@ -103,4 +89,31 @@ def _execute(sql_query: str) -> Sequence[Sequence]:
     # return data
 
     
+# def _selected_sections(sections: list[Section], range: t.Range) -> list[Section]:
+#     "Includes partially selected sections and section at current mouse position."
+#     out = []
+#     for section in sections:
+#         # skip sections before range
+#         if section.line_nr_end < range.start.line:
+#             continue
+#         if section.line_nr_end == range.start.line and section.char_end < range.start.character:
+#             continue
+#         # skip sections after range
+#         if section.line_nr_start > range.end.line:
+#             continue
+#         if section.line_nr_start == range.end.line and section.char_start > range.end.character:
+#             continue
+#         out.append(section)
+#     return out
+"""
 
+line nr is wrong, since it doesn't account for the code before the query-string
+    psycopg.errors.SyntaxError: syntax error at or near ";" 
+    LINE 22: ;
+
+if len(sections) != 1: return [] # this only allows handling sections one at a time (including all queries in the section). TEMP
+
+split section into seperate queries and let range go over queries. Evt. put that logic in embedding.
+
+add test for embedding + range
+"""

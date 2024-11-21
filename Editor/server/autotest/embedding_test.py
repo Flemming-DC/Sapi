@@ -1,14 +1,15 @@
-from tools import embedding
 from itertools import zip_longest
 from textwrap import dedent
+from lsprotocol import types as t
+from tools import embedding
 
-def test_sapi_lines():
-    _test_1_sapi_lines()
-    _test_2_sapi_lines()
+def sapi_sections():
+    _test_1_sapi_sections()
+    _test_2_sapi_sections()
+    _test_3_sapi_sections()
 
 
-def _test_1_sapi_lines():
-
+def _test_1_sapi_sections():
     py_sapi = '''
 class A: ...
 
@@ -37,9 +38,6 @@ join tree ON tree.col_1 = cte.col0_1
 x = 1
 class C: ...
 '''
-    
-    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
-    actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
 
@@ -69,15 +67,13 @@ join tree ON tree.col_1 = cte.col0_1
 
 '''
 
-    actual_sapi_code = '\n'.join(line.rstrip() for line in dedent(actual_sapi_code).split('\n'))
-    expected_sapi_code = '\n'.join(line.rstrip() for line in dedent(expected_sapi_code).split('\n'))
-    actual_sapi_code = actual_sapi_code.rstrip()
-    expected_sapi_code = expected_sapi_code.rstrip()
-    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
 
+    actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
+    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
     _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
 
-def _test_2_sapi_lines():
+def _test_2_sapi_sections():
     py_sapi = '''
 import os
 import sqlglot
@@ -159,9 +155,6 @@ def foo():
     return 5 + 5
 
 '''
-
-    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
-    actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
     expected_sapi_code = '''
 
 
@@ -244,12 +237,11 @@ def foo():
 
 '''
 
-    a, e = dedent(actual_sapi_code), dedent(expected_sapi_code)
-    A = '\n'.join(x.rstrip() for x in a.split('\n'))
-    E = '\n'.join(x.rstrip() for x in e.split('\n'))
-    A = A.rstrip()
-    E = E.rstrip()
-    assert A == E, _error_message(A, E)
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False)
+
+    actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
+    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
+    _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
 
     actual_ranges = [(s.line_nr_start, s.char_start, s.line_nr_end, s.char_end) for s in sapi_sections]
     expected_ranges = [
@@ -271,19 +263,85 @@ def foo():
     ]
     assert actual_ranges == expected_ranges, _error_message_ranges(actual_ranges, expected_ranges)
 
+
+def _test_3_sapi_sections():
+    py_sapi = '''
+class B: ...
+PG = str
+s1: PG = "select 0 from tab0"
+s2: PG = "select 1 from tab1"
+s3: PG = """
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+select 2 from tab2;
+"""
+x = 1
+s3: PG = "select 3 from tab3"
+'''
+    expected_sapi_code = '''
+
+
+
+          select 1 from tab1
+
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+
+
+
+
+'''
+    # range s2 og første query i s3
+    range = t.Range(start=t.Position(line=4, character=2), end=t.Position(line=17, character=4))
+
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False, range)
+
+    actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
+    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
     _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
+
 
 def _error_message(actual_sapi_code: str, expected_sapi_code: str) -> str:
     actual_len, expected_len = len(actual_sapi_code), len(expected_sapi_code)
-    zip_ = zip_longest(actual_sapi_code.split('\n'), expected_sapi_code.split('\n'), fillvalue='')
+    zip_ = zip_longest(actual_sapi_code.split('\n'), expected_sapi_code.split('\n'), fillvalue=None)
     differing_lines_messages = [
-        f"actual: '{a}'         expected: '{e}'" for a, e in zip_ if a != e]
+        f"actual: '{a}'\t\t expected: '{e}'" for a, e in zip_ if a != e]
+    diff_char = [(i, a, e) for i, (a, e) in enumerate(zip_longest(actual_sapi_code, expected_sapi_code, fillvalue=None)) if a != e]
     
-    return f"""
-    len(actual_sapi_code) iff len(expected_sapi_code) = {actual_len} iff {expected_len} = {actual_len == expected_len}
-    \n""" + '\n'.join(differing_lines_messages)
+    return (f"""
+    \nlen(actual_sapi_code) iff len(expected_sapi_code) = {actual_len} iff {expected_len} = {actual_len == expected_len}
+    \n""" 
+    + 'differing_lines:\n\t' + '\n\t'.join(differing_lines_messages) 
+    + f'\n\nfirst few differing characters (index, actual, expected):\n\t{diff_char[:5]}')
     
-
 
 def _error_message_ranges(actual_ranges: list[tuple[int]], expected_ranges: list[tuple[int]]) -> str:
     actual_len, expected_len = len(actual_ranges), len(expected_ranges)
@@ -296,8 +354,6 @@ def _error_message_ranges(actual_ranges: list[tuple[int]], expected_ranges: list
     \n""" + '\n'.join(differing_lines_messages)
     
 
-
-
 def _check_plings_around_sections(sections: list[embedding.Section], lines: list[str]):
     for section in sections:
         before_start = lines[section.line_nr_start][section.char_start - 3 : section.char_start]
@@ -308,4 +364,11 @@ def _check_plings_around_sections(sections: list[embedding.Section], lines: list
         assert '"' in after_end or "'''" in after_end, (
             f"Expected \", \"\"\" or ''' after section. \nline: {lines[section.line_nr_end]}\nafter_end: {after_end}"
             f"\n{section.line_nr_end}, {section.char_end}")
+
+def _make_comparable(sapi_sections: list[embedding.Section], expected_sapi_code: str) -> tuple[str, str]:
+    # actual_sapi_code, actual_sapi_code = dedent(actual_sapi_code), dedent(expected_sapi_code)
+    actual_sapi_code = ''.join([s.leading_whitespace + s.query for s in sapi_sections]) # '\n'.join(sapi_lines)
+    actual_sapi_code = '\n'.join(line.rstrip() for line in dedent(actual_sapi_code).split('\n'))
+    expected_sapi_code = '\n'.join(line.rstrip() for line in dedent(expected_sapi_code).split('\n'))
+    return actual_sapi_code.rstrip(), expected_sapi_code.rstrip()
 
