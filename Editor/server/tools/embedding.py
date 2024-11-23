@@ -51,11 +51,7 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool, range: t.Range
     line_ending = os.linesep if use_os_line_ending else '\n'
     half_sections: list[_HalfSection] = []
     previous_semicolon_line_nr = 0
-    previous_semicolon_char = 0
     for line_nr, line in enumerate(raw_lines):
-        print(line_nr, ': ', line)
-        if line == 'select 2 from tab2;' or line_nr == 22:
-            ...
         # find half_sections in the line
         in_sapi = half_sections[-1].is_query if half_sections else False
         half_sections_within_line = _process_sapi_line(line, [], 0) if in_sapi else _process_surounding_line(line, [], 0)
@@ -67,10 +63,15 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool, range: t.Range
             hs.line_nr_start = line_nr
             hs.line_nr_end = line_nr
         
-        if any(hs for hs in half_sections_within_line if hs.is_query and ';' in hs.text):
-            previous_semicolon_line_nr = line_nr
-            previous_semicolon_char = hs.text.find(';')
-        half_sections_within_line = _glue_if_before_range(half_sections_within_line, range)
+        if range:
+            half_sections_within_line = _glue_if_before_range(half_sections_within_line, range)
+            # break after range
+            if any(hs for hs in half_sections_within_line if hs.is_query and ';' in hs.text):
+                previous_semicolon_line_nr = line_nr
+            first_or_prev = half_sections_within_line[0] if half_sections_within_line else half_sections[-1]
+            line_nr_start = max(first_or_prev.line_nr_start, previous_semicolon_line_nr) 
+            if line_nr_start > range.end.line:
+                break
 
         # glue sections together across lines
         if half_sections != []:
@@ -81,19 +82,15 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool, range: t.Range
                 previous.text += line_ending + half_section.text
                 previous.line_nr_end = line_nr
                 previous.char_end = half_section.char_end
-                # if half_sections_within_line == []:
-                #     continue
+                if half_sections_within_line == []:
+                    continue
 
-        if line == 'select 2 from tab2;':
-            ...
-        # after range
-        first_or_prev = half_sections_within_line[0] if half_sections_within_line else half_sections[-1]
-        line_nr_start = max(first_or_prev.line_nr_start, previous_semicolon_line_nr)
-        if range and line_nr_start > range.end.line:
-            break
-        char_start = max(half_sections[-1].char_end if half_sections else 0, previous_semicolon_char)
-        if range and line_nr_start == range.end.line and char_start > range.end.character:
-            break
+        # # after range
+        # if range:
+        #     first_or_prev = half_sections_within_line[0] if half_sections_within_line else half_sections[-1]
+        #     line_nr_start = max(first_or_prev.line_nr_start, previous_semicolon_line_nr) 
+        #     if line_nr_start > range.end.line:
+        #         break
 
         if half_sections_within_line == []:
             continue
@@ -101,7 +98,10 @@ def sapi_sections(raw_lines: list[str], use_os_line_ending: bool, range: t.Range
         half_sections += half_sections_within_line
 
     
-    return _build_sections(half_sections, range)
+    sections = _build_sections(half_sections)
+    if range:
+        sections = _adjust_for_semicolon(sections, range, line_ending)
+    return sections
 
 
 def _process_surounding_line(remaining_line: str, out: list[_HalfSection], char: int) -> list[_HalfSection]:
@@ -138,7 +138,7 @@ def _process_sapi_line(remaining_line: str, out: list[_HalfSection], char: int) 
     return out
 
 
-def _build_sections(half_sections: list[_HalfSection], range: t.Range|None) -> list[Section]:
+def _build_sections(half_sections: list[_HalfSection]) -> list[Section]:
     sections: list[Section] = []
     length = len(half_sections)
     i = 0
@@ -159,16 +159,54 @@ def _build_sections(half_sections: list[_HalfSection], range: t.Range|None) -> l
     return sections
 
 
-
-def _glue_if_before_range(
-        half_sections_within_line: list[_HalfSection], range: t.Range|None) -> list[_HalfSection]:
-    if range is None:
-        return half_sections_within_line
+def _adjust_for_semicolon(sections: list[Section], range: t.Range, line_ending: str) -> list[Section]:
+    if sections == []: 
+        return []
     
+    first = sections[0]
+    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
+    if range_start_index:
+        last_semicolon_before_range = first.query.rfind(';', 0, range_start_index)
+        if last_semicolon_before_range != -1:
+            first.leading_whitespace = first.leading_whitespace + ' ' * (last_semicolon_before_range + 1)
+            first.query = first.query[(last_semicolon_before_range + 1):]
+            first.line_nr_start = range.start.line
+            first.char_start = range.start.character
+    
+    last = sections[-1]
+    range_end_index = _index(last.query.split(line_ending), range.end.line - last.line_nr_start, range.end.character, line_ending)
+    if range_end_index:
+        first_semicolon_after_range = last.query.find(';', range_end_index)
+        if first_semicolon_after_range != -1:
+            # last.leading_whitespace = last.leading_whitespace + ' ' * (first_semicolon_after_range + 1)
+            last.query = last.query[:(first_semicolon_after_range + 1)]
+            last.line_nr_end = range.end.line
+            last.char_end = range.end.character
+
+    return sections
+
+def _index(lines: list[str], line_nr: int, char: int, line_ending: str) -> int|None:
+    if line_nr < 0: return None
+    if line_nr >= len(lines): return None
+    # char is unchecked
+
+    index = 0
+    for _line_nr, line in enumerate(lines):
+        if _line_nr < line_nr:
+            index += len(line + line_ending)
+            continue
+        elif _line_nr == line_nr:
+            index += char
+            return index
+        else:
+            raise IndexError(f"Cannot get index from line_nr={line_nr}, char={char}")
+    raise IndexError(f"Cannot get index from line_nr={line_nr}, char={char}")
+
+def _glue_if_before_range(half_sections_within_line: list[_HalfSection], range: t.Range) -> list[_HalfSection]:
     out: list[_HalfSection] = []
     line_nr = half_sections_within_line[0].line_nr_end
     for hs in half_sections_within_line:
-        # before 
+        # if before 
         if line_nr < range.start.line or (line_nr == range.start.line and hs.char_end < range.start.character):
             hs.text = ' ' * len(hs.text)
             hs.is_query = False

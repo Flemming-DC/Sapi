@@ -269,7 +269,7 @@ def _test_3_sapi_sections():
 class B: ...
 PG = str
 s1: PG = "select 0 from tab0"
-s2: PG = "select 1 from tab1"
+s2: PG = "select 1 from tab1; select 2 from tab2;"
 s3: PG = """
 WITH cte AS (
     SELECT col0_1, col00_2 FROM tree
@@ -287,16 +287,16 @@ SELECT /* hegr */
 FROM cte 
 join tree ON tree.col_1 = cte.col0_1
 ;
-select 2 from tab2;
+select 3 from tab3; select 4 from tab4;
 """
 x = 1
-s3: PG = "select 3 from tab3"
+s3: PG = "select 5 from tab5"
 '''
     expected_sapi_code = '''
 
 
 
-          select 1 from tab1
+                              select 2 from tab2;
 
 WITH cte AS (
     SELECT col0_1, col00_2 FROM tree
@@ -314,14 +314,13 @@ SELECT /* hegr */
 FROM cte 
 join tree ON tree.col_1 = cte.col0_1
 ;
-
+select 3 from tab3;
 
 
 
 '''
     # range s2 og første query i s3
-    range = t.Range(start=t.Position(line=4, character=2), end=t.Position(line=17, character=4))
-    print('___')
+    range = t.Range(start=t.Position(line=4, character=36), end=t.Position(line=22, character=4))
     sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False, range)
 
     actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
