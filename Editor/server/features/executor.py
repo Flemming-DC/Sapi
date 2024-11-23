@@ -20,6 +20,10 @@ def code_actions(params: t.CodeActionParams) -> list[t.CodeAction]:
     if not any(uri.endswith(file_type) for file_type in server.file_types()):
         return []
     sections = server.sapi_sections(uri, False, params.range)
+    log(params.range)
+    log(uri)
+    log(server.workspace.get_text_document(uri).source.replace('\r', ''))
+    log(sections)
     return code_actions_work(sections, uri)
 
 

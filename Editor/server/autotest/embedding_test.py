@@ -7,6 +7,7 @@ def sapi_sections():
     _test_1_sapi_sections()
     _test_2_sapi_sections()
     _test_3_sapi_sections()
+    _test_4_sapi_sections()
 
 
 def _test_1_sapi_sections():
@@ -263,7 +264,6 @@ def foo():
     ]
     assert actual_ranges == expected_ranges, _error_message_ranges(actual_ranges, expected_ranges)
 
-
 def _test_3_sapi_sections():
     py_sapi = '''
 class B: ...
@@ -319,13 +319,81 @@ select 3 from tab3;
 
 
 '''
-    # range s2 og første query i s3
+
     range = t.Range(start=t.Position(line=4, character=36), end=t.Position(line=22, character=4))
     sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False, range)
 
     actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
     assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
     # we omit check_plings_around_sections, when ranges are involved
+
+def _test_4_sapi_sections():
+    py_sapi = '''
+class A: ...
+
+pg = ""
+class B: ...
+
+pg + """
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+"""
+
+x = 1
+class C: ...
+'''
+    expected_sapi_code = '''
+
+
+
+
+
+
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+;
+
+
+
+
+'''
+
+    pointlike_range = t.Range(start=t.Position(line=13, character=10), end=t.Position(line=13, character=10))
+    print('---')
+    sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False, pointlike_range)
+
+    actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
+    assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
+    _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
+
+
 
 
 def _error_message(actual_sapi_code: str, expected_sapi_code: str) -> str:

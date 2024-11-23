@@ -8,8 +8,8 @@ from tools import embedding
 _PartialHint = namedtuple('Hint', ['position', 'label'])
 
 def test_inlay_hints():
-    # _test_1_inlay_hints()
-    # _test_2_inlay_hints()
+    _test_1_inlay_hints()
+    _test_2_inlay_hints()
     _test_3_inlay_hints()
 
 def _test_1_inlay_hints():
@@ -33,7 +33,7 @@ def _test_1_inlay_hints():
     ;
     """)
     lines = sapi.split('\n')
-    sections = embedding.freeform_single_section(lines, True)
+    sections = embedding.freeform_single_section(lines, True, None)
     # sapi_code = sections[0].leading_whitespace + sections[0].query # temp
     # lines_2 = sapi_code.split('\n')
 
@@ -192,9 +192,9 @@ def foo():
 
 ''')
     lines = python_with_sapi.split('\n')
-    range = t.Range(start = t.Position(line=0, character=0), 
-                    end   = t.Position(line=82, character=0))
-    sections = embedding.sapi_sections(lines, True, range)
+    full_range = t.Range(start = t.Position(line=0, character=0), 
+                         end   = t.Position(line=len(lines), character=len(lines[-1])))
+    sections = embedding.sapi_sections(lines, True, full_range)
 
     expected_hints = {
         _PartialHint(position='56:40', label=' tab0'),

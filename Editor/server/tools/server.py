@@ -17,7 +17,7 @@ class SapiLanguageServer(LanguageServer):
     def sapi_sections(_, uri: str, use_os_line_ending: bool, range: t.Range = None) -> list[embedding.Section]:
         lines = [line.rstrip('\r\n') for line in _.workspace.get_text_document(uri).lines] 
         if uri.endswith(".sapi"):
-            return embedding.freeform_single_section(lines, use_os_line_ending)
+            return embedding.freeform_single_section(lines, use_os_line_ending, range)
         else:
             return embedding.sapi_sections(lines, use_os_line_ending, range)
 

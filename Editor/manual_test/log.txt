@@ -1,144 +1,66 @@
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=0:0-81:0, work_done_token=None),) {} 
+13:12-13:12
+file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -20, char: 0 fails to pick out an index in the lines
+class A: ...
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=0:0-81:0, work_done_token=None),) {} 
+pg = ""
+class B: ...
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -20, char: 0 fails to pick out an index in the lines
+pg + """
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=0:0-81:0, work_done_token=None),) {} 
+;
+"""
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -20, char: 0 fails to pick out an index in the lines
+x = 1
+class C: ...
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=27:0-81:0, work_done_token=None),) {} 
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -3, char: 0 fails to pick out an index in the lines
+[]
+13:12-13:12
+file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=25:0-81:0, work_done_token=None),) {} 
+class A: ...
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 20, in inlay_hints
-    return inlay_hints_work(sections)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 28, in inlay_hints_work
-    hints.extend(_hints_for_section(s))
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 47, in _hints_for_section
-    hints.extend(_hints_for_tok_tree(tok_tree, line_start_indices, lines))
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 64, in _hints_for_tok_tree
-    line_nr, char = _line_nr_and_char(rep.str_to, lines, line_start_indices)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 89, in _line_nr_and_char
-    if line_start_indices[line_nr + 1] < index:
-IndexError: list index out of range
+pg = ""
+class B: ...
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=21:0-81:0, work_done_token=None),) {} 
+pg + """
+WITH cte AS (
+    SELECT col0_1, col00_2 FROM tree
+)
+SELECT /* hegr */
+    'vervre',
+    $$ multi
+    line $$,
+    123,
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+--FROM tree
+--join cte ON tree.col_1 = cte.col0_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -3, char: 0 fails to pick out an index in the lines
+;
+"""
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=19:0-81:0, work_done_token=None),) {} 
+x = 1
+class C: ...
 
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -1, char: 0 fails to pick out an index in the lines
 
---- ARGS, KWARGS --- (for error.as_log_and_popup decorated function)
-(InlayHintParams(text_document=TextDocumentIdentifier(uri='file:///c%3A/Mine/Python/Sapi/Editor/manual_test/py_query.py'), range=16:0-81:0, work_done_token=None),) {} 
-
-Traceback (most recent call last):
-  File "c:\Mine\Python\Sapi\Editor\server\tools\error.py", line 22, in new_func
-    return old_func(*args, **kwargs)
-  File "c:\Mine\Python\Sapi\Editor\server\features\hinting.py", line 19, in inlay_hints
-    sections = server.sapi_sections(uri, True, params.range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\server.py", line 22, in sapi_sections
-    return embedding.sapi_sections(lines, use_os_line_ending, range)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 103, in sapi_sections
-    sections = _adjust_for_semicolon(sections, range, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 167, in _adjust_for_semicolon
-    range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
-  File "c:\Mine\Python\Sapi\Editor\server\tools\embedding.py", line 198, in _index
-    raise IndexError(f"line_nr: {line_nr}, char: {char} fails to pick out an index in the lines")
-IndexError: line_nr: -4, char: 0 fails to pick out an index in the lines
-
+[]

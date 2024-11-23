@@ -29,6 +29,9 @@ def test_code_actions():
     uri="C:\Mine\Python\Sapi\Editor\manual_test\query.sapi"
     full_range = Range(start=Position(line=0, character=0),
                        end=Position(line=len(lines), character=len(lines[-1])))
+    pointlike_range = Range(start=Position(line=13, character=12),
+                            end=Position(line=13, character=12))
+    
 
     expected_sql = """
         WITH cte AS (
@@ -53,7 +56,7 @@ def test_code_actions():
     # expected_sql_to_execute = "\n\nWITH cte AS (\n    SELECT col0_1, col0_2, col00_2 FROM tab0\n    JOIN tab00 USING (tab0_id))\nSELECT /* hegr \n*/\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    tab10.col10_2,\n    (SELECT count(tab20.col20_2) FROM tab20)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tab ON tab.col_1 = cte.col0_1\nJOIN tab1 USING (tab_id)\nJOIN tab10 USING (tab1_id)"
     # expected_sql_to_cast = "\n\nWITH cte AS (\n    SELECT col0_1, col0_2, col00_2 FROM tab0\n    JOIN tab00 USING (tab0_id))\nSELECT /* hegr \n*/\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    tab10.col10_2,\n    (SELECT count(tab20.col20_2) FROM tab20)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tab ON tab.col_1 = cte.col0_1\nJOIN tab1 USING (tab_id)\nJOIN tab10 USING (tab1_id)"
 
-    sections = embedding.freeform_single_section(lines, False)
+    sections = embedding.freeform_single_section(lines, False, pointlike_range)
     actions = executor.code_actions_work(sections, uri)
     actual_sql_to_execute: str = [act.command.arguments[0] for act in actions if act.command != None][0]
     actual_sql_sql_to_cast: str = [act.edit.changes[uri][0].new_text for act in actions if act.edit != None][0]
