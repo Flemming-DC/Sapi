@@ -246,15 +246,25 @@ case1 = Case( # cte, subquery and comments
 '''
     )
 
+
+case13 = Case( # empty string
+    sapi = f"""{case1.sapi}
+    ;
+    --alter table xx;
+    """,
+    expected_sql = f"""{case1.expected_sql}
+    """)
+
 # empty_case = Case(
 #     sapi = """
 #     """,
 #     expected_sql = """
 #     """)
 
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12] 
+select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12, case13] 
 select_error_cases = [case8, case9]
 non_executable_selects = [case12]
+print(f"select test cases = {len(select_cases) + len(select_error_cases) + len(non_executable_selects)}")
 
 # select_cases = [] 
 # select_error_cases = []

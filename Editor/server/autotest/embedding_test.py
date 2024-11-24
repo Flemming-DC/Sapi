@@ -391,7 +391,7 @@ join tree ON tree.col_1 = cte.col0_1
 
     actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)
     assert actual_sapi_code == expected_sapi_code, _error_message(actual_sapi_code, expected_sapi_code)
-    _check_plings_around_sections(sapi_sections, py_sapi.split('\n'))
+    # we omit check_plings_around_sections, when ranges are involved
 
 
 

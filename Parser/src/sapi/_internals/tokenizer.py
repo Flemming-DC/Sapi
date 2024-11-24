@@ -5,12 +5,13 @@ from .db_contact import data_model
 
 
 
-def tokenize(sapi_stmt: str) -> TokenTree:
+def tokenize(sapi_stmt: str) -> TokenTree|None:
     # tokens is a list of builtins.token, which seems to behave like sqlglot-Token, except for type checks.
     glot_tokens: list[glotToken] = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
     # cast to our own Token class and drop useless and / or unreliable data from raw_tokens
     tokens: list[Token] = [Token(t.token_type, t.text, t.line, t.start, t.end) for t in glot_tokens]
     _cut_leading_junk(tokens)
+    if tokens == []: return None
     tree, _ = _make_nested_tok_tree(tokens, 0, sapi_stmt)
     return tree
 
@@ -45,8 +46,9 @@ def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tup
         i += 1
     if i < len(all_tokens) and all_tokens[i].type == TokenType.R_PAREN:
         i -= 1 # dont include finishing parenthesis
-    next_token = all_tokens[i + 1] if i + 1 < len(all_tokens) else None
-
+    next_token = Token(**all_tokens[i + 1].__dict__) if i + 1 < len(all_tokens) else None
+    # if next_token is not None and next_token.line > all_tokens[i].line:
+    #     next_token.line = all_tokens[i].line
     # make single layer of token_tree
     token_tree = TokenTree(tokens_at_this_level, sapi_str, next_token)
     return token_tree, i

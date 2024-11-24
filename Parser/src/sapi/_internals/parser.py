@@ -31,7 +31,8 @@ def parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T:
     sql_token_trees = [] # sapi tok tree
     for stmt in statements:
         sapi_tok_tree = tokenizer.tokenize(stmt)
-        sql_token_trees.append(_parse_token_tree(sapi_tok_tree))
+        if sapi_tok_tree is not None:
+            sql_token_trees.append(_parse_token_tree(sapi_tok_tree))
 
     # choose return type
     if return_type == list[TokenTree]:
@@ -40,6 +41,9 @@ def parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T:
         return [str(t) for t in sql_token_trees]
     elif return_type == str:
         return '\n;\n'.join(str(t) for t in sql_token_trees)
+        # if out.endswith('\n;'):
+        #     out = out[:-2]
+        # return out
     else:
         # evt. allow out = abstrakt syntax tree
         raise TypeError("Unrecognized return type")

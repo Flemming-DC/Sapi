@@ -8,8 +8,8 @@ from sqlglot.tokens import TokenType
 class Token:
     type: TokenType # evt. type: TokType
     text: str
-    line: int # The line that the token ends on. (used by editor, not by parser. could in principle be recalculated)
-    start: int # start index (used in parser and editor)
+    line: int # The line that the token ends on. (maybe usable by editor, but not by parser. could in principle be recalculated)
+    start: int # start index (used in parser and maybe editor)
     end: int = None # start + len(text) + 2 * len(string_boundary) 
 
     def __str__(_): return f"{_.type.name}: {_.text}" # at {_.start} on {_.line}
@@ -21,7 +21,7 @@ class ParserError(Exception): ... # why is this located here ??
 
 @dataclass 
 class _StrReplacement:
-    str_from_: int
+    str_from: int
     str_to: int
     new_tokens: list[Token]
 
@@ -71,11 +71,11 @@ class TokenTree:
         # if _.tokens[from_].type
 
         # make from_tok and new_tokens
-        from_tok: Token|None = _.tokens[from_] if from_ < count else _._next_token
+        next = _._next_token # also = from_tok and to_tok
+        from_tok: Token|None = _.tokens[from_] if from_ < count else next
         if from_tok:
             new_tokens = [Token(t[0], t[1], from_tok.line, from_tok.start) for t in new]
         else:
-            next = _._next_token # also = from_tok and to_tok
             new_tokens: list[Token] = []
             for t in new:
                 prev_start = new_tokens[-1].start if new_tokens else next.start if next else len(_._sapi_str)
@@ -116,18 +116,18 @@ class TokenTree:
         #   sapi-segment + replacement +
         #   sapi-segment 
         sql_str = ""
-        str_replacements.sort(key = lambda r: r.str_from_)
+        str_replacements.sort(key = lambda r: r.str_from)
         for i, rep in enumerate(str_replacements):
             last_rep_to = str_replacements[i - 1].str_to if i > 0 else 0 # helper-data
-            sql_str += _._sapi_str[last_rep_to:rep.str_from_]            # appending a sapi-segment
+            sql_str += _._sapi_str[last_rep_to:rep.str_from]            # appending a sapi-segment
             for tok in rep.new_tokens:
                 sql_str = TokenTree._add_token_str2(sql_str, tok)        # appending a token of replacement
-            if _._if_new_clause_add_newline(sql_str, rep.str_from_):
+            if _._if_new_clause_add_newline(sql_str, rep.str_from):
                 sql_str += '\n'
 
         last_rep_to = str_replacements[-1].str_to
         sql_str += _._sapi_str[last_rep_to:]
-        return sql_str
+        return sql_str # + '\n;'
     
     def recursive_str_replacements(_) -> list[_StrReplacement]:
         "used by editor, but not by other parts of parser."
