@@ -5,11 +5,11 @@ from itertools import zip_longest
 from sapi import DataModel, parse
 from sapi._test import Token, TokenType, TokenTree, TreeJoin, select_analyzer, DynLoop, data_model
 from .select_cases import select_cases, select_error_cases, non_executable_selects
-from . import postgres_model, runtime_model
+from . import demo_pg_model, runtime_model
 
 
 def run_tests():
-    data_models = [runtime_model.make_datamodel(), postgres_model.setup_db_and_make_datamodel()]
+    data_models = [runtime_model.make_datamodel(), demo_pg_model.setup_db_and_make_datamodel()]
     for model in data_models:
         _test_get_expected_table_trees(model)
         _test_get_expected_sql(model)
@@ -169,7 +169,7 @@ def _test_raise_error(dataModel: DataModel):
 
 
 def _test_that_expected_queries_works():
-    connection_info = postgres_model.get_connection_info()
+    connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con:
         with con.cursor() as cur:
             cur.execute("set search_path to sapi_demo")

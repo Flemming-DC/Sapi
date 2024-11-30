@@ -5,7 +5,7 @@ import warnings
 from typing import Callable, Type
 import psycopg
 import sapi
-from . import postgres_model, runtime_model
+from . import demo_pg_model, runtime_model
 
 _select_query = """
     WITH cte AS (
@@ -36,7 +36,7 @@ def _test_low_level_usage():
     for query in sql_list:
         assert isinstance(query, str), ""
     
-        connection_info = postgres_model.get_connection_info()
+        connection_info = demo_pg_model.get_connection_info()
         with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
             cur.execute("set search_path to sapi_demo")
             _ = cur.execute(query).fetchall()
@@ -51,7 +51,7 @@ def _test_sapi_plugin():
             return super().execute(query, params, prepare=prepare, binary=binary)
 
     # ---------- Normal Boilerplate + Execute Query---------- #
-    connection_info = postgres_model.get_connection_info()
+    connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info, cursor_factory=SapiCursor) as con, con.cursor() as cur:
         cur.execute("set search_path to sapi_demo")
         _ = cur.execute(_select_query).fetchall()
@@ -62,7 +62,7 @@ def _test_nice_tooling():
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
         startup_script = "set search_path to sapi_demo",
-        connect_kwargs = postgres_model.get_connection_info(),
+        connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database
 
@@ -77,7 +77,7 @@ def _test_readonly():
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
         startup_script = "set search_path to sapi_demo",
-        connect_kwargs = postgres_model.get_connection_info(),
+        connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database
 

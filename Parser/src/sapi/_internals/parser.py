@@ -1,6 +1,7 @@
 import warnings
 from typing import TypeVar, Type
 from . import tokenizer
+from .insert import insert_parser
 from .select_ import select_parser
 from .token_tree import TokenTree, TokenType
 from .db_contact import data_model
@@ -65,7 +66,9 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
         match tok.type:
             case TokenType.SELECT:
                 token_tree = select_parser.parse_select(token_tree) # this only changes the leaf tokens
-            case TokenType.INSERT | TokenType.UPDATE | TokenType.DELETE | TokenType.CREATE | TokenType.ALTER | TokenType.DROP:
+            case TokenType.INSERT:
+                token_tree = insert_parser.parse_insert(token_tree) # this only changes the leaf tokens
+            case TokenType.UPDATE | TokenType.DELETE | TokenType.CREATE | TokenType.ALTER | TokenType.DROP:
                 warnings.warn(f"\n{tok.type} is not yet implemented."
                               "Sapi will ignore such inputs and pass them to sql unchanged.")
             case _:

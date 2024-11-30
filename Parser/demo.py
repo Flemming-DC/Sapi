@@ -1,7 +1,7 @@
 from __future__ import annotations
 import psycopg
 import sapi
-from test import postgres_model, runtime_model
+from test import demo_pg_model, runtime_model
 
 def low_level_usage():
     sapi_query = """
@@ -27,7 +27,7 @@ def low_level_usage():
         print("--- sql-str ---")
         print(query)
     
-        connection_info = postgres_model.get_connection_info()
+        connection_info = demo_pg_model.get_connection_info()
         with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
             cur.execute("set search_path to sapi_demo")
             data = cur.execute(query).fetchall()
@@ -60,7 +60,7 @@ def sapi_plugin():
         join tree ON tree.col_1 = cte.col0_1
         """
     
-    connection_info = postgres_model.get_connection_info()
+    connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info, cursor_factory=SapiCursor) as con, con.cursor() as cur:
         cur.execute("set search_path to sapi_demo")
         data = cur.execute(sapi_query).fetchall()
@@ -73,7 +73,7 @@ def nice_tooling():
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
         startup_script = "set search_path to sapi_demo",
-        connect_kwargs = postgres_model.get_connection_info(),
+        connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database
 
@@ -90,7 +90,6 @@ def nice_tooling():
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
         """
-    insert_query = "insert into tab (tab_id, col_1, col_2) values (1, 'col_1', 'col_2');"
 
     with sapi.Transaction() as tr:
         data = tr.execute(select_query).rows()
@@ -106,6 +105,7 @@ if __name__ == '__main__':
     low_level_usage()
     # nice_tooling()
     # sapi_plugin()
+    
 
 # cleanup connection-info references in datamodel
 # cleanup default datamodel
