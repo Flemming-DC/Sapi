@@ -31,7 +31,7 @@ class Tab_(BaseModel): # model for the little tree (tab_, tab0_, tab1_, sht__)
     sht__: list[Sht__]
 
 def insert_function() -> dict:
-    with open('tree_.json') as f:
+    with open('tab_.json') as f:
         tree_dict: dict = json.load(f)
     data_model = runtime_model.make_datamodel()
 
@@ -47,12 +47,12 @@ def insert_function() -> dict:
 
 
 def insert_query():
-    with open('tree_.json') as f:
+    with open('tab_.json') as f:
         tree_dict: dict = json.load(f)
     tree_ = Tab_(**tree_dict)
     tree_json = tree_.model_dump_json()
     sapi_query = f"""
-        insert into tree
+        insert into tree_
         values ($${tree_json}$$)
         """
     data_model = runtime_model.make_datamodel()
@@ -64,15 +64,17 @@ def insert_query():
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
         cur.execute("set search_path to sapi_demo")
-        data = cur.execute(sql).fetchall()
-        print("--- low_level ---")
-        print(data)
+        cur.execute(sql)
+        print("sucessfully executed the insert")
+        # data = cur.fetchall()
+        # print("--- low_level ---")
+        # print(data)
 
 
 
 if __name__ == '__main__':
-    insert_function()
-    # insert_query()
+    # insert_function()
+    insert_query()
     
 
 
