@@ -216,30 +216,3 @@ def _setup_dict():
             _group_type_by_glot_type[glotType] = groupType
 
 
-
-"""
-Semicolon:        -
-DataType:             long-list
-Keyword:          long-list
-String:           -
-Number:           -
-Variable:         var/identifier
-Table:            var/identifier
-Routine:          var/identifier
-Schema:           var/identifier
-EmbeddedVariable: colon followed by var/identifier
-"""
-
-"""
-	namespace: evt. Schema, Tree, Table, View
-	type:      DataType
-	variable:  Variable, evt. Schema, Tree, Table, View, evt. all non-routine identifiers
-	function:  Routine
-	keyword:   Keyword, Semicolon
-	modifier:  evt. secondary keywords, evt. hijack for View, Tree
-	comment:   spacing between tokens, unless error. alternatively, get comments glotToken or recalculate
-	string:    String
-	number:    Number
-	operator:  Others
-    regexp:    evt. hijack for something
-"""

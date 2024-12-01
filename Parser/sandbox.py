@@ -38,7 +38,10 @@ def insert_function() -> dict:
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
         cur.execute("set search_path to sapi_demo")
-        sapi.insert_into_tree(cur, "tab_", tree_dict)
+        pickup = sapi.insert_into_tree("tab_", tree_dict)
+        print('---')
+        print(pickup)
+        # sapi.insert_into_tree(cur, "tab_", tree_dict)
     
     # sapi.insert_into_tree("tree_", tree_dict, data_model)
 
@@ -50,35 +53,8 @@ def insert_query():
     tree_json = tree_.model_dump_json()
     sapi_query = f"""
         insert into tree
-        values ({tree_json})
+        values ($${tree_json}$$)
         """
-    # big_sapi_query = f"""
-    #     WITH cte AS (
-    #         SELECT col0_1, col0_2, col00_2 FROM tree
-    #     )
-    #     insert into tree
-    #     select {tree_json}
-    #     from cte
-    #     """
-    hyp_expected_sql = """
-insert into tab_ (col_1_, col_2_) values ('from json', 'from json') returning tab__id;
-
-insert into tab0_ (tab__id, col0_1_, col0_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json') returning tab0__id;
-insert into tab1_ (tab__id, col1_1_, col1_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json') returning tab1__id;
-insert into sht__ (tab__id, tab_id, col1_1__, col_2__)  values (tab__id,           1, 'from json', 'from json') returning sht___id;
-"""
-    # the syntax for "returning id" is dialect dependent. In some dialects it is a seperate command. 
-    expected_plpgsql = """
-DO $$
-DECLARE tab__id bigint;
-BEGIN
-    insert into tab_  (col_1_, col_2_) values ('from json', 'from json') returning tab__id;
-    insert into tab0_ (tab__id, col0_1_, col0_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json'); -- returning tab0__id;
-    insert into tab1_ (tab__id, col1_1_, col1_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json'); -- returning tab1__id;
-    insert into sht__ (tab__id, tab_id, col1_1__, col_2__)  values (tab__id,           1, 'from json', 'from json'); -- returning sht___id;
-END$$;
-"""
-
     data_model = runtime_model.make_datamodel()
     sql = sapi.parse(sapi_query, data_model, str)
     
@@ -96,5 +72,33 @@ END$$;
 
 if __name__ == '__main__':
     insert_function()
+    # insert_query()
     
 
+
+#     # big_sapi_query = f"""
+#     #     WITH cte AS (
+#     #         SELECT col0_1, col0_2, col00_2 FROM tree
+#     #     )
+#     #     insert into tree
+#     #     select {tree_json}
+#     #     from cte
+#     #     """
+#     hyp_expected_sql = """
+# insert into tab_ (col_1_, col_2_) values ('from json', 'from json') returning tab__id;
+
+# insert into tab0_ (tab__id, col0_1_, col0_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json') returning tab0__id;
+# insert into tab1_ (tab__id, col1_1_, col1_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json') returning tab1__id;
+# insert into sht__ (tab__id, tab_id, col1_1__, col_2__)  values (tab__id,           1, 'from json', 'from json') returning sht___id;
+# """
+#     # the syntax for "returning id" is dialect dependent. In some dialects it is a seperate command. 
+#     expected_plpgsql = """
+# DO $$
+# DECLARE tab__id bigint;
+# BEGIN
+#     insert into tab_  (col_1_, col_2_) values ('from json', 'from json') returning tab__id;
+#     insert into tab0_ (tab__id, col0_1_, col0_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json'); -- returning tab0__id;
+#     insert into tab1_ (tab__id, col1_1_, col1_2_, shc_)     values (tab__id, 'from json', 'from json', 'from json'); -- returning tab1__id;
+#     insert into sht__ (tab__id, tab_id, col1_1__, col_2__)  values (tab__id,           1, 'from json', 'from json'); -- returning sht___id;
+# END$$;
+# """

@@ -101,6 +101,13 @@ class TokenTree:
         # modify tokens
         _.tokens[from_:to] = new_tokens
 
+    def print_tokens(_):
+        tokens_str = ' '.join([tok.text for tok in _.tokens])
+        print(tokens_str)
+
+    def expect(_, i: int, tok_type: TokenType):
+        if _.tokens[i].type != tok_type: raise Exception(f"Expected '{tok_type.name}' found '{_.tokens[i].text}'")
+
 
 #region -------------- cast to str --------------
 

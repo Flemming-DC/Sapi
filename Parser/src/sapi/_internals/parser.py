@@ -60,6 +60,7 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
     # parse leaves
     # stmt_type = token_tree.first_leaf().token_type # first leaf or first statement-starter?
     for tok in token_tree.tokens:
+        print(tok.text)
         if isinstance(tok, TokenTree):
             continue
         found_stmt_type = True # to be overridden, if not found
