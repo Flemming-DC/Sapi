@@ -1,11 +1,10 @@
 import sys
 import psycopg
 from textwrap import dedent
-from itertools import zip_longest
 from sapi import DataModel, parse
 from sapi._test import Token, TokenType, TokenTree, TreeJoin, select_analyzer, DynLoop, data_model
 from .select_cases import select_cases, select_error_cases, non_executable_selects
-from . import demo_pg_model, runtime_model
+from . import demo_pg_model, runtime_model, comparison
 
 
 def run_tests():
@@ -132,28 +131,7 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 def _test_get_expected_sql(dataModel: DataModel):
     for sapi, expected_sql in select_cases:
         actual_sql = parse(sapi, dataModel)
-        
-        # remove insignificant differences
-        sapi = dedent(sapi)
-        actual_sql = '\n' + _remove_space_and_newline(actual_sql)
-        expected_sql = '\n' + _remove_space_and_newline(expected_sql)
-
-        if actual_sql.lower() != expected_sql.lower():
-            differing_lines = [(a, e) for a, e in 
-                               zip_longest(actual_sql.split('\n'), expected_sql.split('\n'), fillvalue='') 
-                               if a.lower() != e.lower()]
-            differing_lines = '\n' + '\n'.join(f"'{a}'   differs from   '{e}'" for a, e in differing_lines)
-            raise Exception(dedent("""
-                -------------------------- ERROR -------------------------- 
-                
-                --------- sapi --------- {}
-                 
-                --------- expected_sql --------- {}
-                                   
-                --------- produced_sql --------- {}
-                                   
-                --------- differing_lines --------- {}
-                """).format(sapi, expected_sql, actual_sql, differing_lines))
+        comparison.assert_match(sapi, actual_sql, expected_sql)
 
 
 def _test_raise_error(dataModel: DataModel):

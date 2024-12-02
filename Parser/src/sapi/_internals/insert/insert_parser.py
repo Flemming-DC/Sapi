@@ -19,8 +19,7 @@ _stringtypes = { # dont dublicate this with editor_tok.py
 def parse_insert(token_tree: TokenTree) -> TokenTree:
     tree_name, data = _analyze_insert(token_tree)
     if tree_name is not None: # its a tree
-        tab = "tab_" if tree_name == 'tree_' else "tab" if tree_name == 'tree' else None # temp
-        query, args = insert_generator.generate_insert(tab, data)
+        query, args = insert_generator.generate_insert(data)
         token_tree = _to_token_tree(token_tree, query, args)
 
     return token_tree
@@ -69,7 +68,7 @@ def _to_token_tree(token_tree: TokenTree, query, args):
             query = query.replace('%s', arg_str, 1)
         assert '%s' not in query, "too many placeholders in query"
         return query
-    query = _put_args_into_query(query, args)
+    query = _put_args_into_query(query, args) # not injection safe
 
     TokenType.TREE_INSERT = namedtuple('fake_enum_variant', ['name', 'value'])(name='TREE_INSERT', value='TREE_INSERT')
     token = Token(TokenType.TREE_INSERT, query, token_tree.line, token_tree.start, None)
