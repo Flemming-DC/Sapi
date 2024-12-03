@@ -4,19 +4,24 @@ from textwrap import dedent
 
 
 def assert_match(sapi: str, actual_sql: str, expected_sql: str):
+    if 'manual' in actual_sql:
+        ...
     # remove insignificant differences
     sapi = dedent(sapi)
-    actual_sql = '\n' + _remove_space_and_newline(actual_sql)
-    expected_sql = '\n' + _remove_space_and_newline(expected_sql)
+    actual_sql = _remove_whitespace(actual_sql)
+    expected_sql = _remove_whitespace(expected_sql)
     # check
-    assert actual_sql.lower() == expected_sql.lower(), _error_message(sapi, actual_sql, expected_sql)
+    assert _remove_semicolon_lines(actual_sql) == _remove_semicolon_lines(expected_sql), _error_message(sapi, actual_sql, expected_sql)
     
 
-def _remove_space_and_newline(sql: str) -> str:
-    sql = dedent(sql).lstrip('\n').rstrip(' \n')
-    sql = '\n'.join(line.rstrip(' \n') for line in sql.split('\n') if line.rstrip(' \n;') != '')
+def _remove_semicolon_lines(sql: str) -> str:
+    sql = '\n'.join(line.lower() for line in sql.split('\n') if line.rstrip(' \n;') != '')
     return sql
  
+def _remove_whitespace(sql: str) -> str:
+    sql = dedent(sql).lstrip('\n').rstrip(' \n')
+    sql = '\n'.join(line.rstrip(' \n') for line in sql.split('\n') if line.rstrip(' \n') != '')
+    return sql
 
 
 def _error_message(sapi: str, actual_sql: str, expected_sql: str) -> str:
@@ -29,9 +34,9 @@ def _error_message(sapi: str, actual_sql: str, expected_sql: str) -> str:
         
         --------- sapi --------- {}
             
-        --------- expected_sql --------- {}
+        --------- expected_sql --------- \n{}
                             
-        --------- actual_sql --------- {}
+        --------- actual_sql --------- \n{}
                             
         --------- differing_lines --------- {}
         """).format(sapi, expected_sql, actual_sql, differing_lines)

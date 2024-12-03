@@ -2,7 +2,7 @@
 drop schema if exists sapi_demo cascade;
 set search_path to sapi_demo;
 drop table if exists 
-	tab, tab0, tab1, tab2, tab00, tab01, tab10, tab20, tab21, tab_, tab0_, tab1_, sht3__
+	tab, tab0, tab1, tab2, tab00, tab01, tab10, tab20, tab21, tab_, tab0_, tab1_, sht3__, tab_manual, tab0_manual
 ;
 create schema if not exists sapi_demo;
 
@@ -115,4 +115,20 @@ create table sapi_demo.sht__ (
 
 alter table tab0 add foreign key (tab1__id) references tab1_;
 alter table tab1 add foreign key (tab0__id) references tab0_;
+
+
+--------- MANUAL PRIMARY KEY ---------
+
+create table sapi_demo.tab_manual (
+    tab_manual_id bigint primary key,
+	col_manual_1 text,
+	col_manual_2 text
+);
+
+create table sapi_demo.tab0_manual (
+    tab0_manual_id bigint primary key,
+	tab_manual_id bigint references tab_manual,
+	col0_manual_1 text,
+	col0_manual_2 text
+);
 
