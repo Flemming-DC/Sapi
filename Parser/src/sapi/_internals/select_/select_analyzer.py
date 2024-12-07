@@ -3,38 +3,42 @@ from sapi._internals.error import QueryError, CompilerError
 from sapi._internals.db_contact import data_model
 from sapi._internals.token_tree import Token, TokenTree, TokenType
 from sapi._internals.dyn_loop import DynLoop
-from .tree_join import TreeJoin
+from .tree_join import TreeJoin, Resolvent
 
-def find_tree_joins(loop: DynLoop) -> tuple[list[TreeJoin], list[int, TokenType, str]]:
+def find_tree_joins(loop: DynLoop) -> tuple[list[TreeJoin], list[Resolvent]]:
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
     ref_tables: list[str] = []
-    resolved_tabs: list[int, TokenType, str] = []
+    resolvents: list[Resolvent] = []
+
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
             continue
-        tree_join, on_clause_tables_in_join, at, resolved_tabs_in_join = _make_tree_join(
-            loop, [j.tree_tok for j in tree_joins])
+        # analyze from clause
+        tree_join, on_clause_tables_in_join, resolved_tabs_in_join = _make_tree_join(loop, [j.tree_tok for j in tree_joins])
+        resolvents += resolved_tabs_in_join
         if tree_join:
             tree_joins.append(tree_join)
             tabs_in_on_clauses.append(on_clause_tables_in_join)
-        resolved_tabs += resolved_tabs_in_join
+            continue
+        
+        # find referenced tables and resolve trees outside the from clause
+        ref_tab, resolvent = _table_ref_and_resolvent(loop)
+        if resolvent and resolvent not in resolvents:
+            resolvents.append(resolvent)
+        if ref_tab and ref_tab not in ref_tables:
+            ref_tables.append(ref_tab) 
 
-        if not loop.found([TokenType.IDENTIFIER, TokenType.VAR], 0):
-            continue
-        if _table_from_prefix(ref_tables, loop, at, resolved_tabs):
-            continue
-        _table_from_variable(ref_tables, loop)
 
     _plug_tables_into_tree_joins(ref_tables, tree_joins, tabs_in_on_clauses)
-    return tree_joins, resolved_tabs
+    return tree_joins, resolvents
 
 
 
 def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
-                    ) -> tuple[TreeJoin, list[str], int] | tuple[None, None, None, list]:
+        ) -> tuple[TreeJoin, list[str], list[Resolvent]] | tuple[None, None, list[Resolvent]]:
     if not loop.found([TokenType.FROM, TokenType.JOIN], 0):
-        return None, None, None, []
+        return None, None, []
     loop.next()
     if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 0):
         raise QueryError("expected identifier or variable after from / join.")
@@ -51,7 +55,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
     join_obj = loop.tok() # join_obj at end of join_obj prefixes
     join_obj_index = loop.index()
     if join_obj in prior_join_objs:
-        return None, None, None, [] # don't dublicate join_data (is that actually correct behaviour??)
+        return None, None, [] # don't dublicate join_data (is that actually correct behaviour??)
     is_tree = data_model.is_tree(join_obj.text)
 
     def _on_clause_done(): 
@@ -64,8 +68,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
 
     # resolve tree prefixes and record table prefixes in on clause
     on_clause_tables: list[str] = []
-    at = None
-    resolved_tabs = []
+    resolvents = []
     while not _on_clause_done():
         loop.next()
         resolved_tab = None
@@ -77,66 +80,57 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
             var = loop.peek(2).text
             tree = loop.tok().text
             resolved_tab = _get_table_from_var_and_tree(var, tree)
-            at = loop.index()
-            resolved_tabs.append((loop.index(), TokenType.VAR, resolved_tab))
+            resolvents.append(Resolvent(index=loop.index(), tab_name=resolved_tab))
         # record table prefixes
         if resolved_tab or data_model.is_table(loop.tok().text):
             on_clause_tables.append(resolved_tab if resolved_tab else loop.tok().text) # register table in on clause
     
     
     if not is_tree:
-        return None, None, at, resolved_tabs
+        return None, None, resolvents
     tree_join = TreeJoin(tree_tok=join_obj, tree_tok_index=join_obj_index, on_clause_end_index=loop.index())
     
-    return tree_join, on_clause_tables, at, resolved_tabs
+    return tree_join, on_clause_tables, resolvents
     
 
-def _table_from_prefix(ref_tables: list[str], loop: DynLoop, at: int, resolved_tabs: list[int, TokenType, str]) -> bool:
+def _table_ref_and_resolvent(loop: DynLoop) -> tuple[str|None, Resolvent|None]:
     """
     Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     Each call to _table_from_prefix will update the prefix and 
     If tree.var is encountered, then the tree is resolved into a variable, if table is unique.
     """
-    if not loop.found(TokenType.DOT, -1):
-        return False
-    at_index_minus_2 = (at == loop.index() - 2)
-        
-    tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
-    resolved_tab = None
-    if data_model.is_tree(tab_or_tree.text) and not at_index_minus_2:
-        var = loop.tok().text
-        tree = loop.peek(-2).text
-        resolved_tab = _get_table_from_var_and_tree(var, tree)
-        resolved_tabs.append((loop.index() - 2, TokenType.VAR, resolved_tab))
+    if not loop.found([TokenType.IDENTIFIER, TokenType.VAR], 0):
+        return None, None
 
-    if resolved_tab or data_model.is_table(tab_or_tree.text):
-        ref_tab = resolved_tab if resolved_tab else tab_or_tree.text
-        if ref_tab not in ref_tables:
-            ref_tables.append(ref_tab) 
-    
-    return True
-        
+    if loop.found(TokenType.DOT, -1):
+        # get ref_tab, resolvent from a prefix (e.g. tree.tab, tree.col or tab.col)
+        prefix: str = loop.peek(-2).text # This includes views and cte's as tables. Is that okay?
+        if data_model.is_tree(prefix):
+            var, tree = loop.tok().text, loop.peek(-2).text
+            ref_tab = _get_table_from_var_and_tree(var, tree)
+            return ref_tab, Resolvent(index=loop.index() - 2, tab_name=ref_tab)
+        elif data_model.is_table(prefix):
+            return prefix, None
+        else:
+            return None, None
+    elif data_model.is_var(loop.tok().text):
+        return _table_containing_variable(loop.tok().text), None
+    else:
+        return None, None
 
-def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
-    "returns true if table found. If table is new, then it is registered"
-    # we assume unique tab. Is that okay?
-    if not data_model.is_var(loop.tok().text):
-        return
-    var = loop.tok().text
+        
+       
+
+def _table_containing_variable(var: str) -> str|None:
+    "Get a referenced table from a variable, by asking which table the variable comes from."
     tabs_of_var = data_model.tables_by_var(var)
     if len(tabs_of_var) > 1:
         raise QueryError(f"There are multiple tables {tabs_of_var} with column {var}.")
     elif len(tabs_of_var) == 0:
         raise QueryError(f"The is no table with column {var}.")
-    tab = tabs_of_var[0]
+    else:
+        return tabs_of_var[0]
 
-    if loop.found(TokenType.DOT, -1):
-        raise CompilerError("Trying to insert a table prefix in a variable that already has a prefix")
-    if data_model.is_table(tab) and tab not in ref_tables:
-        ref_tables.append(tab)
-    # loop.insert([
-    #     (TokenType.VAR, tab), 
-    #     (TokenType.DOT, '.')])
 
 def _get_table_from_var_and_tree(var: str, tree: str) -> str:
     tabs = data_model.tables_by_var_and_tree(var, tree)

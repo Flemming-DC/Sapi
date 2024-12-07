@@ -19,4 +19,8 @@ class TreeJoin:
         ]) + ')'
 
 
-
+@dataclass
+class Resolvent: # info to resolve a tree into a table
+    index: int
+    tab_name: str
+    # tree name isnt specified

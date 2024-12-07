@@ -1,7 +1,7 @@
 from sapi._internals.token_tree import TokenType, TokenTree
 from sapi._internals.db_contact import data_model
 from .path_finder import pathType, Node
-from .tree_join import TreeJoin
+from .tree_join import TreeJoin, Resolvent
 
 
 def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType, eldest: Node|None): 
@@ -37,5 +37,9 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
         token_tree.replace(i, i, join_clause_tokens) # equivalent to insert
         i += len(join_clause_tokens)
     
+
+def resolve_trees_to_tabs(token_tree: TokenTree, resolvents: list[Resolvent]):
+    for r in resolvents: # ie.e tables resolved from trees 
+        token_tree.replace(r.index, r.index + 1, [(TokenType.VAR, r.tab_name)])
 
 
