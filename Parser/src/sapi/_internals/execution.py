@@ -7,6 +7,7 @@ from sapi._internals import parser
 from sapi._internals.db_contact.data_model import DataModel
 from sapi._internals.db_contact.dialect import Dialect
 from sapi._internals.db_contact import pep249_database_api_spec_v2 as pep
+from sapi._internals.error import DataModelError
 
 
 class CommitPolicy(Enum):
@@ -27,8 +28,8 @@ class QueryResult:
 @dataclass
 class Database:
     dialect: Dialect # (this is already inside model)
+    sys_schema: str
     startup_script: str = ""
-    sapi_sys_schema: str = "sapi_sys"
     commit_policy: CommitPolicy = CommitPolicy.OnTransactionSuccess
     QueryResult_: Type[QueryResult] = QueryResult
     
@@ -46,10 +47,11 @@ class Database:
 
     def setup(_, cursor: pep.Cursor):
         if _._data_model is None: 
-            _._data_model = DataModel.from_database(_.dialect, cursor, _.sapi_sys_schema)
+            _._data_model = DataModel.from_database(_.dialect, cursor, _.sys_schema)
 
     def data_model(_): 
-        if _._data_model is None: raise Exception("---")
+        if _._data_model is None: raise DataModelError(
+            "Datamodel is None. Call setup on the database object before accessing its datamodel")
         return _._data_model
 
 

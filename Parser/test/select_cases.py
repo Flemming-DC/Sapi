@@ -1,5 +1,5 @@
 from collections import namedtuple
-from sapi._test import ParserError
+from sapi._test import QueryError
 
 
 Case = namedtuple('Case', ['sapi', 'expected_sql'])
@@ -152,7 +152,7 @@ case8 = Case(
 select shc_
 from tree_ 
     """,
-    expected_sql = ParserError)
+    expected_sql = QueryError)
 
 case9 = Case(
     sapi = """
@@ -160,7 +160,7 @@ select sht__.col_1__
 from tree_
 from tree using (sht___id)
     """,
-    expected_sql = ParserError)
+    expected_sql = QueryError)
 
 delim = '\n;\n'
 

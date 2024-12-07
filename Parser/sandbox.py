@@ -33,7 +33,7 @@ def insert_function() -> dict:
 
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
-        cur.execute("set search_path to sapi_demo")
+        demo_pg_model.set_demo_searchpath(cur)
         pickup = sapi.insert_into_tree(cur, tree_dict)
         print('---')
         print(pickup)
@@ -43,7 +43,7 @@ def insert_function() -> dict:
 
 
 def insert_query():
-    with open('tab_.json') as f:
+    with open('test/tab_.json') as f:
         tree_json = f.read()
         # tree_dict: dict = json.load(f)
         # tree_ = [Tab_(**td) for td in tree_dict.values()]
@@ -60,7 +60,7 @@ def insert_query():
 
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
-        cur.execute("set search_path to sapi_demo")
+        demo_pg_model.set_demo_searchpath(cur)
         cur.execute(sql)
         print("sucessfully executed the insert")
         # data = cur.fetchall()

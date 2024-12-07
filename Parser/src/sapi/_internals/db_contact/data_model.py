@@ -4,7 +4,7 @@ from anytree import Node
 from . import deployment
 from .dialect import Dialect
 from .pep249_database_api_spec_v2 import Cursor
-
+from sapi._internals.error import DataModelError
 
 @dataclass
 class Table:
@@ -37,7 +37,8 @@ class DataModel:
 
         for tree in trees:
             if tree.name in _._table_tree_names:
-                raise Exception(f"You cannot have two trees with the same name. name = {tree.name}")
+                raise DataModelError(f"You cannot have two trees with the same name in the same instance"
+                                f" of the DataModel class. name = {tree.name}")
             _._table_tree_names.append(tree.name)
             for tab in tree.tables:
                 if tab.name not in _._all_tables:
@@ -70,18 +71,18 @@ class DataModel:
 
 
     @staticmethod
-    def from_database(dialect: Dialect, cur: Cursor, sapi_sys_schema: str) -> DataModel:
+    def from_database(dialect: Dialect, cur: Cursor, sys_schema: str) -> DataModel:
         cur.execute("savepoint DataModel_from_database")
-        if not deployment.is_deployed(cur, dialect, sapi_sys_schema):
-            raise Exception("You must call deployment.setup, before calling this function.")
-        cur.execute(f"set search_path to {sapi_sys_schema}")
-        trees = _make_trees(dialect, cur)
+        if not deployment.is_deployed(cur, dialect, sys_schema):
+            raise DataModelError("You must call deployment.setup, before calling this function.")
+        cur.execute(f"set search_path to {sys_schema}")
+        trees = _make_trees(dialect, cur, sys_schema)
         cur.execute("rollback to savepoint DataModel_from_database")
         
         return DataModel(dialect, trees)
 
 
-def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
+def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
     columns_query = dialect.columns_query
     foreign_keys_query = dialect.foreign_keys_query
 
@@ -93,8 +94,8 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
             sapi_tables.table_name,
             col.column_name,
             sapi_tables.sapi_tables_id
-        FROM sapi_sys.sapi_trees AS tree 
-        JOIN sapi_sys.sapi_tables ON sapi_tables.sapi_trees_id = tree.sapi_trees_id
+        FROM {sys_schema}.sapi_trees AS tree 
+        JOIN {sys_schema}.sapi_tables ON sapi_tables.sapi_trees_id = tree.sapi_trees_id
         LEFT JOIN columns AS col ON col.table_name = sapi_tables.table_name and col.schema_name = tree.schema_name
         ORDER BY tree.schema_name, tree.tree_name, sapi_tables.table_name, col.column_name
         """)
@@ -107,9 +108,9 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
             ref_tab.table_name as parent,
             fk.primary_key_col,
             fk.foreign_key_col 
-        from sapi_sys.sapi_tables as tab
-        join sapi_sys.sapi_tables as ref_tab using (sapi_trees_id)
-        join sapi_sys.sapi_trees as trees using (sapi_trees_id)
+        from {sys_schema}.sapi_tables as tab
+        join {sys_schema}.sapi_tables as ref_tab using (sapi_trees_id)
+        join {sys_schema}.sapi_trees as trees using (sapi_trees_id)
         join foreign_keys as fk
             on trees.schema_name = fk.schema
             and trees.schema_name = fk.referenced_schema
@@ -119,10 +120,10 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
     join_info = cur.fetchall()
     join_info_by_table_id = {j[0]: {'parent': j[1], 'primary_key_col': j[2], 'foreign_key_col': j[3]} for j in join_info}
 
-    cur.execute("""
+    cur.execute(f"""
         select distinct schema_name, table_name
-        from sapi_sys.sapi_tables
-        join sapi_sys.sapi_trees using (sapi_trees_id)
+        from {sys_schema}.sapi_tables
+        join {sys_schema}.sapi_trees using (sapi_trees_id)
         """) 
     remaining_expected_tables = [schema + '.' + tab for schema, tab in cur.fetchall()] # used for error checking 
 
@@ -144,7 +145,7 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
         if not current_table or col_row['table_name'] != current_table.name:
             current_table = Table(name=col_row['table_name'], parent=None, columns=[])
             if current_table.name in [t.name for t in current_tree.tables]:
-                raise Exception("Table name should be unique inside tree.")
+                raise DataModelError("Table name should be unique inside tree.")
             current_tree.tables.append(current_table)
             # set parent and any necessary join info
             join_info = join_info_by_table_id.get(col_row['sapi_tables_id'], None)
@@ -158,12 +159,13 @@ def _make_trees(dialect: Dialect, cur: Cursor) -> list[Tree]:
         # now current_table must exist
         if col_row['column_name'] is None:
             full_name = f"{col_row['schema_name']}.{col_row['tree_name']}.{col_row['table_name']}"
-            raise Exception(f"Failed to find any table '{full_name}' containing any columns.")
+            raise DataModelError(f"Failed to find any table '{full_name}' containing any columns.")
         # now col_row['column_name'] must exist
         current_table.columns.append(col_row['column_name'])
 
     if remaining_expected_tables:
-        raise Exception(f"Failed to find the following table even though they are listed in sapi_sys.sapi_tables.\n{remaining_expected_tables}")
+        raise DataModelError(f"Failed to find the following table even though they are listed in "
+                            f"{sys_schema}.sapi_tables.\n{remaining_expected_tables}")
 
     return trees
 

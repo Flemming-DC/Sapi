@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from anytree import walker, Node
 from sapi._internals.db_contact import data_model
+from sapi._internals.error import CompilerError
 
 pathType = list[tuple[Node, Node]]
 @dataclass
@@ -20,7 +21,8 @@ def join_path(table_names: list[str], first_table: str|None, tree_name: str) -> 
     pathInfo = _PathInfo()
     for tab_node in table_nodes:
         _increment_join_path(pathInfo, tab_node)
-    assert not pathInfo.nodes or len(pathInfo.nodes) == len(pathInfo.path) + 1, "Expected final table count to be 0 or 1 + path length"
+    if (pathInfo.nodes and len(pathInfo.nodes) != len(pathInfo.path) + 1): 
+        raise CompilerError("Expected final table count to be 0 or 1 + path length")
 
 
     return pathInfo.path, pathInfo.eldest
@@ -31,7 +33,7 @@ def _increment_join_path(pathInfo: _PathInfo, next_node: Node) -> None:
         pathInfo.eldest = next_node
         # we don't init path, since len(path) == len(nodes) - 1 == 0
         return
-    assert pathInfo.nodes and pathInfo.eldest, "missing values"
+    if not (pathInfo.nodes and pathInfo.eldest): raise CompilerError("missing values")
 
     upwards, top, downwards = walker.Walker.walk(pathInfo.eldest, next_node)
     walk_path = upwards + (top,) + downwards

@@ -1,6 +1,5 @@
 import json
 from collections import namedtuple
-from sapi._test import ParserError
 
 # -------- define cases -------- #
 Case = namedtuple('Case', ['sapi', 'expected_sql'])

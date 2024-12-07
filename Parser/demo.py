@@ -29,7 +29,7 @@ def low_level_usage():
     
         connection_info = demo_pg_model.get_connection_info()
         with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
-            cur.execute("set search_path to sapi_demo")
+            demo_pg_model.set_demo_searchpath(cur)
             data = cur.execute(query).fetchall()
             print("--- low_level ---")
             print(data)
@@ -62,7 +62,7 @@ def sapi_plugin():
     
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info, cursor_factory=SapiCursor) as con, con.cursor() as cur:
-        cur.execute("set search_path to sapi_demo")
+        demo_pg_model.set_demo_searchpath(cur)
         data = cur.execute(sapi_query).fetchall()
         print("--- plugin ---")
         print(data)
@@ -72,7 +72,8 @@ def nice_tooling():
     # ---------- Setup ---------- #
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
-        startup_script = "set search_path to sapi_demo",
+        sys_schema = demo_pg_model.sys_schema(),
+        startup_script = f"set search_path to {demo_pg_model.demo_schema()}",
         connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database

@@ -1,11 +1,13 @@
 from typing import Any
 from sapi._internals.db_contact.pep249_database_api_spec_v2 import Cursor
+from sapi._internals.error import QueryError, CompilerError
 
 # ------------- generate insert ------------- #
 _Pickup = list[tuple[str, list]] # list of (query, args)
 
 def generate_insert(json: dict[list[dict]]) -> tuple[str, list]:
-    assert len(json.items()) == 1, f"Expected only one tree or subtree to insert into, but received {list(json.keys())}"
+    if len(json.items()) != 1: raise QueryError(
+        f"Expected only one tree or subtree to insert into, but received {list(json.keys())}")
     root = list(json.keys())[0]
     data = list(json.values())[0]
     # if isinstance(data, dict):
@@ -18,7 +20,7 @@ def generate_insert(json: dict[list[dict]]) -> tuple[str, list]:
     return query, args
 
 def _recursive_generate_insert(pickup: _Pickup, tab_name: str, data: list[dict], parent: str) -> _Pickup:
-    assert pickup is not None, ""
+    if pickup is None: raise CompilerError("ØV!")
     if data == []: return pickup
     # assert tab_name.isascii() and tab_name.replace('_', '').isalnum(), "tab_name should be ascii and alhanumeric"
 
@@ -63,7 +65,8 @@ def _generate_table_insert(tab_name: str, data: list[dict], parent: str) -> tupl
 
 
 def insert_into_tree(cur: Cursor, json: dict[list[dict]]):
-    assert len(json.items()) == 1, f"Expected only one tree or subtree to insert into, but received {list(json.keys())}"
+    if len(json.items()) != 1: raise QueryError(
+        f"Expected only one tree or subtree to insert into, but received {list(json.keys())}")
     root = list(json.keys())[0]
     data = list(json.values())[0]
     _recursive_insert_into_tree(cur, root, data, [], None)
@@ -73,7 +76,7 @@ def insert_into_tree(cur: Cursor, json: dict[list[dict]]):
 def _recursive_insert_into_tree(cur: Cursor, tab_name: str, data: list[dict], parent_ids: list[int], parent_id_name: str):
     if data == []: 
         return # evt. return query, args
-    assert bool(parent_id_name) == bool(parent_ids), ""
+    if bool(parent_id_name) != bool(parent_ids): raise CompilerError("")
     # check that tab_name is alphanumeric
 
     id_name = tab_name + '_id' # handle user defined name of id
@@ -83,7 +86,7 @@ def _recursive_insert_into_tree(cur: Cursor, tab_name: str, data: list[dict], pa
     # print(_put_args_into_query(query, args))
     cur.execute(query, args)
     ids: list[int] = [id_row[0] for id_row in cur.fetchall()]
-    assert len(ids) == len(data), ""
+    if len(ids) != len(data): raise CompilerError("")
 
     children_data = _from_hieracical_to_sql_format(data)
     # recursion
@@ -130,7 +133,7 @@ def _from_hieracical_to_sql_format(data: list[dict[str, Any]]) -> dict[str, list
     for row in data:
         for child in children_names:
             child_data = row[child]
-            assert _is_subtree(child_data), ""
+            if not _is_subtree(child_data): raise CompilerError("")
             children_data[child] += child_data
 
     return children_data
@@ -139,9 +142,9 @@ def _from_hieracical_to_sql_format(data: list[dict[str, Any]]) -> dict[str, list
 def _put_args_into_query(query: str, args: list): # only used for debugging
     for arg in args:
         arg_str = f"'{arg}'" if isinstance(arg, str) else f"{arg}"
-        assert '%s' in query, "too few placeholders in query"
+        if '%s' not in query: raise CompilerError("too few placeholders in query")
         query = query.replace('%s', arg_str, 1)
-    assert '%s' not in query, "too many placeholders in query"
+    if '%s' in query: raise CompilerError("too many placeholders in query")
     return query
 
 def _is_subtree(var): return isinstance(var, list) and (var == [] or isinstance(var[0], dict))

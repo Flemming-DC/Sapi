@@ -1,8 +1,8 @@
 # from sqlglot import Dialect
 from sqlglot.tokens import Token as glotToken
-from .token_tree import TokenTree, TokenType, ParserError, Token
+from .token_tree import TokenTree, TokenType, Token
 from .db_contact import data_model
-
+from sapi._internals.error import CompilerError, QueryError
 
 
 def tokenize(sapi_stmt: str) -> TokenTree|None:
@@ -20,7 +20,7 @@ def tokenize(sapi_stmt: str) -> TokenTree|None:
 
 def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tuple[TokenTree, int]:
     if all_tokens[i].type == TokenType.L_PAREN:
-        ParserError("TokenTree should not start with (") 
+        raise (QueryError if i == 0 else CompilerError)("TokenTree should not start with (") 
     depth = 0 # parenthesis nesting depth
     token_count = len(all_tokens)
     tokens_at_this_level: list[Token] = []

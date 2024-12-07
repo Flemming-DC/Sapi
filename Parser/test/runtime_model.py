@@ -1,5 +1,6 @@
 from sapi import dialect, DataModel
 from sapi._test import Tree, Table
+from test.demo_pg_model import demo_schema
 
 def make_datamodel():
     _tree = Tree(
@@ -15,7 +16,7 @@ def make_datamodel():
             Table(name='tab20', parent='tab2', columns=['col20_1', 'col20_2', 'tab20_id', 'tab2_id']), 
             Table(name='tab21', parent='tab2', columns=['col21_1', 'col21_2', 'tab21_id', 'tab2_id']),
             ], 
-        name='tree', schema='sapi_demo')
+        name='tree', schema=demo_schema())
 
     _tree_ = Tree(
         tables=[
@@ -24,7 +25,7 @@ def make_datamodel():
             Table(name='tab0_', parent='tab_', columns=['col0_1_', 'col0_2_', 'shc_', 'tab0__id', 'tab1_id', 'tab__id']), 
             Table(name='tab1_', parent='tab_', columns=['col1_1_', 'col1_2_', 'shc_', 'tab0_id', 'tab1__id', 'tab__id']),
             ], 
-        name='tree_', schema='sapi_demo')
+        name='tree_', schema=demo_schema())
 
     return DataModel(dialect.postgres(), [_tree, _tree_])
 

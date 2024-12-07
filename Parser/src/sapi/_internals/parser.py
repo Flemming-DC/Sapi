@@ -6,7 +6,7 @@ from .select_ import select_parser
 from .token_tree import TokenTree, TokenType
 from .db_contact import data_model
 from .db_contact.data_model import DataModel
-
+from .error import CompilerError
 
 
 # def try_parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T | Exception:
@@ -18,12 +18,16 @@ from .db_contact.data_model import DataModel
 #         return Exception(message) # cuts off traceback
 
 T = TypeVar('T')
+_return_types = (list[TokenTree], list[str], str)
 def parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T:
-    # setup
+    # check
     if not (isinstance(sapi_str, str) and isinstance(model, DataModel) and isinstance(return_type, type)):
         expected = str.__name__, DataModel.__name__, type.__name__
         actual = sapi_str.__class__.__name__, model.__class__.__name__, return_type.__class__.__name__
         raise TypeError(f"Excepted input types {expected}, received {actual}")
+    if return_type not in _return_types:
+        raise TypeError(f"Excepted return_type in {_return_types}, received {return_type}")
+    # setup
     data_model.set_current(model)
 
     # work
@@ -46,8 +50,7 @@ def parse(sapi_str: str, model: DataModel, return_type: Type[T] = str) -> T:
         #     out = out[:-2]
         # return out
     else:
-        # evt. allow out = abstrakt syntax tree
-        raise TypeError("Unrecognized return type")
+        raise CompilerError("Unrecognized return type")
 
 
 def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
@@ -80,17 +83,17 @@ def _parse_token_tree(token_tree: TokenTree) -> TokenTree:
 
 
 
-def _trailing_semicolon(stmt_str: str) -> str:
-    if not stmt_str.strip().endswith(';'):
-        return ''
-    semicolon_idx = len(stmt_str.strip()) - 1
-    previous_newline_idx = stmt_str.rfind('\n', 0, semicolon_idx)
-    if previous_newline_idx == -1:
-        return ';' # No newline found, so no indentation, only ;
-    indented_semicolon = stmt_str[previous_newline_idx : semicolon_idx + 1]
-    if any(c != ' ' and c != ';' for c in indented_semicolon):
-        raise Exception(indented_semicolon)
-    return indented_semicolon
+# def _trailing_semicolon(stmt_str: str) -> str:
+#     if not stmt_str.strip().endswith(';'):
+#         return ''
+#     semicolon_idx = len(stmt_str.strip()) - 1
+#     previous_newline_idx = stmt_str.rfind('\n', 0, semicolon_idx)
+#     if previous_newline_idx == -1:
+#         return ';' # No newline found, so no indentation, only ;
+#     indented_semicolon = stmt_str[previous_newline_idx : semicolon_idx + 1]
+#     if any(c != ' ' and c != ';' for c in indented_semicolon):
+#         raise CompilerError(indented_semicolon)
+#     return indented_semicolon
     
 
 

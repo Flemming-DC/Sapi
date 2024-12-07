@@ -1,10 +1,10 @@
 --------- header ---------
-drop schema if exists sapi_demo cascade;
+-- drop schema if exists sapi_demo cascade;
 set search_path to sapi_demo;
 drop table if exists 
-	tab, tab0, tab1, tab2, tab00, tab01, tab10, tab20, tab21, tab_, tab0_, tab1_, sht3__, tab_manual, tab0_manual
+	tab, tab0, tab1, tab2, tab00, tab01, tab10, tab20, tab21, tab_, tab0_, tab1_, sht__, tab_manual, tab0_manual
 ;
-create schema if not exists sapi_demo;
+-- create schema if not exists sapi_demo;
 
 
 --------- tree ---------

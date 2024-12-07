@@ -2,6 +2,7 @@ import sys
 import psycopg
 from textwrap import dedent
 from sapi import DataModel, parse
+from sapi._internals.error import TestError
 from sapi._test import Token, TokenType, TokenTree, TreeJoin, select_analyzer, DynLoop, data_model
 from .select_cases import select_cases, select_error_cases, non_executable_selects
 from . import demo_pg_model, runtime_model, comparison
@@ -110,7 +111,8 @@ def _test_get_expected_table_trees(dataModel: DataModel):
     for _, expected, tok_tree in cases:
         actual: list[TreeJoin] = select_analyzer.find_tree_joins(DynLoop(tok_tree))
         for a, e in zip(actual, expected): # zip_longest
-            assert _equal_join_data(a, e), "table_finder.get_tables(tokens1) gave incorrect join_data."
+            if not _equal_join_data(a, e): 
+                raise TestError("table_finder.get_tables(tokens1) gave incorrect join_data.")
 
 
 def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
@@ -150,7 +152,7 @@ def _test_that_expected_queries_works():
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info) as con:
         with con.cursor() as cur:
-            cur.execute("set search_path to sapi_demo")
+            demo_pg_model.set_demo_searchpath(cur)
             con.commit()
             exc = None
             for _, expected_sql in [q for q in select_cases if q not in non_executable_selects]:

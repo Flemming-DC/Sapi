@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from collections import namedtuple
 from sqlglot.tokens import TokenType
-
+from sapi._internals.error import CompilerError, QueryError
 
 @dataclass
 class Token:
@@ -17,7 +17,6 @@ class Token:
 
 
 
-class ParserError(Exception): ... # why is this located here ??
 
 @dataclass 
 class _StrReplacement:
@@ -47,7 +46,7 @@ class TokenTree:
     @property 
     def start(_): return _.tokens[0].start if _.tokens else None
     @property 
-    def end(_): raise Exception("Don't call end() on TokenTree.") # dont use this
+    def end(_): raise CompilerError("Don't call end() on TokenTree.") # dont use this
     # -------------------------------------- # 
 
     def has_passed(_, stopping_obj: str, str_index: int) -> bool:
@@ -65,9 +64,9 @@ class TokenTree:
                 _.replace(i, i + 1, []) 
             to = from_ + 1
         if to != from_ and to != from_ + 1:
-            raise ParserError("Replace currently only allows the removal of up to one token at a time")
+            raise CompilerError("Replace currently only allows the removal of up to one token at a time")
         if from_ < 0 or to > count:
-            raise ParserError("index out of bounds")
+            raise CompilerError("index out of bounds")
         # if _.tokens[from_].type
 
         # make from_tok and new_tokens
@@ -106,7 +105,7 @@ class TokenTree:
     #     print(tokens_str)
 
     def expect(_, i: int, tok_type: TokenType):
-        if _.tokens[i].type != tok_type: raise Exception(f"Expected '{tok_type.name}' found '{_.tokens[i].text}'")
+        if _.tokens[i].type != tok_type: raise QueryError(f"Expected '{tok_type.name}' found '{_.tokens[i].text}'")
 
 
 #region -------------- cast to str --------------

@@ -1,6 +1,7 @@
 from textwrap import dedent
+from sapi._internals.error import QueryError, CompilerError
 from sapi._internals.db_contact import data_model
-from sapi._internals.token_tree import Token, TokenTree, TokenType, ParserError
+from sapi._internals.token_tree import Token, TokenTree, TokenType
 from sapi._internals.dyn_loop import DynLoop
 from .tree_join import TreeJoin
 
@@ -31,7 +32,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
         return None, None
     loop.next()
     if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 0):
-        raise ParserError("expected identifier or variable after from / join.")
+        raise QueryError("expected identifier or variable after from / join.")
     
     # pass through join_obj prefix
     while loop.found(TokenType.DOT, 1):
@@ -39,7 +40,8 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
         loop.next()
 
     if loop.at_end():
-        raise ParserError("Encountered end of query while passing through prefix. Expected join_obj instead.")
+        raise QueryError("Encountered end of query while parsing prefix (such as schem.tree.table). "
+                         "Expected an object to join with instead.")
 
     join_obj = loop.tok() # join_obj at end of join_obj prefixes
     join_obj_index = loop.index()
@@ -62,7 +64,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
         # resolve tree prefixes
         if data_model.is_tree(loop.tok().text):
             if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
-                raise ParserError("Expected column after tree, as in tree.column") # why not table?
+                raise QueryError("Expected column after tree, as in tree.column") # why not table?
             
             var = loop.peek(2).text
             tree = loop.tok().text
@@ -106,13 +108,13 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
     var = loop.tok().text
     tabs_of_var = data_model.tables_by_var(var)
     if len(tabs_of_var) > 1:
-        raise ParserError(f"There are multiple tables {tabs_of_var} with column {var}.")
+        raise QueryError(f"There are multiple tables {tabs_of_var} with column {var}.")
     elif len(tabs_of_var) == 0:
-        raise ParserError(f"The is no table with column {var}.")
+        raise QueryError(f"The is no table with column {var}.")
     tab = tabs_of_var[0]
 
     if loop.found(TokenType.DOT, -1):
-        raise ParserError("Trying to insert a table prefix in a variable that already has a prefix")
+        raise CompilerError("Trying to insert a table prefix in a variable that already has a prefix")
     if data_model.is_table(tab) and tab not in ref_tables:
         ref_tables.append(tab)
     # loop.insert([
@@ -122,9 +124,9 @@ def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
 def _get_table_from_var_and_tree(var: str, tree: str) -> str:
     tabs = data_model.tables_by_var_and_tree(var, tree)
     if len(tabs) > 1:
-        raise ParserError(f"The tree {tree} contains multiple tables {tabs} with column {var}.")
+        raise QueryError(f"The tree {tree} contains multiple tables {tabs} with column {var}.")
     elif len(tabs) == 0:
-        raise ParserError(f"The tree {tree} does not contain any table with column {var}.")
+        raise QueryError(f"The tree {tree} does not contain any table with column {var}.")
     return tabs[0]
 
 
@@ -157,7 +159,7 @@ def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
         if j.tree_tok.text not in trees_of_tab:
             continue
         if already_found:
-            raise ParserError(
+            raise QueryError(
                 "You cannot have multiple trees in the same query, while using columns from a table that belongs to both. "
                 f"table {table_name} belongs to {trees_of_tab}.")
         already_found = True

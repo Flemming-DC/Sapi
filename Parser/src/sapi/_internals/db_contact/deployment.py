@@ -1,26 +1,27 @@
 from pathlib import Path
-from .pep249_database_api_spec_v2 import Connection, Cursor
+from .pep249_database_api_spec_v2 import Cursor
 from .dialect import Dialect
+from sapi._internals.error import DataModelError
 
 
-def setup_sapi(dialect: Dialect, cur: Cursor, sapi_sys_schema: str):
-    if is_deployed(cur, dialect, sapi_sys_schema):
+def setup_sapi(dialect: Dialect, cur: Cursor, sys_schema: str):
+    if is_deployed(cur, dialect, sys_schema):
         return
     
     print("setting up sapi system tables")
     builtin_deploy_scripts = sorted([str(f) for f in Path(dialect.sapi_deploy_folder).iterdir() if f.name.endswith('.sql')])
     for sql_script in builtin_deploy_scripts:
         with open(sql_script) as f:
-            cur.execute(f.read().replace('sapi_sys', sapi_sys_schema))
+            cur.execute(f.read().replace('sapi_sys', sys_schema))
 
 
-def is_deployed(cur: Cursor, dialect: Dialect, sapi_sys_schema: str) -> bool:
-    cur.execute("savepoint deployment_is_deployed")
-    cur.execute(f"with columns as ({dialect.columns_query})"
-        + f"select distinct table_name from columns where schema_name = '{sapi_sys_schema}'")
-    actual_sapi_sys_tables = {row[0] for row in cur.fetchall()}
-    cur.execute("rollback to savepoint deployment_is_deployed")
+def is_deployed(cur: Cursor, dialect: Dialect, sys_schema: str) -> bool:
     expected_sapi_sys_tables = {'sapi_trees', 'sapi_tables'}
+    cur.execute("savepoint is_deployed")
+    cur.execute(f"with columns as ({dialect.columns_query})"
+        + f"select distinct table_name from columns where schema_name = '{sys_schema}'")
+    actual_sapi_sys_tables = {row[0] for row in cur.fetchall() if row[0] in expected_sapi_sys_tables}
+    cur.execute("rollback to savepoint is_deployed")
 
     if actual_sapi_sys_tables == expected_sapi_sys_tables:
         return True
@@ -36,5 +37,5 @@ def is_deployed(cur: Cursor, dialect: Dialect, sapi_sys_schema: str) -> bool:
         Hint: Consider making a backup of the data in the sapi system tables and recreating them 
         by calling this function again. Next copy the data back into the sapi system tables.
         """
-    raise Exception(msg)
+    raise DataModelError(msg)
 

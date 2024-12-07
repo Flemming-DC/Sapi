@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 import warnings
-from typing import Callable, Type
 import psycopg
+import traceback
+from typing import Callable, Type
 import sapi
 from . import demo_pg_model, runtime_model
+from sapi._internals.error import QueryError, TestError
 
 _select_query = """
     WITH cte AS (
@@ -31,14 +33,14 @@ def run_tests():
 def _test_low_level_usage():
     data_model = runtime_model.make_datamodel()
     sql_list = sapi.parse(_select_query, data_model, list[str])
-    assert isinstance(sql_list, list), ""
+    if not isinstance(sql_list, list): raise TestError("")
 
     for query in sql_list:
-        assert isinstance(query, str), ""
+        if not isinstance(query, str): raise TestError("")
     
         connection_info = demo_pg_model.get_connection_info()
         with psycopg.Connection.connect(**connection_info) as con, con.cursor() as cur:
-            cur.execute("set search_path to sapi_demo")
+            demo_pg_model.set_demo_searchpath(cur)
             _ = cur.execute(query).fetchall()
 
 
@@ -53,7 +55,7 @@ def _test_sapi_plugin():
     # ---------- Normal Boilerplate + Execute Query---------- #
     connection_info = demo_pg_model.get_connection_info()
     with psycopg.Connection.connect(**connection_info, cursor_factory=SapiCursor) as con, con.cursor() as cur:
-        cur.execute("set search_path to sapi_demo")
+        demo_pg_model.set_demo_searchpath(cur)
         _ = cur.execute(_select_query).fetchall()
 
 
@@ -61,7 +63,8 @@ def _test_nice_tooling():
     # ---------- Setup ---------- #
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
-        startup_script = "set search_path to sapi_demo",
+        sys_schema = demo_pg_model.sys_schema(),
+        startup_script = f"set search_path to {demo_pg_model.demo_schema()}",
         connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database
@@ -76,7 +79,8 @@ def _test_readonly():
     # ---------- Setup ---------- #
     database = sapi.Database(
         dialect = sapi.dialect.postgres(),
-        startup_script = "set search_path to sapi_demo",
+        sys_schema = demo_pg_model.sys_schema(),
+        startup_script = f"set search_path to {demo_pg_model.demo_schema()}",
         connect_kwargs = demo_pg_model.get_connection_info(),
         )
     sapi.Transaction.default_database = database
@@ -85,15 +89,19 @@ def _test_readonly():
     insert_query = "insert into tab (tab_id, col_1, col_2) values (1, 'col_1', 'col_2');"
     with warnings.catch_warnings(record=True): # captures "insert not yet implemented warning"
         with sapi.Transaction(read_only=True) as tr:
-            assert _raises(lambda: tr.execute(insert_query))
-        assert _raises(lambda: sapi.read(insert_query))
+            _check_raises(lambda: tr.execute(insert_query))
+        _check_raises(lambda: sapi.read(insert_query))
 
 
-def _raises(func: Callable, error_type: Type[Exception] = Exception):
+def _check_raises(func: Callable):
     try:   func()
-    except error_type: return True
-    except Exception: ...
-    return False
+    except QueryError: return True
+    except psycopg.errors.Error: return True
+    except Exception: 
+        print("------ Incorrect exception type ------")
+        traceback.print_exc()
+        print("------")
+    raise TestError(f"{func} did not raise the expected error.")
 
 
 
