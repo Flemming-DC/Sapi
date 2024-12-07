@@ -22,10 +22,12 @@ class DynLoop:
     #     if distance <= 0:
     #         _._i += growth
 
-    def replace(_, new: tuple[TokenType, str], distance = 0):
-        at = _._i + distance
-        _._token_tree.replace(at, at + 1, [new])
-        
+    # def replace(_, new: tuple[TokenType, str], distance = 0):
+    #     at = _._i + distance
+    #     _._token_tree.replace(at, at + 1, [new])
+    
+      
+
     
     def peek(_, distance: int = 1) -> Token|None: 
         index = _._i + distance

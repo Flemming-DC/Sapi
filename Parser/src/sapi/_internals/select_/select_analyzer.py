@@ -5,31 +5,36 @@ from sapi._internals.token_tree import Token, TokenTree, TokenType
 from sapi._internals.dyn_loop import DynLoop
 from .tree_join import TreeJoin
 
-def find_tree_joins(loop: DynLoop) -> list[TreeJoin]:
+def find_tree_joins(loop: DynLoop) -> tuple[list[TreeJoin], list[int, TokenType, str]]:
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
     ref_tables: list[str] = []
+    resolved_tabs: list[int, TokenType, str] = []
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
             continue
-        tree_join, on_clause_tables_in_join = _make_tree_join(loop, [j.tree_tok for j in tree_joins])
+        tree_join, on_clause_tables_in_join, at, resolved_tabs_in_join = _make_tree_join(
+            loop, [j.tree_tok for j in tree_joins])
         if tree_join:
             tree_joins.append(tree_join)
             tabs_in_on_clauses.append(on_clause_tables_in_join)
+        resolved_tabs += resolved_tabs_in_join
+
         if not loop.found([TokenType.IDENTIFIER, TokenType.VAR], 0):
             continue
-        if _table_from_prefix(ref_tables, loop):
+        if _table_from_prefix(ref_tables, loop, at, resolved_tabs):
             continue
         _table_from_variable(ref_tables, loop)
 
     _plug_tables_into_tree_joins(ref_tables, tree_joins, tabs_in_on_clauses)
-    return tree_joins
+    return tree_joins, resolved_tabs
 
 
 
-def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJoin, list[str]] | tuple[None, None]:
+def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
+                    ) -> tuple[TreeJoin, list[str], int] | tuple[None, None, None, list]:
     if not loop.found([TokenType.FROM, TokenType.JOIN], 0):
-        return None, None
+        return None, None, None, []
     loop.next()
     if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 0):
         raise QueryError("expected identifier or variable after from / join.")
@@ -46,7 +51,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
     join_obj = loop.tok() # join_obj at end of join_obj prefixes
     join_obj_index = loop.index()
     if join_obj in prior_join_objs:
-        return None, None # don't dublicate join_data (is that actually correct behaviour??)
+        return None, None, None, [] # don't dublicate join_data (is that actually correct behaviour??)
     is_tree = data_model.is_tree(join_obj.text)
 
     def _on_clause_done(): 
@@ -59,8 +64,11 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
 
     # resolve tree prefixes and record table prefixes in on clause
     on_clause_tables: list[str] = []
+    at = None
+    resolved_tabs = []
     while not _on_clause_done():
         loop.next()
+        resolved_tab = None
         # resolve tree prefixes
         if data_model.is_tree(loop.tok().text):
             if not loop.found([TokenType.VAR, TokenType.IDENTIFIER], 2): # peek(2) should be column
@@ -68,19 +76,22 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]) -> tuple[TreeJo
             
             var = loop.peek(2).text
             tree = loop.tok().text
-            tab = _get_table_from_var_and_tree(var, tree)
-            loop.replace((TokenType.VAR, tab)) # replace tree prefix with table prefix
+            resolved_tab = _get_table_from_var_and_tree(var, tree)
+            at = loop.index()
+            resolved_tabs.append((loop.index(), TokenType.VAR, resolved_tab))
         # record table prefixes
-        if data_model.is_table(loop.tok().text):
-            on_clause_tables.append(loop.tok().text) # register table in on clause
-            
+        if resolved_tab or data_model.is_table(loop.tok().text):
+            on_clause_tables.append(resolved_tab if resolved_tab else loop.tok().text) # register table in on clause
+    
+    
     if not is_tree:
-        return None, None
+        return None, None, at, resolved_tabs
     tree_join = TreeJoin(tree_tok=join_obj, tree_tok_index=join_obj_index, on_clause_end_index=loop.index())
-    return tree_join, on_clause_tables
+    
+    return tree_join, on_clause_tables, at, resolved_tabs
     
 
-def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
+def _table_from_prefix(ref_tables: list[str], loop: DynLoop, at: int, resolved_tabs: list[int, TokenType, str]) -> bool:
     """
     Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     Each call to _table_from_prefix will update the prefix and 
@@ -88,20 +99,26 @@ def _table_from_prefix(ref_tables: list[str], loop: DynLoop) -> bool:
     """
     if not loop.found(TokenType.DOT, -1):
         return False
+    at_index_minus_2 = (at == loop.index() - 2)
+        
     tab_or_tree: Token = loop.peek(-2) # This includes views and cte's as tables. Is that okay?
-    if data_model.is_tree(tab_or_tree.text):
+    resolved_tab = None
+    if data_model.is_tree(tab_or_tree.text) and not at_index_minus_2:
         var = loop.tok().text
         tree = loop.peek(-2).text
-        tab = _get_table_from_var_and_tree(var, tree)
-        loop.replace((TokenType.VAR, tab), distance = -2) # replace tree prefix with table prefix
+        resolved_tab = _get_table_from_var_and_tree(var, tree)
+        resolved_tabs.append((loop.index() - 2, TokenType.VAR, resolved_tab))
+
+    if resolved_tab or data_model.is_table(tab_or_tree.text):
+        ref_tab = resolved_tab if resolved_tab else tab_or_tree.text
+        if ref_tab not in ref_tables:
+            ref_tables.append(ref_tab) 
     
-    if data_model.is_table(tab_or_tree.text) and tab_or_tree.text not in ref_tables:
-        ref_tables.append(tab_or_tree.text) 
     return True
         
 
 def _table_from_variable(ref_tables: list[str], loop: DynLoop) -> bool:
-    "returns true if table found. If table is new, then it is inserted."
+    "returns true if table found. If table is new, then it is registered"
     # we assume unique tab. Is that okay?
     if not data_model.is_var(loop.tok().text):
         return

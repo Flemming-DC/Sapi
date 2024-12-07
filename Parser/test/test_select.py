@@ -109,7 +109,8 @@ def _test_get_expected_table_trees(dataModel: DataModel):
         ]
 
     for _, expected, tok_tree in cases:
-        actual: list[TreeJoin] = select_analyzer.find_tree_joins(DynLoop(tok_tree))
+        actual, _ = select_analyzer.find_tree_joins(DynLoop(tok_tree))
+        actual: list[TreeJoin]
         for a, e in zip(actual, expected): # zip_longest
             if not _equal_join_data(a, e): 
                 raise TestError("table_finder.get_tables(tokens1) gave incorrect join_data.")
@@ -132,6 +133,8 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 
 def _test_get_expected_sql(dataModel: DataModel):
     for sapi, expected_sql in select_cases:
+        # print('---')
+        # print(sapi)
         actual_sql = parse(sapi, dataModel)
         comparison.assert_match(sapi, actual_sql, expected_sql)
 
