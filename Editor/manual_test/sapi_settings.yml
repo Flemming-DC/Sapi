@@ -6,7 +6,7 @@ databases:
     demo_database:
         dialect: postgres
         startup_script: "set search_path to sapi_demo"
-        sapi_sys_schema: "sapi_sys"
+        sys_schema: "sapi_sys"
         commit_policy: "AutoCommit" # Choose one of [AutoCommit, ManualCommit, OnTransactionSuccess]
         # prompt_for_password: False # indicates whether to prompt for password, when firing a query in the editor. 
 

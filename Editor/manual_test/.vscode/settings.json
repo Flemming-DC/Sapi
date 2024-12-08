@@ -14,5 +14,6 @@
         { "scope": "sapi.no-traling-comma-error", "settings": { "foreground": "#000000" } }
         ]
     },
-    "sapi.maxInlayHintLength": 5
+    "sapi.maxInlayHintLength": 5,
+    "sapi.pythonInpreter": "C:/Mine/Python/Sapi/Editor/local_editor_env/Scripts/python.exe",
 }

@@ -38,7 +38,7 @@ def freeform_single_section(lines: list[str], use_os_line_ending: bool, range: t
         line_nr_start = 0,
         line_nr_end = len(lines),
         char_start = 0,
-        char_end = len(lines[-1]),
+        char_end = len(lines[-1]) if lines != [] else 0,
         )]
     return _adjust_for_semicolon(sections, range, line_ending) if range else sections
 

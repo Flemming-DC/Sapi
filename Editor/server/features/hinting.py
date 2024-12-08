@@ -4,6 +4,7 @@ from lsprotocol import types as t
 from tools.server import server
 from tools.log import log
 from sapi._editor import TokenTree, common_select_clauses
+from sapi._internals.token_tree import StrReplacement # interface violations!
 from tools import settings, error
 from tools.embedding import Section
 import sapi
@@ -35,7 +36,9 @@ def _hints_for_section(section: Section) -> list[t.InlayHint]:
 
     dataModel = settings.load_datamodel() # what if there are multiple datamodels in use ?
     try:
-        sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
+        list_of_str_replacements = sapi.parse(sapi_code, dataModel, list[list[StrReplacement]])
+        # sql_token_trees = sapi.parse(sapi_code, dataModel, list[TokenTree])
+        # list_of_str_replacements = [t.recursive_str_replacements() for t in sql_token_trees]
     except Exception as e: # create a user error class for the parser and filter by it
         code_start = sapi_code if len(sapi_code) < 10 else sapi_code[:10] + '...'
         log(f"Failed to parse ['''{code_start}''']:\nError: {e}")
@@ -43,13 +46,12 @@ def _hints_for_section(section: Section) -> list[t.InlayHint]:
     
     line_start_indices = _line_start_indices(lines)
     hints = []
-    for tok_tree in sql_token_trees:
-        hints.extend(_hints_for_tok_tree(tok_tree, line_start_indices, lines))
+    for str_replacements in list_of_str_replacements:
+        hints.extend(_hints_for_tok_tree(str_replacements, line_start_indices, lines))
     return hints
 
 
-def _hints_for_tok_tree(tok_tree: TokenTree, line_start_indices: list[int], lines: list[str]) -> list[t.InlayHint]:
-    str_replacements = tok_tree.recursive_str_replacements() # collect replacements in subtrees
+def _hints_for_tok_tree(str_replacements: list[StrReplacement], line_start_indices: list[int], lines: list[str]) -> list[t.InlayHint]:
     if not str_replacements:
         return [] # handle the None case
     
@@ -84,9 +86,10 @@ def _line_nr_and_char(rep_str_to: int, lines: list[str], line_start_indices: lis
         # This loop will find line_nr, char if the generated code goes at the beginning of a line (up to indention)
         index = rep_str_to # index for end of generated code. It ends where it begins, since it is inserted 
                            # into preexisting code, rather than replacing it.
+        last_index = len(lines) - 1 
         for line_nr, line in enumerate(lines):
             start_index = line_start_indices[line_nr]
-            if line_start_indices[line_nr + 1] < index: 
+            if line_nr < last_index and line_start_indices[line_nr + 1] < index: 
                 continue # skipping earlier lines
             if index < start_index: 
                 break # skipping later lines
