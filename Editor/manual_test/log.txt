@@ -1,429 +1,4 @@
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-24:1-24:1
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tab0
-    JOIN tab00 USING (tab0_id))
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tab20)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tab ON tab.col_1 = cte.col0_1
-JOIN tab1 USING (tab_id)
-JOIN tab10 USING (tab1_id)
-;
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query='\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;', leading_whitespace='\n            \n\n       \n            \n\n                                                                                                                                                                                                                                                                                                                                                                                        ', line_nr_start=24, line_nr_end=24, char_start=1, char_end=1)]
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-24:1-24:1
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tab0
-    JOIN tab00 USING (tab0_id))
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tab20)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tab ON tab.col_1 = cte.col0_1
-JOIN tab1 USING (tab_id)
-JOIN tab10 USING (tab1_id)
-;
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query='\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;', leading_whitespace='\n            \n\n       \n            \n\n                                                                                                                                                                                                                                                                                                                                                                                        ', line_nr_start=24, line_nr_end=24, char_start=1, char_end=1)]
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-14:8-14:8
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.py
-
-class A: ...
-
-pg = ""
-class B: ...
-
-pg + """
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-;
-"""
-
-x = 1
-class C: ...
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1\nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n;", leading_whitespace='\n            \n\n       \n            \n\n        ', line_nr_start=6, line_nr_end=14, char_start=8, char_end=8)]
-Failed to parse ['''
-
-
-    ...''']:
-Error: removed feature
-Failed to parse ['''
-
-
-
-
-...''']:
-Error: removed feature
-Failed to parse ['''
-WITH cte...''']:
-Error: removed feature
-5:13-5:13
+8:8-8:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -448,8 +23,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=5, char_start=0, char_end=13)]
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+8:8-8:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -474,11 +49,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-Failed to parse ['''
-WITH cte...''']:
-Error: removed feature
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+8:8-8:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -503,8 +75,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+8:8-8:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -529,8 +101,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+7:8-7:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -555,8 +127,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+7:8-7:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -581,8 +153,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-10:6-10:6
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+7:8-7:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -607,8 +179,8 @@ join tree ON tree.col_1 = cte.col0_1
 
 
 
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-18:1-18:1
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
+7:8-7:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -628,24 +200,21 @@ FROM cte
 join tab ON tab.col_1 = cte.col0_1
 JOIN tab1 USING (tab_id)
 JOIN tab10 USING (tab1_id)
-;l10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1 
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-
 ;
 
 
 
 
-[Section(query='l10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;', leading_whitespace='                                                                                                                                                                                                                                                                                                                                                                                 ', line_nr_start=18, line_nr_end=18, char_start=1, char_end=1)]
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tab0\n    JOIN tab00 USING (tab0_id))\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tab20)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tab ON tab.col_1 = cte.col0_1\nJOIN tab1 USING (tab_id)\nJOIN tab10 USING (tab1_id)\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]
 Failed to parse ['''
 WITH cte...''']:
-Error: removed feature
-18:1-18:1
+Error: Error tokenizing ' tab1 USING (tab_id)
+JOIN tab10 USING (tab1_id)'
+Failed to parse ['''
+WITH cte...''']:
+Error: Error tokenizing ' tab1 USING (tab_id)
+JOIN tab10 USING (tab1_id)'
+7:8-7:8
 file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
 
 WITH cte AS (
@@ -665,52 +234,9 @@ FROM cte
 join tab ON tab.col_1 = cte.col0_1
 JOIN tab1 USING (tab_id)
 JOIN tab10 USING (tab1_id)
-;l10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1 
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-
 ;
 
 
 
 
-[Section(query='l10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;', leading_whitespace='                                                                                                                                                                                                                                                                                                                                                                                 ', line_nr_start=18, line_nr_end=18, char_start=1, char_end=1)]
-Failed to parse ['''
-WITH cte...''']:
-Error: removed feature
-Failed to parse ['''
-WITH cte...''']:
-Error: removed feature
-10:6-10:6
-file:///c%3A/Mine/Python/Sapi/Editor/manual_test/query.sapi
-
-WITH cte AS (
-    SELECT col0_1, col00_2 FROM tree
-)
-SELECT /* hegr */
-    'vervre',
-    $$ multi
-    line $$,
-    123,
-    cte.col00_2,
-    col10_2,
-    (SELECT count(col20_2) FROM tree)
---FROM tree
---join cte ON tree.col_1 = cte.col0_1 
-FROM cte 
-join tree ON tree.col_1 = cte.col0_1
-
-
-;
-
-
-
-
-[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tree\n)\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tree)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tree ON tree.col_1 = cte.col0_1\n\n\n;", leading_whitespace='', line_nr_start=0, line_nr_end=10, char_start=0, char_end=6)]
-Failed to parse ['''
-WITH cte...''']:
-Error: removed feature
+[Section(query="\nWITH cte AS (\n    SELECT col0_1, col00_2 FROM tab0\n    JOIN tab00 USING (tab0_id))\nSELECT /* hegr */\n    'vervre',\n    $$ multi\n    line $$,\n    123,\n    cte.col00_2,\n    col10_2,\n    (SELECT count(col20_2) FROM tab20)\n--FROM tree\n--join cte ON tree.col_1 = cte.col0_1 \nFROM cte \njoin tab ON tab.col_1 = cte.col0_1\nJOIN tab1 USING (tab_id)\nJOIN tab10 USING (tab1_id)\n;", leading_whitespace='', line_nr_start=0, line_nr_end=18, char_start=0, char_end=1)]

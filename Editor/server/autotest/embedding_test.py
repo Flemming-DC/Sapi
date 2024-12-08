@@ -386,7 +386,7 @@ join tree ON tree.col_1 = cte.col0_1
 '''
 
     pointlike_range = t.Range(start=t.Position(line=13, character=10), end=t.Position(line=13, character=10))
-    print('---')
+    
     sapi_sections = embedding.sapi_sections(py_sapi.split('\n'), False, pointlike_range)
 
     actual_sapi_code, expected_sapi_code = _make_comparable(sapi_sections, expected_sapi_code)

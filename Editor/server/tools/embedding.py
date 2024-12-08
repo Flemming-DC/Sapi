@@ -175,25 +175,38 @@ def _adjust_for_semicolon(sections: list[Section], range: t.Range, line_ending: 
     if sections == []: 
         return []
     
+    # first = sections[0]
+    # range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
+    # if range_start_index:
+    #     last_semicolon_before_range = first.query.rfind(';', 0, range_start_index)
+    #     if last_semicolon_before_range != -1:
+    #         first.leading_whitespace = first.leading_whitespace + ' ' * (last_semicolon_before_range + 1)
+    #         first.query = first.query[(last_semicolon_before_range + 1):]
+    #         first.line_nr_start = range.start.line # make section start at semicolon, not at range
+    #         first.char_start = range.start.character
+
     first = sections[0]
     range_start_index = _index(first.query.split(line_ending), range.start.line - first.line_nr_start, range.start.character, line_ending)
     if range_start_index:
-        last_semicolon_before_range = first.query.rfind(';', 0, range_start_index)
-        if last_semicolon_before_range != -1:
-            first.leading_whitespace = first.leading_whitespace + ' ' * (last_semicolon_before_range + 1)
-            first.query = first.query[(last_semicolon_before_range + 1):]
-            first.line_nr_start = range.start.line
-            first.char_start = range.start.character
-    
+        lines_before_range = first.query[:range_start_index].split(line_ending)
+        for i_before, line in enumerate(reversed((lines_before_range))):
+            if ';' in line: # update to match last semicolon before range
+                last_semicolon_before_range_idx = first.query.rfind(';', 0, range_start_index)
+                first.leading_whitespace = first.leading_whitespace + ' ' * (last_semicolon_before_range_idx + 1)
+                first.query = first.query[(last_semicolon_before_range_idx + 1):]
+                first.line_nr_start = range.start.line - i_before # make section start at semicolon, not at range
+                first.char_start = line.find(';') + 1
+
+
     last = sections[-1]
     range_end_index = _index(last.query.split(line_ending), range.end.line - last.line_nr_start, range.end.character, line_ending)
     if range_end_index:
-        first_semicolon_after_range = last.query.find(';', range_end_index)
-        if first_semicolon_after_range != -1:
-            # last.leading_whitespace = last.leading_whitespace + ' ' * (first_semicolon_after_range + 1)
-            last.query = last.query[:(first_semicolon_after_range + 1)]
-            last.line_nr_end = range.end.line
-            last.char_end = range.end.character
+        for i, line in enumerate(last.query[range_end_index:].split(line_ending)):
+            if ';' in line: # update to match first semicolon after range
+                last.query = last.query[:(last.query.find(';', range_end_index) + 1)]
+                last.line_nr_end = range.end.line + i
+                last.char_end = line.find(';') + 1
+                break
 
     return sections
 
@@ -213,4 +226,11 @@ def _index(lines: list[str], line_nr: int, char: int, line_ending: str) -> int|N
         else:
             raise IndexError(f"Cannot get index from line_nr={line_nr}, char={char}")
     raise IndexError(f"Cannot get index from line_nr={line_nr}, char={char}")
+
+# def _line_nr_char(source: str, index: int, line_ending: str) -> int|None:
+#     # for i, c in enumerate(source):
+#     #     if 
+#     i = 0
+#     for line_nr, line in enumerate(source.split(line_ending)):
+        
 

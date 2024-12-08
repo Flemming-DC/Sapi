@@ -1,3 +1,0 @@
-Failed to parse ['''
-WITH cte...''']:
-Error: Excepted return_type in (list[sapi._internals.token_tree.TokenTree], list[sapi._internals.token_tree._StrReplacement], list[str], <class 'str'>), received list[list[sapi._internals.token_tree._StrReplacement]]

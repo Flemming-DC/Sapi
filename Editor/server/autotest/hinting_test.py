@@ -40,12 +40,12 @@ def _test_1_inlay_hints():
 
     expected_hints = {
         _PartialHint(position=f'2:44', label=' tab0'),
-        _PartialHint(position=f'3:{0 + 0}', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position=f'3:{0 + 0}', label='JOIN tab00 USING (tab0_id)'),
         _PartialHint(position=f'12:36', label=' tab20'),
         _PartialHint(position=f'16:9', label=' tab'),
         _PartialHint(position=f'16:17', label=' tab'),
-        _PartialHint(position=f'17:{0 + 0}', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position=f'18:{0 + 0}', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position=f'17:{0 + 0}', label='JOIN tab1 USING (tab_id)'),
+        _PartialHint(position=f'18:{0 + 0}', label='JOIN tab10 USING (tab1_id)'),
     }
 
     actual_hints = hinting.inlay_hints_work(sections)
@@ -93,12 +93,12 @@ class C: ...
     line_nr_offset = sections[1].line_nr_start
     expected_hints_2 = {
         _PartialHint(position=f'{2  + line_nr_offset}:{44 + 4}', label=' tab0'),
-        _PartialHint(position=f'{3  + line_nr_offset}:{0  + 4}', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position=f'{3  + line_nr_offset}:{0  + 4}', label='JOIN tab00 USING (tab0_id)'),
         _PartialHint(position=f'{12 + line_nr_offset}:{36 + 4}', label=' tab20'),
         _PartialHint(position=f'{16 + line_nr_offset}:{9  + 4}', label=' tab'),
         _PartialHint(position=f'{16 + line_nr_offset}:{17 + 4}', label=' tab'),
-        _PartialHint(position=f'{17 + line_nr_offset}:{0  + 4}', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position=f'{18 + line_nr_offset}:{0  + 4}', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position=f'{17 + line_nr_offset}:{0  + 4}', label='JOIN tab1 USING (tab_id)'),
+        _PartialHint(position=f'{18 + line_nr_offset}:{0  + 4}', label='JOIN tab10 USING (tab1_id)'),
     }
     expected_hints = expected_hints_1.union(expected_hints_2)
 
@@ -198,12 +198,12 @@ def foo():
 
     expected_hints = {
         _PartialHint(position='56:40', label=' tab0'),
-        _PartialHint(position='57:4', label='JOIN tab00 USING ( tab0_id )'),
+        _PartialHint(position='57:4', label='JOIN tab00 USING (tab0_id)'),
         _PartialHint(position='65:40', label=' tab20'),
         _PartialHint(position='69:13', label=' tab'),
         _PartialHint(position='69:21', label=' tab'),
-        _PartialHint(position='70:4', label='JOIN tab1 USING ( tab_id )'),
-        _PartialHint(position='71:4', label='JOIN tab10 USING ( tab1_id )'),
+        _PartialHint(position='70:4', label='JOIN tab1 USING (tab_id)'),
+        _PartialHint(position='71:4', label='JOIN tab10 USING (tab1_id)'),
     }
 
     actual_hints = hinting.inlay_hints_work(sections)
@@ -235,3 +235,17 @@ def _error_message(actual_hints: set[_PartialHint], expected_hints: set[_Partial
     expected - actual: 
         {e_not_a}
     """
+
+
+
+
+
+"""
+hints for multiple queries in one sapi file are incorrect
+
+probably due to rep.str_to in ```line_nr, char = _line_nr_and_char(rep.str_to, lines, line_start_indices)``` 
+not accounting for ;
+"""
+
+
+

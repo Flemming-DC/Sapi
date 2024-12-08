@@ -3,8 +3,7 @@ from textwrap import dedent
 from lsprotocol import types as t
 from tools.server import server
 from tools.log import log
-from sapi._editor import TokenTree, common_select_clauses
-from sapi._internals.token_tree import StrReplacement # interface violations!
+from sapi._internals.token_tree import StrReplacement 
 from tools import settings, error
 from tools.embedding import Section
 import sapi
@@ -59,15 +58,15 @@ def _hints_for_tok_tree(str_replacements: list[StrReplacement], line_start_indic
     put_on_new_line_sequence_len = 0 # used to put join_clauses on seperate lines.
     str_replacements.sort(key = lambda r: r.str_from)
     for rep in str_replacements:
-        if not rep.new_tokens:
+        if rep.text == '':
             continue
-        put_on_new_line = rep.new_tokens[0].type in common_select_clauses()
+        put_on_new_line = rep.is_new_clause
         put_on_new_line_sequence_len = put_on_new_line_sequence_len + 1 if put_on_new_line else 0
         line_nr, char = _line_nr_and_char(rep.str_to, lines, line_start_indices)
         line_nr += put_on_new_line_sequence_len
 
         prefix = '' if put_on_new_line else ' '
-        hint_text = prefix + ' '.join([t.text for t in rep.new_tokens])
+        hint_text = prefix + rep.text
 
         hint = t.InlayHint(
             label=hint_text,
