@@ -34,12 +34,9 @@ case1 = Case( # cte, subquery and comments
         JOIN tab10 USING (tab1_id)
     """)
 
-case2 = Case( # select no columns (postgres only)
+case2 = Case( # select no columns
     sapi = "select 1 from tree",
-    expected_sql = "select 1")
-# caseN = Case( # select no columns (oracle only)
-#     sapi = "select 1 from A",
-#     expected_sql = "select 1 from dual")
+    expected_sql = QueryError)
 
 case3 = Case( # join multiple trees
     sapi = """
@@ -165,8 +162,8 @@ from tree using (sht___id)
 delim = '\n;\n'
 
 case10 = Case( # multi query
-    sapi = case1.sapi + delim + case2.sapi,
-    expected_sql = case1.expected_sql + delim + case2.expected_sql,
+    sapi = case1.sapi + delim + case3.sapi,
+    expected_sql = case1.expected_sql + delim + case3.expected_sql,
     )
 
 case11 = Case( # multi query
@@ -206,7 +203,7 @@ case1 = Case( # cte, subquery and comments
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
     ;
-    select 1 from tree
+    select 1
 ''',
     expected_sql = '''
 
@@ -267,26 +264,64 @@ join dual_pk using (dual_pk_id1, dual_pk_id2)
 
 case15 = Case( # historic
     sapi = """
-select historic_col1
+select historic_col1, 1 * 1
 from historic
-where historic_col2 != ''
+where historic_col2 != '' and 1 = 1 * 1
     """,
     expected_sql = """
-select historic_col1
+select historic_col1, 1 * 1
 from historic1
 JOIN historic2 ON persistent2_id = persistent1_id and from_date2 < to_date2 and from_date1 < to_date1
-where historic_col2 != ''
+where historic_col2 != '' and 1 = 1 * 1
     """)
 
-# case16 = Case( # seleft * from dual_key
-#     sapi = """
-# select *
-# from dual_key
-#     """,
-#     expected_sql = """
-#     """)
+case16 = Case( # select * from dual_key
+    sapi = """
+select *
+from dual_key
+    """,
+    expected_sql = QueryError)
+
+case17 = Case( # alias and blank tree
+    sapi = """
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 as b 
+    FROM tree
+)
+SELECT 
+    cte.b,
+    cte.col0_2
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+    """,
+    expected_sql = QueryError)
 
 
+case18 = Case( # alias and blank tree
+    sapi = """
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 as b 
+    FROM tree
+)
+SELECT 
+    cte.b,
+    cte.col0_2,
+    tab.col_1
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
+    """,
+    expected_sql = """
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 as b 
+    FROM tab0
+    JOIN tab00 USING (tab0_id))
+SELECT 
+    cte.b,
+    cte.col0_2,
+    tab.col_1
+FROM cte
+join tab ON tab.col_1 = cte.col0_1
+""")
 
 
 # empty_case = Case(
@@ -295,10 +330,10 @@ where historic_col2 != ''
 #     expected_sql = """
 #     """)
 
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12, case13, case14, case15] 
-select_error_cases = [case8, case9]
+select_cases = [case1, case3, case4, case5, case6, case7, case10, case11, case12, case13, case14, case15, case18] 
+select_error_cases = [case2, case8, case9, case16, case17]
 non_executable_selects = [case12]
-print(f"select test cases = {len(select_cases) + len(select_error_cases) + len(non_executable_selects)}")
+# print(f"select test cases = {len(select_cases) + len(select_error_cases) + len(non_executable_selects)}")
 
 # select_cases = [] 
 # select_error_cases = []

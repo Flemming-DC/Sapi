@@ -15,6 +15,7 @@ def find_tree_joins(loop: AnalyzerLoop) -> tuple[list[TreeJoin], list[Resolvent]
     while loop.next():
         if isinstance(loop.tok(), TokenTree):
             continue
+        _check_for_select_all(loop)
         # analyze from clause
         tree_join, on_clause_tables_in_join, resolved_tabs_in_join = _make_tree_join(loop, [j.tree_tok for j in tree_joins])
         resolvents += resolved_tabs_in_join
@@ -30,8 +31,9 @@ def find_tree_joins(loop: AnalyzerLoop) -> tuple[list[TreeJoin], list[Resolvent]
         if ref_tab and ref_tab not in ref_tables:
             ref_tables.append(ref_tab) 
 
-
     _plug_tables_into_tree_joins(ref_tables, tree_joins, tabs_in_on_clauses)
+    if any(j.referenced_tables == [] for j in tree_joins):
+        raise QueryError("Unused tree in from clause.")
     return tree_joins, resolvents
 
 
@@ -85,7 +87,6 @@ def _make_tree_join(loop: AnalyzerLoop, prior_join_objs: list[Token]
         # record table prefixes
         if resolved_tab or data_model.is_table(loop.tok().text):
             on_clause_tables.append(resolved_tab if resolved_tab else loop.tok().text) # register table in on clause
-    
     
     if not is_tree:
         return None, None, resolvents
@@ -179,3 +180,15 @@ def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
         j.referenced_tables.append(table_name)
         if len(trees_of_tab) == 1:
             break # this break is an optimization
+
+
+def _check_for_select_all(loop: AnalyzerLoop):
+    if loop.tok().type != TokenType.STAR: return
+    if loop.peek(-1).type == TokenType.DOT and data_model.is_tree(loop.peek(-2).text): return
+    
+    if loop.peek().type in [TokenType.COMMA, TokenType.FROM]:
+        raise QueryError("The wildcard '*' cannot be used, when selecting from a tree, "
+                         "unless you restrict the wildcard by an expression on the form 'ojbect.*', "
+                         "where 'ojbect' is not a tree.")
+
+

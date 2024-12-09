@@ -2,7 +2,6 @@ from . import select_analyzer, path_finder, join_generator
 from sapi._internals.token_tree import TokenTree, StrReplacement
 from sapi._internals.select_.analyzer_loop import AnalyzerLoop
 
-
 def parse_select(token_tree: TokenTree) -> list[StrReplacement]:
     tree_joins, resolvents = select_analyzer.find_tree_joins(AnalyzerLoop(token_tree))
 

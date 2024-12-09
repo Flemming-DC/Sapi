@@ -47,7 +47,7 @@ class AnalyzerLoop:
     
     
     def has_passed(_, stopping_obj: str) -> bool:
-        return _.at_end() or _._token_tree.has_passed(stopping_obj, _.tok().start)
+        return _.at_end() or stopping_obj in _.view() #_._token_tree.has_passed(stopping_obj, _.tok().start)
     
     def at_end(_, distance: int = 0): return _._i + distance >= _._count
 

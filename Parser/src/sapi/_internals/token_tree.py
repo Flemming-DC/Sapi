@@ -49,9 +49,9 @@ class TokenTree:
     def end(_): raise CompilerError("Don't call end() on TokenTree.") # dont use this
     # -------------------------------------- # 
 
-    def has_passed(_, stopping_obj: str, str_index: int) -> bool:
-        location = _._sapi_str.find(stopping_obj)
-        return str_index >= location and location != -1
+    # def has_passed(_, stopping_obj: str, str_index: int) -> bool:
+    #     location = _._sapi_str.find(stopping_obj)
+    #     return str_index >= location and location != -1
         
 
     def make_replacement(_, from_: int, to: int, new_text: str, is_new_clause: bool):

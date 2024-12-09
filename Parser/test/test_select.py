@@ -12,14 +12,14 @@ def run_tests():
     data_models = [runtime_model.make_datamodel(), demo_pg_model.setup_db_and_make_datamodel()]
     # data_models = [demo_pg_model.setup_db_and_make_datamodel()]
     for model in data_models:
-        _test_get_expected_table_trees(model)
+        _test_get_expected_tree_joins(model)
         _test_get_expected_sql(model)
         _test_raise_error(model)
     _test_that_expected_queries_works()
 
 
 
-def _test_get_expected_table_trees(dataModel: DataModel):
+def _test_get_expected_tree_joins(dataModel: DataModel):
     data_model.set_current(dataModel)
     # ------- tokens ---------
     tokens1 = [
@@ -133,11 +133,11 @@ def _equal_join_data(j1: TreeJoin, j2: TreeJoin):
 
 
 def _test_get_expected_sql(dataModel: DataModel):
-    for sapi, expected_sql in select_cases:
+    for i, (sapi, expected_sql) in enumerate(select_cases):
         # print('---')
         # print(sapi)
         actual_sql = parse(sapi, dataModel)
-        comparison.assert_match(sapi, actual_sql, expected_sql)
+        comparison.assert_match(sapi, actual_sql, expected_sql, i)
 
 
 def _test_raise_error(dataModel: DataModel):
@@ -159,7 +159,8 @@ def _test_that_expected_queries_works():
             demo_pg_model.set_demo_searchpath(cur)
             con.commit()
             exc = None
-            for _, expected_sql in [q for q in select_cases if q not in non_executable_selects]:
+            executable_selects = [(i, q.expected_sql) for i, q in enumerate(select_cases) if q not in non_executable_selects]
+            for i, expected_sql in executable_selects:
                 if 'some_view' in expected_sql:
                     continue # some_view doesnt actually exist, so we dont demand this query to work
                 try:
@@ -168,6 +169,7 @@ def _test_that_expected_queries_works():
                     exc = e
                     con.rollback()
                     print("------ failed to execute expected_sql ------")
+                    print(f'test case index: {i}')
                     print(expected_sql)
                     print()
                     print(e)
