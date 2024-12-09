@@ -3,6 +3,7 @@ sandbox/
 notes/
 noter/
 sapi_env/
+to-dst/
 */local_sapi_env/
 */remote_sapi_env/
 */local_parser_env/
