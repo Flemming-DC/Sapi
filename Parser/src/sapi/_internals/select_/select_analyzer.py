@@ -184,11 +184,11 @@ def _plug_ref_table_into_tree_join(table_name: str, tree_joins: list[TreeJoin]):
 
 def _check_for_select_all(loop: AnalyzerLoop):
     if loop.tok().type != TokenType.STAR: return
-    if loop.peek(-1).type == TokenType.DOT and data_model.is_tree(loop.peek(-2).text): return
+    if loop.peek(-1).type == TokenType.DOT and not data_model.is_tree(loop.peek(-2).text): return
     
     if loop.peek().type in [TokenType.COMMA, TokenType.FROM]:
         raise QueryError("The wildcard '*' cannot be used, when selecting from a tree, "
-                         "unless you restrict the wildcard by an expression on the form 'ojbect.*', "
-                         "where 'ojbect' is not a tree.")
+                         "unless you restrict the wildcard by an expression on the form 'object.*', "
+                         "where 'object' is not a tree.")
 
 
