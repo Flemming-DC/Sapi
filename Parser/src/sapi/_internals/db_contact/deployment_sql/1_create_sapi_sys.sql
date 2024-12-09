@@ -22,12 +22,13 @@ create table sapi_sys.sapi_tables (
     sapi_tables_id bigint primary key generated always as identity,
 	sapi_trees_id bigint not null references sapi_trees,
 	table_name text not null, -- check valid name and check that table exists
-	table_acronym text check (table_acronym is null or length(table_acronym) < length(table_name)),
-	-- unchecked_references (evt. separate into another table)
+	join_clause text not null default 'JOIN __parent__ USING (__keys__)',
 
 	unique (table_name, sapi_trees_id),
-	unique (table_acronym, sapi_trees_id)
 );
 
+comment on column sapi_sys.sapi_tables.join_clause is
+    '__parent__, __keys__ is replaced at runtime with the parent table and the foreign keys pointing to the parent table'
+;
 
 

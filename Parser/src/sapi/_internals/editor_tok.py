@@ -42,7 +42,7 @@ def _setup_dict():
         GlotType.PARAMETER,
     }
 
-    _group_set_by_grouptype[_TokTypeGroup.String] = {
+    _group_set_by_grouptype[_TokTypeGroup.String] = { # string tokens are also listed in the insert parser
         GlotType.BIT_STRING,
         GlotType.HEX_STRING,
         GlotType.BYTE_STRING,

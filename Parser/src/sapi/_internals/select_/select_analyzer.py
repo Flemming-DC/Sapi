@@ -2,10 +2,11 @@ from textwrap import dedent
 from sapi._internals.error import QueryError, CompilerError
 from sapi._internals.db_contact import data_model
 from sapi._internals.token_tree import Token, TokenTree, TokenType
-from sapi._internals.dyn_loop import DynLoop
+from sapi._internals.select_.analyzer_loop import AnalyzerLoop
 from .tree_join import TreeJoin, Resolvent
 
-def find_tree_joins(loop: DynLoop) -> tuple[list[TreeJoin], list[Resolvent]]:
+
+def find_tree_joins(loop: AnalyzerLoop) -> tuple[list[TreeJoin], list[Resolvent]]:
     tree_joins: list[TreeJoin] = []
     tabs_in_on_clauses: list[list[str]] = [] # on_clause_tables_across_joins
     ref_tables: list[str] = []
@@ -35,7 +36,7 @@ def find_tree_joins(loop: DynLoop) -> tuple[list[TreeJoin], list[Resolvent]]:
 
 
 
-def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
+def _make_tree_join(loop: AnalyzerLoop, prior_join_objs: list[Token]
         ) -> tuple[TreeJoin, list[str], list[Resolvent]] | tuple[None, None, list[Resolvent]]:
     if not loop.found([TokenType.FROM, TokenType.JOIN], 0):
         return None, None, []
@@ -93,7 +94,7 @@ def _make_tree_join(loop: DynLoop, prior_join_objs: list[Token]
     return tree_join, on_clause_tables, resolvents
     
 
-def _table_ref_and_resolvent(loop: DynLoop) -> tuple[str|None, Resolvent|None]:
+def _table_ref_and_resolvent(loop: AnalyzerLoop) -> tuple[str|None, Resolvent|None]:
     """
     Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     Each call to _table_from_prefix will update the prefix and 

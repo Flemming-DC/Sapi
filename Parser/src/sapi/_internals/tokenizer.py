@@ -50,7 +50,7 @@ def _make_nested_tok_tree(all_tokens: list[Token], i: int, sapi_str: str) -> tup
     # if next_token is not None and next_token.line > all_tokens[i].line:
     #     next_token.line = all_tokens[i].line
     # make single layer of token_tree
-    token_tree = TokenTree(tokens_at_this_level, sapi_str, next_token)
+    token_tree = TokenTree(tokens_at_this_level, len(sapi_str), next_token)
     return token_tree, i
 
 

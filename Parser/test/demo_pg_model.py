@@ -32,9 +32,13 @@ def setup_test_datamodel(cursor: psycopg.Cursor, sys_schema: str):
     deploy_scripts = sorted([str(f) for f in Path('./test/demo_database').iterdir() if f.name.endswith('.sql')])
     # cursor.execute(f"set search_path to {sys_schema}")
     for sql_script in deploy_scripts:
-        with open(sql_script) as f:
-            code = f.read()
-            cursor.execute(code.replace('sapi_sys', sys_schema))
+        try:
+            with open(sql_script) as f:
+                code = f.read()
+                cursor.execute(code.replace('sapi_sys', sys_schema))
+        except Exception:
+            print(f"Falied to execute deployment script: '{sql_script}'\n")
+            raise
 
 def set_demo_searchpath(cur: psycopg.Cursor):
     cur.execute(f"set search_path to {demo_schema()}")

@@ -9,11 +9,11 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
     if not tree_join.first_table:
         # replace A with a "blank" from clause, such as "from dual" in Oracle or "" in postgres
         # note that replacing from i + 1 to i + 1 is including the lower bound, but excluding the upper bound
-        token_tree.replace(i - 1, i + 1, data_model.dialect().blank_from_clause_tokens())
+        token_tree.make_replacement(i - 1, i + 1, data_model.dialect().blank_from_clause_tokens(), False)
         return
 
     # replace table_tree with first table in join_path
-    token_tree.replace(i, i + 1, [(TokenType.VAR, tree_join.first_table)])
+    token_tree.make_replacement(i, i + 1, tree_join.first_table, False)
 
     # autogenerate the remaining joins in join_path
     i = tree_join.on_clause_end_index + 1
@@ -26,20 +26,16 @@ def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType
         # check for alternative join clauses in the tree
         # this code assumes that foreign key and primary keys follow your naming convention.
         # in the general case, then you need next_tab, referenced_table and a join rule to make join_clause_tokens
-        join_clause_tokens = [
-            (TokenType.JOIN, 'JOIN'), 
-            (TokenType.VAR, next_tab.name), 
-            (TokenType.USING, 'USING'), 
-            (TokenType.L_PAREN, '('), 
-            (TokenType.VAR, referenced_table.name + '_id'), 
-            (TokenType.R_PAREN, ')'), 
-            ]
-        token_tree.replace(i, i, join_clause_tokens) # equivalent to insert
-        i += len(join_clause_tokens)
+        # join_clause = f"JOIN {next_tab.name} USING ({referenced_table.name}_id)"    
+
+        child_table = next_tab if not going_up_the_tree else tab
+        join_clause = data_model.join_clause_by_tab(child_table.name, going_up_the_tree)
+        token_tree.make_replacement(i, i, join_clause, True) # equivalent to insert
+        
     
 
 def resolve_trees_to_tabs(token_tree: TokenTree, resolvents: list[Resolvent]):
     for r in resolvents: # ie.e tables resolved from trees 
-        token_tree.replace(r.index, r.index + 1, [(TokenType.VAR, r.tab_name)])
+        token_tree.make_replacement(r.index, r.index + 1, r.tab_name, False)
 
 

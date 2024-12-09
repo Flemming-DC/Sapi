@@ -3,7 +3,7 @@ import sqlglot
 from typing import Callable
 import sqlglot.dialects
 import sqlglot.dialects.postgres
-from sapi._internals.token_tree import TokenType
+from sapi._internals.token_tree import TokenType, Token
 from .pep249_database_api_spec_v2 import Connect, Connection
 from dataclasses import dataclass
 
@@ -20,11 +20,12 @@ class Dialect:
     def __post_init__(_):
         _._glot_dialect = sqlglot.Dialect.get_or_raise(_._name)
         _fix_sqlglot_oversights(_._glot_dialect)
-        _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
-            for t in _._glot_dialect.tokenize(_.blank_from_clause)]
+        # _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
+        #     for t in _._glot_dialect.tokenize(_.blank_from_clause)]
 
     def sqlglot_dialect(_) -> sqlglot.Dialect: return _._glot_dialect
-    def blank_from_clause_tokens(_): return _._blank_from_clause
+    # def blank_from_clause_tokens(_): return _._blank_from_clause
+    def blank_from_clause_tokens(_): return _.blank_from_clause
 
 
 
@@ -71,12 +72,12 @@ def postgres():
             """,
         foreign_keys_query = """
             SELECT
-                schema.nspname  as schema,
-                fschema.nspname as referenced_schema,
-                tab.relname     AS table,
-                ftab.relname    AS referenced_table,
-                col.attname     AS primary_key_col, -- note that a pk can contain multiple columns
-                fcol.attname    AS foreign_key_col -- note that a fk can contain multiple columns
+                schema.nspname                          AS schema,
+                fschema.nspname                         AS referenced_schema,
+                tab.relname                             AS table,
+                ftab.relname                            AS referenced_table,
+                string_agg(distinct col.attname,  ', ') AS primary_key_col, 
+                string_agg(distinct fcol.attname, ', ') AS foreign_key_col  
             FROM pg_constraint AS con
             JOIN pg_class      AS tab     ON tab.oid = con.conrelid
             JOIN pg_namespace  AS schema  ON schema.oid = tab.relnamespace
@@ -84,13 +85,14 @@ def postgres():
             JOIN pg_class      AS ftab    ON ftab.oid = con.confrelid
             JOIN pg_namespace  AS fschema ON fschema.oid = ftab.relnamespace
             JOIN pg_attribute  AS fcol    ON fcol.attnum = ANY(con.confkey) AND fcol.attrelid = con.confrelid
-            WHERE con.contype = 'f'
+            WHERE con.contype = 'f'     -- only select foreign keys, not any other constraints
                 and col.attnum > 0      -- exclude system columns
                 and fcol.attnum > 0     -- exclude system columns
                 and tab.relkind = 'r'   -- filter out non-table objects in pg_class (e.g. views, sequences etc.)
                 and ftab.relkind = 'r'  -- filter out non-table objects in pg_class (e.g. views, sequences etc.)
                 and not col.attisdropped 
                 and not fcol.attisdropped 
+            GROUP BY schema.nspname, fschema.nspname, tab.relname , ftab.relname -- anything bu fk, pk
             """,
         sapi_deploy_folder = "./engine/db_contact/deployment_sql",
         connect = psycopg.Connection.connect,

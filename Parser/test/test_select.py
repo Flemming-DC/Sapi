@@ -3,13 +3,14 @@ import psycopg
 from textwrap import dedent
 from sapi import DataModel, parse
 from sapi._internals.error import TestError
-from sapi._test import Token, TokenType, TokenTree, TreeJoin, select_analyzer, DynLoop, data_model
+from sapi._test import Token, TokenType, TokenTree, TreeJoin, select_analyzer, AnalyzerLoop, data_model
 from .select_cases import select_cases, select_error_cases, non_executable_selects
 from . import demo_pg_model, runtime_model, comparison
 
 
 def run_tests():
     data_models = [runtime_model.make_datamodel(), demo_pg_model.setup_db_and_make_datamodel()]
+    # data_models = [demo_pg_model.setup_db_and_make_datamodel()]
     for model in data_models:
         _test_get_expected_table_trees(model)
         _test_get_expected_sql(model)
@@ -109,7 +110,7 @@ def _test_get_expected_table_trees(dataModel: DataModel):
         ]
 
     for _, expected, tok_tree in cases:
-        actual, _ = select_analyzer.find_tree_joins(DynLoop(tok_tree))
+        actual, _ = select_analyzer.find_tree_joins(AnalyzerLoop(tok_tree))
         actual: list[TreeJoin]
         for a, e in zip(actual, expected): # zip_longest
             if not _equal_join_data(a, e): 

@@ -254,13 +254,48 @@ case13 = Case( # empty string
     expected_sql = f"""{case1.expected_sql}
     """)
 
+case14 = Case( # dual_key
+    sapi = """
+select dual_pk_col, dual_fk_col
+from dual_key
+    """,
+    expected_sql = """
+select dual_pk_col, dual_fk_col
+from dual_fk 
+join dual_pk using (dual_pk_id1, dual_pk_id2)
+    """)
+
+case15 = Case( # historic
+    sapi = """
+select historic_col1
+from historic
+where historic_col2 != ''
+    """,
+    expected_sql = """
+select historic_col1
+from historic1
+JOIN historic2 ON persistent2_id = persistent1_id and from_date2 < to_date2 and from_date1 < to_date1
+where historic_col2 != ''
+    """)
+
+# case16 = Case( # seleft * from dual_key
+#     sapi = """
+# select *
+# from dual_key
+#     """,
+#     expected_sql = """
+#     """)
+
+
+
+
 # empty_case = Case(
 #     sapi = """
 #     """,
 #     expected_sql = """
 #     """)
 
-select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12, case13] 
+select_cases = [case1, case2, case3, case4, case5, case6, case7, case10, case11, case12, case13, case14, case15] 
 select_error_cases = [case8, case9]
 non_executable_selects = [case12]
 print(f"select test cases = {len(select_cases) + len(select_error_cases) + len(non_executable_selects)}")

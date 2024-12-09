@@ -6,7 +6,8 @@ Case = namedtuple('Case', ['sapi', 'expected_sql'])
 
 def _query(data: dict[list[dict]]): 
     json_data = json.dumps(data)
-    return f"insert into tree_ values ($${json_data}$$)" 
+    # return f"insert into tree_ values ($${json_data}$$)" 
+    return f"insert $${json_data}$$" 
 
 
 
