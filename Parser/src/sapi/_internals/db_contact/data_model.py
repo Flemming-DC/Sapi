@@ -10,7 +10,8 @@ from sapi._internals.error import CompilerError, DataModelError
 class Table:
     name: str 
     parent: str 
-    columns: list[str] 
+    columns: list[str]
+    primary_key: str
     join_clause: str 
     # foreign_keys: str # a comma seperated list of foreign_keys
 
@@ -29,6 +30,7 @@ class DataModel:
     def __init__(_, dialect: Dialect, trees: list[Tree]):
         _._table_tree_names: list[str] = []
         _._trees_by_table: dict[str, list[str]] = {}
+        _._primary_key_by_tab: dict[str, str] = {}
         _._tables_by_var: dict[str, list[str]]  = {}
         _._tables_by_var_and_tree: dict[tuple[str, str], list[str]] = {}
         _._node_by_tab_and_tree: dict[tuple[str, str], Node] = {}
@@ -38,8 +40,8 @@ class DataModel:
 
         for tree in trees:
             if tree.name in _._table_tree_names:
-                raise DataModelError(f"You cannot have two trees with the same name in the same instance"
-                                f" of the DataModel class. name = {tree.name}")
+                raise DataModelError(f"You cannot have two trees with the same name in the same instance "
+                                     f"of the DataModel class. name = {tree.name}")
             _._table_tree_names.append(tree.name)
             for tab in tree.tables:
                 if tab.name not in _._all_tables:
@@ -50,10 +52,14 @@ class DataModel:
                 if tree.name not in _._trees_by_table[tab.name]: 
                     _._trees_by_table[tab.name].append(tree.name)
 
+                
+                if tab.name not in _._primary_key_by_tab.keys(): 
+                    _._primary_key_by_tab[tab.name] = tab.primary_key
+
                 if tab.name not in _._join_clause_by_tab.keys(): 
                     _._join_clause_by_tab[(tab.name, True)] = tab.join_clause # from child join parent
                     if tab.parent and not tab.join_clause: raise CompilerError(
-                        "Table should have parent without having a rule for how to on join the parent")
+                        "Table should not have parent without having a rule for how to on join the parent")
                     if tab.parent:
                         _._join_clause_by_tab[(tab.name, False)] = tab.join_clause.replace(tab.parent, tab.name, 1) # from parent join child
 
@@ -91,11 +97,8 @@ class DataModel:
 
 
 def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
-    columns_query = dialect.columns_query
-    foreign_keys_query = dialect.foreign_keys_query
-
     cur.execute(f"""
-        WITH columns as ({columns_query})
+        WITH columns as ({dialect.columns_query})
         SELECT 
             tree.schema_name,
             tree.tree_name,
@@ -110,7 +113,7 @@ def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
     columns_data = cur.fetchall()
     
     cur.execute(f"""
-        WITH foreign_keys as ({foreign_keys_query})
+        WITH foreign_keys as ({dialect.foreign_keys_query})
         select 
             tab.sapi_tables_id,
             ref_tab.table_name as parent,
@@ -130,6 +133,20 @@ def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
     join_info_by_table_id = {
         j[0]: {'parent': j[1], 'primary_key_col': j[2], 'foreign_key_col': j[3], 'join_clause': j[4]} 
         for j in join_info}
+
+    cur.execute(f"""
+        WITH primary_keys as ({dialect.primary_keys_query})
+        select 
+            tab.table_name,
+            pk.primary_key_col
+        from {sys_schema}.sapi_tables as tab
+        join {sys_schema}.sapi_trees as trees using (sapi_trees_id)
+        join primary_keys as pk
+            on  trees.schema_name = pk.schema
+            and tab.table_name = pk.table
+        """)
+    primary_keys = cur.fetchall()
+    primary_key_by_tab_ = {pk[0]: pk[1] for pk in primary_keys}
 
     cur.execute(f"""
         select distinct schema_name, table_name
@@ -154,7 +171,9 @@ def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
 
         # now current_tree must exist
         if not current_table or col_row['table_name'] != current_table.name:
-            current_table = Table(name=col_row['table_name'], parent=None, columns=[], join_clause=None)
+            current_table = Table(
+                name=col_row['table_name'], primary_key=primary_key_by_tab_[col_row['table_name']], 
+                parent=None, columns=[], join_clause=None)
             if current_table.name in [t.name for t in current_tree.tables]:
                 raise DataModelError("Table name should be unique inside tree.")
             current_tree.tables.append(current_table)
@@ -165,6 +184,7 @@ def _make_trees(dialect: Dialect, cur: Cursor, sys_schema: str) -> list[Tree]:
                 current_table.join_clause = str(join_info['join_clause']
                     ).replace('__parent__', join_info['parent']
                     ).replace('__keys__', join_info['foreign_key_col'])
+                
 
             qualified_table = current_tree.schema + '.' + current_table.name
             if qualified_table in remaining_expected_tables:
@@ -192,6 +212,7 @@ def is_tree(tok_text: str):  return tok_text in DataModel._current._table_tree_n
 def is_table(tok_text: str): return tok_text in DataModel._current._all_tables
 def tables_by_var(var: str): return DataModel._current._tables_by_var[var]
 def trees_by_table(table_name: str):                     return DataModel._current._trees_by_table[table_name]
+def primary_key_by_tab(table_name: str):                 return DataModel._current._primary_key_by_tab[table_name]
 def join_clause_by_tab(table_name: str, going_up: bool): return DataModel._current._join_clause_by_tab[(table_name, going_up)]
 def node_by_tab_and_tree(tab: str, tree: str):           return DataModel._current._node_by_tab_and_tree[(tab, tree)]
 def tables_by_var_and_tree(var: str, tree: str):         return DataModel._current._tables_by_var_and_tree[(var, tree)]

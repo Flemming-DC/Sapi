@@ -1,5 +1,6 @@
 from typing import Any
 from sapi._internals.db_contact.pep249_database_api_spec_v2 import Cursor
+from sapi._internals.db_contact import data_model
 from sapi._internals.error import QueryError, CompilerError
 
 # ------------- generate insert ------------- #
@@ -10,8 +11,6 @@ def generate_insert(json: dict[list[dict]]) -> tuple[str, list]:
         f"Expected only one tree or subtree to insert into, but received {list(json.keys())}")
     root = list(json.keys())[0]
     data = list(json.values())[0]
-    # if isinstance(data, dict):
-    #     data = [data]
     pickup = _recursive_generate_insert([], root, data, None)
     query = ';\n'.join(p[0] for p in pickup)
     args = []
@@ -39,7 +38,7 @@ def _generate_table_insert(tab_name: str, data: list[dict], parent: str) -> tupl
     # build query and args
     columns = [col for col, datum in data[0].items() if not _is_subtree(datum)]
     if parent:
-        parent_id_name = parent + '_id'
+        parent_id_name = data_model.primary_key_by_tab(parent) # parent + '_id'
         columns = [parent_id_name] + columns
         query += f"with parent as (select max({parent_id_name}) as id from {parent})\n"
     query += f"insert into {tab_name} (" 
@@ -79,7 +78,7 @@ def _recursive_insert_into_tree(cur: Cursor, tab_name: str, data: list[dict], pa
     if bool(parent_id_name) != bool(parent_ids): raise CompilerError("")
     # check that tab_name is alphanumeric
 
-    id_name = tab_name + '_id' # handle user defined name of id
+    id_name = data_model.primary_key_by_tab(tab_name) # tab_name + '_id' # handle user defined name of id
     query, args = _generate_immediate_table_insert(tab_name, data, parent_ids, parent_id_name)
 
     # execute
@@ -116,7 +115,7 @@ def _generate_immediate_table_insert(tab_name: str, data: list[dict], parent_ids
         args += [d for d in row.values() if not _is_subtree(d)]
         if parent_ids:
             args.append(parent_ids[i])
-    id_name = tab_name + '_id' # handle user defined name of id
+    id_name = data_model.primary_key_by_tab(tab_name) # tab_name + '_id' # handle user defined name of id
     # optionally quit the returning clause for the leaves
     query += f"returning {id_name};\n" # non-postgress databases will need something different here.
 

@@ -1,16 +1,13 @@
-from sapi._internals.token_tree import TokenType, TokenTree
+from sapi._internals.token_tree import TokenTree
 from sapi._internals.db_contact import data_model
+from sapi._internals.error import QueryError
 from .path_finder import pathType, Node
 from .tree_join import TreeJoin, Resolvent
-
 
 def make_join_clauses(token_tree: TokenTree, tree_join: TreeJoin, path: pathType, eldest: Node|None): 
     i = tree_join.tree_tok_index
     if not tree_join.first_table:
-        # replace A with a "blank" from clause, such as "from dual" in Oracle or "" in postgres
-        # note that replacing from i + 1 to i + 1 is including the lower bound, but excluding the upper bound
-        token_tree.make_replacement(i - 1, i + 1, data_model.dialect().blank_from_clause_tokens(), False)
-        return
+        raise QueryError("Unused tree in from clause.")
 
     # replace table_tree with first table in join_path
     token_tree.make_replacement(i, i + 1, tree_join.first_table, False)

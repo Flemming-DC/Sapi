@@ -10,8 +10,9 @@ from dataclasses import dataclass
 @dataclass
 class Dialect:
     _name: str
-    blank_from_clause: str
+    # blank_from_clause: str
     columns_query: str
+    primary_keys_query: str
     foreign_keys_query: str
     connect: Connect 
     sapi_deploy_folder: str # ehh... ugly
@@ -20,12 +21,9 @@ class Dialect:
     def __post_init__(_):
         _._glot_dialect = sqlglot.Dialect.get_or_raise(_._name)
         _fix_sqlglot_oversights(_._glot_dialect)
-        # _._blank_from_clause: list[tuple[TokenType, str]] = [(t.token_type, t.text) 
-        #     for t in _._glot_dialect.tokenize(_.blank_from_clause)]
 
     def sqlglot_dialect(_) -> sqlglot.Dialect: return _._glot_dialect
-    # def blank_from_clause_tokens(_): return _._blank_from_clause
-    def blank_from_clause_tokens(_): return _.blank_from_clause
+    # def blank_from_clause_tokens(_): return _.blank_from_clause
 
 
 
@@ -56,7 +54,7 @@ def postgres():
 
     return Dialect(
         _name = "postgres",
-        blank_from_clause = "",
+        # blank_from_clause = "",
         columns_query = """
             SELECT 
                 schema.nspname as schema_name,
@@ -70,6 +68,21 @@ def postgres():
                 and tab.relkind = 'r' -- filter out non-table objects in pg_class (e.g. views, sequences etc.)
                 and schema.nspname not in ('pg_catalog', 'pg_toast', 'information_schema')
             """,
+        primary_keys_query = """
+            SELECT
+                schema.nspname                          AS schema,
+                tab.relname                             AS table,
+                string_agg(distinct col.attname,  ', ') AS primary_key_col
+            FROM pg_constraint AS con
+            JOIN pg_class      AS tab     ON tab.oid = con.conrelid
+            JOIN pg_namespace  AS schema  ON schema.oid = tab.relnamespace
+            JOIN pg_attribute  AS col     ON col.attnum = ANY(con.conkey) AND col.attrelid = con.conrelid
+            WHERE con.contype = 'p'     -- only select foreign keys, not any other constraints
+                and col.attnum > 0      -- exclude system columns
+                and tab.relkind = 'r'   -- filter out non-table objects in pg_class (e.g. views, sequences etc.)
+                and not col.attisdropped 
+            GROUP BY schema.nspname, tab.relname -- anything but fk, pk
+        """, # used by insert
         foreign_keys_query = """
             SELECT
                 schema.nspname                          AS schema,
@@ -92,7 +105,7 @@ def postgres():
                 and ftab.relkind = 'r'  -- filter out non-table objects in pg_class (e.g. views, sequences etc.)
                 and not col.attisdropped 
                 and not fcol.attisdropped 
-            GROUP BY schema.nspname, fschema.nspname, tab.relname , ftab.relname -- anything bu fk, pk
+            GROUP BY schema.nspname, fschema.nspname, tab.relname, ftab.relname -- anything but fk, pk
             """,
         sapi_deploy_folder = "./engine/db_contact/deployment_sql",
         connect = psycopg.Connection.connect,
@@ -103,7 +116,7 @@ def postgres():
 #     import oracledb
 #     return Dialect(
 #         name = "oracle",
-#         blank_from_clause = "from dual",
+#         # blank_from_clause = "from dual",
 #         columns_query = missing,
 #         foreign_keys_query = missing,
 #         sapi_deploy_folder = missing,

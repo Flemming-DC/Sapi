@@ -24,7 +24,7 @@ create table sapi_sys.sapi_tables (
 	table_name text not null, -- check valid name and check that table exists
 	join_clause text not null default 'JOIN __parent__ USING (__keys__)',
 
-	unique (table_name, sapi_trees_id),
+	unique (table_name, sapi_trees_id)
 );
 
 comment on column sapi_sys.sapi_tables.join_clause is

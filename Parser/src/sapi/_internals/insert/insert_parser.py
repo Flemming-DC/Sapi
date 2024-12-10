@@ -13,14 +13,6 @@ _stringtypes = { # dont dublicate this with editor_tok.py
     TokenType.UNICODE_STRING,
     TokenType.STRING,
 }
-        
-        
-        
-        
-        
-        
-        
-        
 
 
 def parse_insert(tokens: list[Token]) -> str|None:
@@ -56,36 +48,6 @@ def _analyze_insert(tokens: list[Token]) -> dict[list[dict]]|None:
     return data
 
 
-# def _analyze_insert_old(tokens: list[Token]) -> tuple[str|None, dict|None]:
-#     if len(tokens) < 6: raise QueryError("Cannot have fewer tokens in insert statement, than [insert, into, identifier, values, (, )]")
-#     _expect(tokens[0], TokenType.INSERT)
-#     _expect(tokens[1], TokenType.INTO)
-
-#     insertable = tokens[2].text
-#     if not data_model.is_tree(insertable):
-#         return None, None # not a tree
-#     if tokens[3].type == TokenType.L_PAREN: raise QueryError(
-#         f"Expected 'values' found '('. \nHint: Don't specify column names, when inserting into a tree.")
-#     if tokens[3].type == TokenType.SELECT: raise QueryError(
-#         f"Expected 'values' found 'select'. \n'Insert into select from' cannot be used upon trees.")
-#     _expect(tokens[3], TokenType.VALUES)
-#     _expect(tokens[4], TokenType.L_PAREN)
-#     if tokens[5].type not in _stringtypes: raise QueryError( # allow placeholder
-#         f"Expected a json-string. Found '{tokens[5].text}', which is not a string, let alone a json-string.")
-
-#     value = tokens[5].text
-#     try: data = json.loads(value)
-#     except Exception as e: raise QueryError(
-#         f"Expected a json-string. Found '{value}', which is a string, but not a json-string: "
-#         f"Json parsing error: {e}")
-
-#     if not any(tok.type == TokenType.R_PAREN for tok in tokens[6:]): QueryError(
-#         f"Opening brace before values was never closed.")
-
-#     # hey, this only works for inserting a single json. expand this into a list of json.
-#     # well technically a single json can contain a list of json. 
-
-#     return insertable, data
 
 
 def _put_args_into_query(query: str, args: list): # doesnt handle dict args
