@@ -1,0 +1,16 @@
+
+
+insert $${'tab_': [{
+        'col_1_': 'from json',
+        'col_2_': 'from json',
+        'tab0_': [{'col0_1_': 'from json', 'col0_2_': 'from json', 'shc_': 'from json'}],
+        'tab1_': [{'col1_1_': 'from json', 'col1_2_': 'from json', 'shc_': 'from json'}],
+        'sht__': [{'tab_id': 1, 'col_1__': 'from json', 'col_2__': 'from json'}],
+        }]}$$
+;
+
+
+
+
+
+

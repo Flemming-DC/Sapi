@@ -1,58 +1,61 @@
 {
-"name": "sapi",
-"description": "Provides syntax highlighting and other editor support for the sapi query language.",
-"author": "fch",
-"bugs": { "url": "https://github.com/Flemming-DC/Sapi/issues" },
-"repository": {
+  "name": "sapi",
+  "description": "Provides syntax highlighting and other editor support for the sapi query language.",
+  "author": "fch",
+  "bugs": { "url": "https://github.com/Flemming-DC/Sapi/issues" },
+  "repository": {
     "type": "git",
     "url": "https://github.com/Flemming-DC/Sapi"
-},
-"license": "MIT",
-"version": "0.0.0",
-"publisher": "fch",
-"categories": [],
-"engines": { "vscode": "^1.75.0" },
-"main": "./client/out/extension",
+  },
+  "license": "MIT",
+  "version": "0.0.0",
+  "publisher": "fch",
+  "categories": [],
+  "engines": { "vscode": "^1.75.0" },
+  "main": "./client/out/extension",
 
-"activationEvents": [
+  "activationEvents": [
     "onLanguage:python"
-],
+  ],
 
-"contributes": {
-    "languages": [{
+  "contributes": {
+    "languages": [
+      {
         "id": "sapi",
-        "aliases": ["sapi"],
-        "extensions": [".sapi"],
+        "aliases": [ "sapi" ],
+        "extensions": [ ".sapi" ],
         "configuration": "./client/comment-bracket.json"
-    }],
+      }
+    ],
 
     "grammars": [
-        {
-            "language": "sapi",
-            "path": "./client/postgres-grammar.json",
-            "scopeName": "source.pgsql"
-        },
-        {
-            "path": "./client/injection-grammar.json",
-            "scopeName": "sapi-py",
-            "injectTo": ["source.python"],
-            "embeddedLanguages": {"meta.embedded.sapi": "sapi"}
-        }
+      {
+        "language": "sapi",
+        "path": "./client/postgres-grammar.json",
+        "scopeName": "source.pgsql"
+      },
+      {
+        "path": "./client/injection-grammar.json",
+        "scopeName": "sapi-py",
+        "injectTo": [ "source.python" ],
+        "embeddedLanguages": { "meta.embedded.sapi": "sapi" }
+      }
     ]
 
-},
+  },
 
 
 
-"scripts": {
-"vscode:prepublish": "npm run compile",
-"compile": "tsc -b",
-"watch": "tsc -b -w",
-"postinstall": "cd client && npm install && cd ../server && npm install && cd .."
-},
-"devDependencies": {
-"@types/node": "^20.5.7",
-"typescript": "^5.6.2"
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "typescript": "^5.6.2"
+  }
 }
-}
-
+    
+    
