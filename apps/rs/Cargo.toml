@@ -1,0 +1,15 @@
+[package]
+name = "sapi_rust_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sapi_compiler = { path = "../../sapi_compiler" }
+
+
+# [[bin]]
+# name = "sandbox"
+# path = "src/sandbox.rs"
+
+
+
