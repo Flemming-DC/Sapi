@@ -1,0 +1,19 @@
+[package]
+name = "sapi_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# sqlx = { version = "0.8.2", features = [ "postgres", "runtime-tokio-rustls" ] }
+# sqlparser = "0.52.0"
+# bumpalo = "3.16.0"
+
+[lib]
+name = "sapi_compiler"
+path = "src/lib.rs"
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+
+# [profile.release]
+# crate-type = ["staticlib"]
+
