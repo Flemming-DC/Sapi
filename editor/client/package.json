@@ -1,0 +1,60 @@
+{
+	"name": "nrs-language-server",
+	"description": "nano rust language server",
+	"license": "MIT",
+	"version": "1.5.0",
+	"categories": [],
+	"keywords": ["sapi", "sql"],
+	"repository": { "url": "https://github.com/Flemming-DC/Sapi" },
+	"engines": { "vscode": "^1.85.0" },
+	"enabledApiProposals": [],
+	"activationEvents": ["onLanguage:nrs"],
+	"main": "target/extension.js",
+	"contributes": {
+		"languages": [{ "id": "nrs", "extensions": [".nrs"] }],
+		"configuration": {
+			"type": "object",
+			"title": "nrs-language-server",
+			"properties": { "nrs-language-server.trace.server": {
+				"type": "string",
+				"scope": "window",
+				"enum": ["off", "messages", "verbose"],
+				"enumDescriptions": ["No traces", "Error only", "Full log"],
+				"default": "off",
+				"description": "Traces the communication between VS Code and the language server."
+			} }
+		}
+	},
+	"files": ["target/**", "LICENSE"],
+	"scripts": {
+		"compile": "npm run check-types && node esbuild.js --production",
+		"check-types": "tsc --noEmit",
+		"watch": "npm-run-all -p watch:*",
+		"watch:esbuild": "node esbuild.js --watch",
+		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+		"prepackage": "cargo build --release && copy /y ..\\..\\target\\release\\nrs-language-server.exe target",
+		"package": "pnpm compile && vsce package --no-dependencies",
+		"postpackage": "copy /y nrs-language-server-1.5.0.vsix ..\\dist"
+	},
+	"devDependencies": {
+		"@types/glob": "8.1.0",
+		"@types/mocha": "10.0.10",
+		"@types/node": "22.10.2",
+		"@typescript-eslint/eslint-plugin": "^8.19.0",
+		"@typescript-eslint/parser": "^8.19.0",
+		"@vscode/vsce": "^3.2.1",
+		"cross-env": "^7.0.2",
+		"esbuild": "^0.24.2",
+		"eslint": "9.17.0",
+		"glob": "11.0.0",
+		"mocha": "11.0.2",
+		"npm-run-all": "^4.1.5",
+		"ts-loader": "^9.5.1",
+		"typescript": "5.4.5",
+		"@vscode/test-electron": "^2.4.1",
+		"vscode-uri": "^3.0.2",
+		"@types/vscode": "1.85.0"
+	},
+	"dependencies": { "vscode-languageclient": "9.0.1" },
+	"packageManager": "pnpm@8.15.7"
+}
