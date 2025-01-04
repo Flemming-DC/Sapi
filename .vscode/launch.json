@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "rust app",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=sapi_rust_app",
+                    "--package=sapi_rust_app"
+                ],
+                "filter": {
+                    "name": "sapi_rust_app",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "python app",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "apps/py/main.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "C# app",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}\\apps\\cs\\cs.csproj",
+            "launchConfigurationId": "TargetFramework=;cs"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test rust app",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=sapi_rust_app",
+                    "--package=sapi_rust_app"
+                ],
+                "filter": {
+                    "name": "sapi_rust_app",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+          "type": "extensionHost",
+          "request": "launch",
+          "name": "editor",
+          "preLaunchTask": "compile",
+          "runtimeExecutable": "${execPath}",
+          "args": ["--extensionDevelopmentPath=${workspaceRoot}/editor/client"],
+          "outFiles": ["${workspaceRoot}/editor/client/out/**/*.js"]
+        },
+    ]
+}

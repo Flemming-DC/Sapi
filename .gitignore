@@ -1,0 +1,14 @@
+**/target
+**/node_modules
+**/editor/out
+**/sandbox
+
+**/target/**
+**/node_modules/**
+**/editor/out/**
+**/sandbox/**
+
+**/dummy.py
+**/dummy.ts
+**.vsix
+
