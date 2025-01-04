@@ -1,0 +1,29 @@
+
+------- Setup extension in vscode ------- 
+! pnpm i
+! cargo build
+? edited package.json
+    old: "devDependencies": "vscode-test": "^1.4.0",
+    new: "devDependencies": "@vscode/test-electron": "^1.4.0",
+! pnpm add typescript -D
+! pnpm compile
+
+------- Deploy extension to user ------- 
+? edited package.json
+	new: "files": ["dist/**", "LICENSE"],
+! edited .vscode/launch.json
+	old: "SERVER_PATH": "${workspaceRoot}/target/debug/nrs-language-server"
+	new: "SERVER_PATH": "${workspaceRoot}/target/release/nrs-language-server"
+! run client to produce the release server .exe 
+! copy release server .exe to dist
+! edited client/src/extension.ts
+	old: const command = process.env.SERVER_PATH || "nrs-language-server";
+	new: const command = path.join(__dirname, "nrs-language-server");
+		 traceOutputChannel.appendLine(`command: ${command}`);
+! pnpm compile
+! pnpm run package
+! copy .vsix and examples/demo.nrs to user
+! at user: code --install-extension nrs-language-server-1.5.0.vsix
+! at user: open examples/demo.nrs in vscode
+
+
