@@ -1,0 +1,32 @@
+
+select:
+	placeholders
+	evt. pass data_model by parameter. Also internally.
+	embeddedment
+	evt. allow omission of reference to tree if you have globally unambigous join rules.
+	evt. hierachic select (make this fit into insert. This would require changing table, but keeping data)
+
+insert:
+	jsonish type
+	placeholders
+	injection
+	fetch fk names
+	don't dublicate string token types
+	
+	evt. replace the immidiate insert with generation of efficient dialect and/or language specific code
+	
+	evt. allow references to other tables or jsonish'es
+	evt. check that tables in insert statement matches tree_name or omit the tree name
+
+update:
+	...
+
+delete:
+	...
+
+evt. upsert:
+
+evt. automatically update data_model on create, alter, drop
+
+
+

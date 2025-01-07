@@ -1,0 +1,43 @@
+
+git:
+	git add . && git commit -m "m" && git push
+
+
+env:
+	create env:     python -m venv <env_name>
+	activate env:   sapi_env\Scripts\activate
+	list packages:  pip list
+
+designer:
+	nb: the environment must be activated first
+	sapi_env\Scripts\activate && qt5-tools designer
+	pyuic5 source.ui -o destination.py  (-x foran source tilføjer en __name__ == '__main__' block) 
+	pyuic5 editor\designer\editor.ui -o editor\auto\editor.py   
+
+packaging:
+	-- update version in toml
+	deactivate
+	py -m build
+	py -m twine upload --repository testpypi dist/*
+	-- new cmd
+	remote_sapi_env\Scripts\activate
+	py -m pip install  --upgrade --pre --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sapi-lib
+	-- if setting up editable install
+	local_sapi_env\Scripts\activate
+	py -m pip install --editable .
+	py -m pip install --editable ..\Parser
+
+extension:
+	npm install
+	npm install --save-dev
+	npm install js-yaml --save-dev
+	npx js-yaml client\postgres-grammar.yml > client\postgres-grammar.json
+
+	-- packaging
+	vsce package --skip-license --out sapi.vsix
+	code --install-extension sapi.vsix
+	code --uninstall-extension sapi.vsix
+
+
+
+

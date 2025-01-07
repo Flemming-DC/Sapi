@@ -1,0 +1,24 @@
+
+try to make stuff into const functions.
+
+sqlparser:
+    a local copy of sqlparser's tokenize_with_location_into_buf function could make it bumpalo friendly.
+    size_of Token and TokenWithSpan are 56, 88 Bytes. Unnecesarily large due to holding values inside enum:
+        size_of::<TokenWithSpan>() = 88
+        size_of::<Token>() = 56
+        size_of::<Location>() = 16
+        size_of::<usize>() = 8
+        size_of::<Word>() = 32
+        size_of::<(String, bool)>() = 32
+        size_of::<char>() = 4
+        size_of::<DollarQuotedString>() = 48
+        size_of::<String>() = 24
+
+    tokens
+        list(type (tiny enum evt with ptr to content))
+        list(span) (aka. line, char span)
+        list(idxSpan)
+        // constructor guarentees equal length
+        evt. functions for lookup by id
+        function for text from id, query (uses idxSpan) (evt. tool for including / excluding delimiters)
+        function for debug display

@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 # sqlx = { version = "0.8.2", features = [ "postgres", "runtime-tokio-rustls" ] }
-# sqlparser = "0.52.0"
-# bumpalo = "3.16.0"
+sqlparser = "0.53.0"
+bumpalo = { version = "3.16.0", features = [ "collections", "boxed" ] } # evt. cut the box feature
+# [patch.crates-io]
+# my-crate = { path = "../sqlparser" } // make sqlparser compatible with bumpalo
 
 [lib]
 name = "sapi_compiler"
@@ -14,6 +16,4 @@ path = "src/lib.rs"
 crate-type = ["rlib", "staticlib", "cdylib"]
 
 
-# [profile.release]
-# crate-type = ["staticlib"]
 
