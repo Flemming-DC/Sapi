@@ -3,7 +3,8 @@ use bumpalo::Bump;
 use bumpalo::collections::Vec as bVec;
 use sqlparser::keywords::Keyword;
 use sqlparser::tokenizer::Token;
-use super::{tokenizer, select};
+use crate::internals::db_contact::DataModel;
+use super::{tokenizer, select, db_contact};
 use super::token_tree::*;
 
 // mod sealed {
@@ -17,7 +18,6 @@ use super::token_tree::*;
 
 // }
 
-pub struct DataModel; // stub
 
 pub fn parse<'a>(sapi_str: String, _model: &DataModel) -> String {
     let bump = Bump::new();

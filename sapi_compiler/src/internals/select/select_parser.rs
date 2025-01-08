@@ -14,7 +14,7 @@ pub fn parse_select<'a>(bump: &'a Bump, token_tree: &'a TokenTree<'a>) -> bVec<'
     join_generator::resolve_trees_to_tabs(token_tree, &resolvents);
     for tree_join in tree_joins {
         let (path, eldest) = path_finder::join_path(
-            tree_join.referenced_tables, tree_join.first_table, tok_text(tree_join.tree_tok));
+            &tree_join.referenced_tables, tree_join.first_table, tok_text(&tree_join.tree_tok));
         join_generator::make_join_clauses(token_tree, &tree_join, path, eldest);
     }
 

@@ -1,5 +1,10 @@
 
 
+pub enum SapiError {
+    QueryError,
+    DataModelError,
+}
+
 // class CompilerError(Exception): ...
 // class QueryError(Exception): ...
 // class DataModelError(Exception): ...

@@ -27,5 +27,5 @@ fn main() {
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
         ";
-    parser::parse(sapi_query.into(), &parser::DataModel);
+    parser::parse(sapi_query.into(), &DataModel);
 }

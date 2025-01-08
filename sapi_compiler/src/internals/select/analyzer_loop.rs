@@ -1,9 +1,9 @@
-use crate::internals::token_tree::TokenTree; // , Token, TokenType
+use sqlparser::{keywords::Keyword, tokenizer::Token};
+use crate::internals::token_tree::{tok_text, TokNode, TokenTree}; // , Token, TokenType
 
 pub struct AnalyzerLoop<'a> {
     token_tree: &'a TokenTree<'a>,
-    // tokens, // could be eliminated in favor of _._token_tree.tokens
-    i: i32, // index = token_index, not sapi_str index
+    i: isize, // index = token_index, not sapi_str index
     count: usize,
     breakpoint_index: Option<usize>,
 }
@@ -12,58 +12,81 @@ impl<'a> AnalyzerLoop<'a> {
     pub fn new(token_tree: &'a TokenTree<'a>) -> Self {
         AnalyzerLoop {
             token_tree: token_tree,
-            // tokens: token_tree.tokens // could be eliminated in favor of _._token_tree.tokens
+            // tokens: token_tree.tokens // could be eliminated in favor of self._token_tree.tokens
             i: 0 - 1, // index = token_index, not sapi_str index (it starts with one less than the value at the first step)
             count: token_tree.tokens.len(),
             breakpoint_index: None,
         }
     }
+    pub fn tok(&self) -> &TokNode { &self.token_tree.tokens[self.i as usize] }
+
+    
+    pub fn peek(&self, distance: isize) -> Option<&TokNode> {
+        let index = self.i + distance;
+        if index < 0 || index as usize >= self.count {
+            return None; }
+        return Some(&self.token_tree.tokens[index as usize]);
+    }
+    
+    pub fn next(&mut self) -> bool {
+        // Step to next element and return true, if a next element was found
+        self.i += 1;
+        if self.i as usize >= self.count {
+            return false; }
+        if self.breakpoint_index != None && Some(self.i as usize) >= self.breakpoint_index {
+            unsafe { std::arch::asm!("int3"); } } // this triggers a breakpoint 
+            self.breakpoint_index = None;
+        return true;
+    }
+    
+    pub fn found(&self, token_types: &[Token], after_steps: isize) -> bool {
+        // Checks for tokenType after presicely the specified number of steps.
+        let index = self.i + after_steps;
+        if index < 0 || index as usize >= self.count {
+            return false; }
+        // token_types = if isinstance(tokenType, list) {tokenType}  else {[tokenType]};
+        match &self.token_tree.tokens[index as usize] {
+            TokNode::Tree(_) => { return false; }
+            TokNode::Leaf(tok) => { return matches!(tok, token_types); }
+        }
+    }
+    pub fn found_kw(&self, keywords: &[Keyword], after_steps: isize) -> bool {
+        // Checks for tokenType after presicely the specified number of steps.
+        let index = self.i + after_steps;
+        if index < 0 || index as usize >= self.count {
+            return false; }
+        // token_types = if isinstance(tokenType, list) {tokenType}  else {[tokenType]};
+        if let TokNode::Leaf(Token::Word(word)) = self.tok() { 
+            return keywords.contains(&word.keyword) }
+        else { 
+            return false;}
+    }
+
+    // if let TokNode::Leaf(Token::Word(word)) = tok { 
+    
+    pub fn index(&self) -> isize { self.i }
+
+    pub fn at_end(&self) -> bool { self.i as usize >= self.count }
+    pub fn next_at_end(&self) -> bool { self.i as usize + 1 >= self.count }
+
+    pub fn has_passed(&self, stopping_obj: &str) -> bool {
+        // Meant for debugging
+        return self.at_end() || self.view(None, Some(0)).contains(stopping_obj) // self._token_tree.has_passed(stopping_obj, self.tok().start)
+    }   
+
+    pub fn view(&self, from_: Option<isize>, to: Option<isize>) -> String {
+        // Meant for debugging
+        let from_ =  if from_ != None {(from_.expect("already checked") + self.i) as usize} else {0};
+        let to = if to != None {(to.expect("already checked") + self.i) as usize} else {self.token_tree.tokens.len() - 1};
+        
+        let mut out = String::from("");
+        for t in &self.token_tree.tokens[from_..to]{
+            out += t.text();
+            out += " ";
+        }
+        return out;
+    }
 }
-//     pub fn tok(_): 
-//         return _._tokens[_._i]
-
-
-    
-//     pub fn peek(_, distance: int = 1) -> Token|None: 
-//         index = _._i + distance
-//         if index < 0 or index >= _._count:
-//             return None
-//         return _._tokens[index]
-
-    
-//     pub fn next(_) -> bool:
-//         "Step to next element and return True, if a next element was found"
-//         _._i += 1
-//         if _._i >= _._count:
-//             return False
-//         if _._breakpoint_index is not None and _._i >= _._breakpoint_index:
-//             breakpoint()
-//             _._breakpoint_index = None
-//         return True
-    
-    
-//     pub fn found(_, tokenType: TokenType|list[TokenType], after_steps: int) -> bool:
-//         "Checks for tokenType after presicely the specified number of steps."
-//         index = _._i + after_steps
-//         if index < 0 or index >= _._count:
-//             return False
-//         tokenTypes = tokenType if isinstance(tokenType, list) else [tokenType]
-//         return _._tokens[index].type in tokenTypes
-    
-    
-//     pub fn index(_): return _._i 
-    
-    
-//     pub fn has_passed(_, stopping_obj: str) -> bool:
-//         return _.at_end() or stopping_obj in _.view() #_._token_tree.has_passed(stopping_obj, _.tok().start)
-    
-//     pub fn at_end(_, distance: int = 0): return _._i + distance >= _._count
-
-//     pub fn view(_, from_: int|None = None, to: int = 0):
-//         "Meant for debugging"
-//         from_ = from_ + _._i if from_ is not None else 0
-//         to = to + _._i if to is not None else -1
-//         return ' '.join(t.text for t in _._tokens[from_:to])
 
 
 

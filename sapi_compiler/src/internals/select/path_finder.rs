@@ -2,6 +2,7 @@
 // from anytree import walker, Node
 // from sapi._internals.db_contact import data_model
 // from sapi._internals.error import CompilerError
+use crate::internals::db_contact::data_model::Node;
 
 // pathType = list[tuple[Node, Node]]
 // @dataclass
@@ -10,8 +11,7 @@
 //     nodes: list[Node] = field(default_factory=list) // = []
 //     eldest: Node|None = None
 
-pub struct Node; // stup
-pub struct PathType; // stup
+pub struct PathType; // stub
 
 
 pub fn join_path(table_names: &[&str], first_table: Option<&str>, tree_name: &str) -> (PathType, Option<Node>) { 

@@ -12,11 +12,13 @@
 // from sapi import _test # only for use by Sapi AutoTests
 
 pub mod parser;
+pub use db_contact::DataModel;
 
 mod tokenizer;
 mod token_tree;
 mod error;
 mod generate_sql_str;
 mod select;
+mod db_contact;
 
 

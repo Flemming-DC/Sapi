@@ -1,6 +1,6 @@
 
 use bumpalo::Bump;
-use sqlparser::tokenizer::{Token, TokenWithSpan}; // sqlglot.tokens import TokenType
+use sqlparser::{keywords::Keyword, tokenizer::{Token, TokenWithSpan}}; // sqlglot.tokens import TokenType
 use bumpalo::collections::Vec as bVec;
 // use error::CompilerError;
 
@@ -24,7 +24,7 @@ use bumpalo::collections::Vec as bVec;
 // }
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StrReplacement<'a> {
     pub str_from: usize,
     pub str_to: usize,
@@ -32,10 +32,25 @@ pub struct StrReplacement<'a> {
     pub is_new_clause: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokNode<'a> { Leaf(Token), Tree(&'a TokenTree<'a>) } // size_of Token and TokenWithSpan are 56, 88 Bytes. Unnecesarily large.
 
-#[derive(Debug)]
+impl<'a> TokNode<'a> {
+    pub fn text(&self) -> &'static str { "" } // where to put this?
+    pub fn is_identifier(&self) -> bool { 
+        if let TokNode::Leaf(Token::Word(word)) = self { 
+            word.keyword == Keyword::NoKeyword // check if word.keyword is empty (whatever that means)
+        } else {false} 
+    }
+    pub fn is_kw(&self, keyword: Keyword) -> bool { 
+        if let TokNode::Leaf(Token::Word(word)) = self { 
+            word.keyword == keyword // check if word.keyword is empty (whatever that means)
+        } else {false} 
+    }
+    
+}
+
+#[derive(Debug, PartialEq)]
 pub struct TokenTree<'a> {
     pub tokens: bVec<'a, TokNode<'a>>,
     len_sapi_str: usize, // (evt. only store at the root tree) // contains sapi code for one statement

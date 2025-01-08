@@ -1,13 +1,14 @@
+use bumpalo::collections::Vec as bVec;
 use crate::internals::token_tree::TokenTree;
 use sqlparser::tokenizer::Token;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TreeJoin<'a> {
-    pub tree_tok: &'a Token, // this is not a TokenTree, but an identifier for a table_tree
+    pub tree_tok: Token, // this is not a TokenTree, but an identifier for a table_tree
     pub tree_tok_index: usize,
     pub on_clause_end_index: usize,
     pub first_table: Option<&'a str>, // = None // the unique element of on_clause_tables except prior_tables
-    pub referenced_tables: &'a [&'a str], // = [] // referenced tables. aka. those tables that must be autojoined.
+    pub referenced_tables: bVec<'a, &'a str>, // = [] // referenced tables. aka. those tables that must be autojoined.
 }
 //     fn __str__(_) {
 //         return 'JoinData(' + ', '.join([
@@ -18,8 +19,9 @@ pub struct TreeJoin<'a> {
 //         ]) + ')'
 // }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Resolvent<'a> { // info to resolve a tree into a table
-    index: usize,
-    tab_name: &'a str,
+    pub index: usize,
+    pub tab_name: &'a str,
     // tree name isnt specified
 }

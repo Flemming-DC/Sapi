@@ -1,7 +1,8 @@
 // from sapi._internals.db_contact import data_model
 // from sapi._internals.error import QueryError
 // from .path_finder import pathType, Node
-use super::path_finder::{PathType, Node};
+use crate::internals::db_contact::data_model::Node;
+use super::path_finder::PathType;
 use crate::internals::token_tree::TokenTree; // , Token, TokenType
 use super::tree_join::{TreeJoin, Resolvent};
 
