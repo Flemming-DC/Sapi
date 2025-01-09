@@ -1,3 +1,4 @@
+use bumpalo::Bump;
 use sapi_compiler::*;
 
 #[cfg(test)]
@@ -14,6 +15,7 @@ mod tests {
 
 
 fn main() {
+    let model_bumb = Bump::new();
     // sqlparser::tokenizer
     let sapi_query = r"
         WITH cte AS (
@@ -27,5 +29,6 @@ fn main() {
         FROM cte 
         join tree ON tree.col_1 = cte.col0_1
         ";
-    parser::parse(sapi_query.into(), &DataModel);
+    let data_model = DataModel::new(&model_bumb, &Dialect{}, &[]);
+    parser::parse(sapi_query.into(), &data_model);
 }

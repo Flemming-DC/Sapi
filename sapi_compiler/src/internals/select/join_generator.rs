@@ -34,7 +34,10 @@ pub fn make_join_clauses(token_tree: &TokenTree, tree_join: &TreeJoin, path: Pat
     
 
 pub fn resolve_trees_to_tabs(token_tree: &TokenTree, resolvents: &[Resolvent]) {
-//     for r in resolvents: // ie.e tables resolved from trees 
-//         token_tree.make_replacement(r.index, r.index + 1, r.tab_name, False)
+    // let mut tt = token_tree.clone();
+    // for r in resolvents { // ie.e tables resolved from trees 
+    //     token_tree.make_replacement(r.index, r.index + 1, r.tab_name, false)
+    // }
+    // return token_tree
 }
 

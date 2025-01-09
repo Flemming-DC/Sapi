@@ -22,3 +22,6 @@ sqlparser:
         evt. functions for lookup by id
         function for text from id, query (uses idxSpan) (evt. tool for including / excluding delimiters)
         function for debug display
+
+use 
+    set_allocation_limit during mem consumption test

@@ -34,7 +34,7 @@ impl<'a> AnalyzerLoop<'a> {
         if self.i as usize >= self.count {
             return false; }
         if self.breakpoint_index != None && Some(self.i as usize) >= self.breakpoint_index {
-            unsafe { std::arch::asm!("int3"); } } // this triggers a breakpoint 
+            #[cfg(debug_assertions)] unsafe { std::arch::asm!("int3"); } } // this triggers a breakpoint 
             self.breakpoint_index = None;
         return true;
     }
@@ -69,12 +69,12 @@ impl<'a> AnalyzerLoop<'a> {
     pub fn at_end(&self) -> bool { self.i as usize >= self.count }
     pub fn next_at_end(&self) -> bool { self.i as usize + 1 >= self.count }
 
-    pub fn has_passed(&self, stopping_obj: &str) -> bool {
+    #[cfg(debug_assertions)] pub fn has_passed(&self, stopping_obj: &str) -> bool {
         // Meant for debugging
         return self.at_end() || self.view(None, Some(0)).contains(stopping_obj) // self._token_tree.has_passed(stopping_obj, self.tok().start)
     }   
 
-    pub fn view(&self, from_: Option<isize>, to: Option<isize>) -> String {
+    #[cfg(debug_assertions)] pub fn view(&self, from_: Option<isize>, to: Option<isize>) -> String {
         // Meant for debugging
         let from_ =  if from_ != None {(from_.expect("already checked") + self.i) as usize} else {0};
         let to = if to != None {(to.expect("already checked") + self.i) as usize} else {self.token_tree.tokens.len() - 1};

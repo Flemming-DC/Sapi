@@ -68,6 +68,7 @@ fn cut_leading_junk<'a>(bump: &'a Bump, tokens: &'a [Token]) -> bVec<'a, Token> 
     for (i, tok) in tokens.iter().enumerate() {
         // if tok.type in _keywords:
         if let Token::Word(word) = tok {
+            if word.keyword == Keyword::NoKeyword {continue;}
             // check if word.keyword is empty (whatever that means)
             // tokens = tokens[i:] // modifying list is ok, since we break the loop
             for tok in tokens[i..].iter() {}
@@ -77,11 +78,7 @@ fn cut_leading_junk<'a>(bump: &'a Bump, tokens: &'a [Token]) -> bVec<'a, Token> 
     return bVec::from_iter_in(tokens.iter().map(|t| (*t).clone()), &bump);
 }
 
-//     /// A keyword (like SELECT) or an optionally quoted SQL identifier
-//     Word(Word), 
-//         /// If the word was not quoted and it matched one of the known keywords,
-//         /// this will have one of the values from dialect::keywords, otherwise empty
-//         pub keyword: Keyword,
-//     dialect::keywords
-// // tokenizer::ALL_KEYWORDS
-// //      use crate::keywords::{Keyword, ALL_KEYWORDS, ALL_KEYWORDS_INDEX};
+
+// tokenizer::ALL_KEYWORDS
+//      use crate::keywords::{Keyword, ALL_KEYWORDS, ALL_KEYWORDS_INDEX};
+

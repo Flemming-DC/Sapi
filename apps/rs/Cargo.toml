@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 sapi_compiler = { path = "../../sapi_compiler" }
+bumpalo = { version = "3.16.0", features = [ "collections", "boxed" ] } # should not be necessary
 
 
 # [[bin]]

@@ -14,7 +14,7 @@ use crate::internals::db_contact::data_model::Node;
 pub struct PathType; // stub
 
 
-pub fn join_path(table_names: &[&str], first_table: Option<&str>, tree_name: &str) -> (PathType, Option<Node>) { 
+pub fn join_path<'a>(table_names: &[&str], first_table: Option<&str>, tree_name: &str) -> (PathType, Option<Node<'a>>) { 
     (PathType {}, None)
 //     if not first_table:
 //         return [], None // this means that there is nothing to join. e.g. "select 1 from A"

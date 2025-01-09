@@ -13,6 +13,7 @@
 
 pub mod parser;
 pub use db_contact::DataModel;
+pub use db_contact::deployment::Dialect;
 
 mod tokenizer;
 mod token_tree;

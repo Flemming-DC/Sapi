@@ -37,6 +37,8 @@ pub enum TokNode<'a> { Leaf(Token), Tree(&'a TokenTree<'a>) } // size_of Token a
 
 impl<'a> TokNode<'a> {
     pub fn text(&self) -> &'static str { "" } // where to put this?
+    pub fn start(&self) -> usize { 0 } // where to put this?
+    pub fn end(&self) -> usize { 0 } // where to put this?
     pub fn is_identifier(&self) -> bool { 
         if let TokNode::Leaf(Token::Word(word)) = self { 
             word.keyword == Keyword::NoKeyword // check if word.keyword is empty (whatever that means)
@@ -80,35 +82,31 @@ impl<'a> TokenTree<'a> {
     //     return str_index >= location and location != -1
         
 
-//     pub fn make_replacement(_, from_: int, to: int, new_text: str, is_new_clause: bool):
-//         count = len(_.tokens)
-//         if from_ < 0 or to > count:
-//             raise CompilerError("index out of bounds")
-//         if to < from_:
-//             raise CompilerError("to < from_ is an error.")
-                
-//         // save str data
-//         next = _._next_token // also = from_tok and to_tok
-//         from_tok: Token|None = _.tokens[from_] if from_ < count else next
-//         str_from = from_tok.start if from_tok else _._len_sapi_str
+    pub fn make_replacement(&mut self, from_: usize, to: usize, new_text: &'a str, is_new_clause: bool) {
+        let count = self.tokens.len();
+        if to > count { panic!("index out of bounds"); }
+        if to < from_ { panic!("to < from_ is an error."); }
 
-//         before_to_tok: Token|None = _.tokens[to - 1] if to > 0 and to - 1 < count else next if to > 0 else None
-//         str_to = str_from if to == from_ else before_to_tok.end + 1 if before_to_tok else _._len_sapi_str // traditional
+        // save str data
+        let next = self.next_token.as_ref().map(|n|TokNode::Leaf(n.clone())); // also = from_tok and to_tok
+        let from_tok = if from_ < count {Some(self.tokens[from_].clone())} else {next.clone()};
+        let str_from = if from_tok != None {from_tok.expect("checked").start()} else {self.len_sapi_str};
+
+        let before_to_tok = if to > 0 && to - 1 < count {Some(self.tokens[to - 1].clone())} else if to > 0 {next} else {None};
+        let str_to = if to == from_ {str_from} else if before_to_tok != None {before_to_tok.expect("checked").end() + 1} else {self.len_sapi_str}; // traditional
         
-//         _._str_replacements.append(StrReplacement(str_from, str_to, new_text, is_new_clause))
-
+        self.str_replacements.push(StrReplacement {str_from, str_to, text: new_text, is_new_clause });
+    }
 
 
 
     pub fn recursive_str_replacements(&self, bump: &'a Bump) -> bVec<'a, StrReplacement<'a>> {
-        bVec::new_in(bump)
-//         "used by editor, but not by other parts of parser."
-//         str_replacements: list[StrReplacement] = []
-//         str_replacements += _._str_replacements
-//         for tok in _.tokens:
-//             if isinstance(tok, TokenTree):
-//                 str_replacements += tok.recursive_str_replacements()
-//         return str_replacements
+        // used by editor, but not by other parts of parser.
+        let mut str_replacements = bVec::from_iter_in(self.str_replacements.iter().cloned(), bump);
+        for tok in &self.tokens {
+            if let TokNode::Tree(tok) = tok {
+                str_replacements.extend_from_slice(&tok.recursive_str_replacements(bump)); }}
+        return str_replacements;
     }
 }
 
