@@ -11,8 +11,10 @@
 // from sapi import _editor # only for use by Sapi Editor
 // from sapi import _test # only for use by Sapi AutoTests
 
+pub mod tools;
 pub mod ffi;
 pub mod compiler;
+pub use tools::*;
 pub use db_contact::DataModel;
 pub use db_contact::data_model::{Table, Tree}; // temp
 

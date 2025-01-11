@@ -4,6 +4,7 @@ use sqlparser::keywords::Keyword;
 use sqlparser::tokenizer::{Token, TokenWithSpan, Tokenizer, TokenizerError, Whitespace};
 use sqlparser::dialect::{dialect_from_str, PostgreSqlDialect};
 use super::token_tree::{TokenTree, TokNode};
+use crate::Q;
 
 // Result<Vec<TokenWithSpan>, TokenizerError>
 pub fn tokenize<'a>(bump: &'a Bump, dialect_name: &str, sapi_stmt: &str) -> Option<&'a TokenTree<'a>> {
@@ -29,14 +30,13 @@ fn make_nested_tok_tree<'a>(bump: &'a Bump, all_tokens: &[Token], mut i: usize, 
     let token_count = all_tokens.len();
     let mut tokens_at_this_level: bVec<TokNode> = bVec::with_capacity_in(10, &bump); // number is a guess
 
-    fn _continue(i: usize, depth: usize, token_count: usize, tok: &Token) -> bool {
+    let continue_ = |i: usize, depth: usize|  {
         if i >= token_count { return false; } 
-        let depth_goes_negative = (*tok == Token::RParen && depth <= 0);
-        return (*tok == Token::SemiColon) && !depth_goes_negative;
-    }
-       
-    
-    while _continue(i, depth, token_count, &all_tokens[i]) {
+        let depth_goes_negative = (all_tokens[i] == Token::RParen && depth <= 0);
+        return (all_tokens[i] != Token::SemiColon) && !depth_goes_negative;
+    };
+
+    while continue_(i, depth) {
         let mut tok_node = TokNode::Leaf(all_tokens[i].clone());
         match &all_tokens[i] {
             Token::LParen => { depth += 1; } // evt. check if next token if a sub query start

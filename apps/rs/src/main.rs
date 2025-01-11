@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports, unused_variables, unused_parens)]
 // use bumpalo::Bump;
 use sapi_compiler::*;
 
@@ -60,13 +61,13 @@ fn main() {
         JOIN tab1 USING (tab_id)
         JOIN tab10 USING (tab1_id)
     ";
-    println!("----- expected -----");
-    println!("{:#}", &expected_sql);
+    // println!("----- expected -----");
+    // println!("{:#}", &expected_sql);
 
-    println!("----- actual -----");
-    println!("{:#}", &sql);
-    println!();
+    // println!("----- actual -----");
+    // println!("{:#}", &sql);
+    // println!();
 
-    assert!(&sql == expected_sql);
+    // assert!(&sql == expected_sql);
 
 }

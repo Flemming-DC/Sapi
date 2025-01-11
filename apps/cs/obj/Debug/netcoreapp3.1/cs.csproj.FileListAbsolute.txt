@@ -40,3 +40,4 @@ c:\Mine\Rust\sapi\apps\cs\obj\Debug\netcoreapp3.1\cs.csproj.CoreCompileInputs.ca
 c:\Mine\Rust\sapi\apps\cs\obj\Debug\netcoreapp3.1\cs.dll
 c:\Mine\Rust\sapi\apps\cs\obj\Debug\netcoreapp3.1\cs.pdb
 c:\Mine\Rust\sapi\apps\cs\obj\Debug\netcoreapp3.1\cs.genruntimeconfig.cache
+c:\Mine\Rust\sapi\apps\cs\obj\Debug\netcoreapp3.1\cs.sourcelink.json

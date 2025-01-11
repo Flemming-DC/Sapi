@@ -1,5 +1,7 @@
+use std::hint::black_box;
+
 use sqlparser::{keywords::Keyword, tokenizer::Token};
-use crate::internals::token_tree::{tok_text, TokNode, TokenTree}; // , Token, TokenType
+use crate::{brk, brk_if, internals::token_tree::{tok_text, TokNode, TokenTree}, Q}; // , Token, TokenType
 
 pub struct AnalyzerLoop<'a> {
     token_tree: &'a TokenTree<'a>,
@@ -18,7 +20,8 @@ impl<'a> AnalyzerLoop<'a> {
             breakpoint_index: None,
         }
     }
-    pub fn tok(&self) -> &TokNode { &self.token_tree.tokens[self.i as usize] }
+    pub fn tok(&self) -> &TokNode { 
+        &self.token_tree.tokens[self.i as usize] }
 
     
     pub fn peek(&self, distance: isize) -> Option<&TokNode> {
@@ -32,10 +35,11 @@ impl<'a> AnalyzerLoop<'a> {
         // Step to next element and return true, if a next element was found
         self.i += 1;
         if self.i as usize >= self.count {
-            return false; }
+            return false; 
+        }
         if self.breakpoint_index != None && Some(self.i as usize) >= self.breakpoint_index {
-            #[cfg(debug_assertions)] unsafe { std::arch::asm!("int3"); } } // this triggers a breakpoint 
-            self.breakpoint_index = None;
+            brk!();
+            self.breakpoint_index = None;}
         return true;
     }
     

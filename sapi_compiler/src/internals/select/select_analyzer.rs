@@ -4,7 +4,8 @@ use sqlparser::keywords::Keyword;
 use sqlparser::tokenizer::Token;
 use crate::internals::error::SapiError::QueryError; //, CompilerError
 use crate::internals::db_contact::data_model::DataModel;
-use crate::internals::token_tree::{tok_text, TokNode, TokenTree}; // , Token, TokenType
+use crate::internals::token_tree::{tok_text, TokNode, TokenTree};
+use crate::Q; // , Token, TokenType
 use super::analyzer_loop::AnalyzerLoop;
 use super::tree_join::{TreeJoin, Resolvent};
 
@@ -30,10 +31,12 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, mut lup: Analyz
             if let Some(on_clause_tables_in_join) = on_clause_tables_in_join {
                 tree_joins.push(tree_join);
                 tabs_in_on_clauses.push(on_clause_tables_in_join.clone());
-                continue }
+                continue 
             } else { panic!("INTERNAL COMPILER ERROR: Inkonsistent None case."); }
+        }
         
         // find referenced tables and resolve trees outside the from clause
+        if lup.at_end() {break;} 
         let (ref_tab, resolvent) = table_ref_and_resolvent(bump, model, &lup);
         if let Some(r) = resolvent { if resolvents.contains(&r) {
             resolvents.push(r); }}
@@ -52,14 +55,14 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLo
     // (None, None, bVec::new_in(bump))
     if !lup.found_kw(&[Keyword::FROM, Keyword::JOIN], 0) {
         return (None, None, bVec::new_in(bump)); }
-    lup.next();
+    if !lup.next() {return (None, None, bVec::new_in(bump));}
     // if not lup.found([Token::VAR, Token::IDENTIFIER], 0) {
     //     raise QueryError("expected identifier or variable after from / join."); }
     
     // pass through join_obj prefix
     while lup.found(&[Token::Period], 1) {
-        lup.next();
-        lup.next();
+        if !lup.next() {return (None, None, bVec::new_in(bump));}
+        if !lup.next() {return (None, None, bVec::new_in(bump));}
     }
     // if lup.at_end() {
     //     raise QueryError("Encountered end of query while parsing prefix (such as schem.tree.table). "
@@ -86,7 +89,7 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLo
     let mut resolvents: bVec<Resolvent> = bVec::with_capacity_in(1, bump);
     loop {
         if on_clause_done(&lup) { break; }
-        lup.next();
+        if !lup.next() {return (None, None, bVec::new_in(bump));}
         let resolved_tab = None;
         // resolve tree prefixes
         if model.is_tree(lup.tok().text()) {

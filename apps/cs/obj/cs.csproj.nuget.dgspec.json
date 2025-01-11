@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj": {}
+    "c:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj": {}
   },
   "projects": {
-    "C:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj": {
+    "c:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj",
+        "projectUniqueName": "c:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj",
         "projectName": "cs",
-        "projectPath": "C:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj",
+        "projectPath": "c:\\Mine\\Rust\\sapi\\apps\\cs\\cs.csproj",
         "packagesPath": "C:\\Users\\flem1\\.nuget\\packages\\",
-        "outputPath": "C:\\Mine\\Rust\\sapi\\apps\\cs\\obj\\",
+        "outputPath": "c:\\Mine\\Rust\\sapi\\apps\\cs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

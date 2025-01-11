@@ -17,7 +17,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/apps/rs"
         },
         {
             "name": "python app",
@@ -50,7 +50,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/apps/rs"
         },
         {
           "type": "extensionHost",
@@ -60,6 +60,16 @@
           "runtimeExecutable": "${execPath}",
           "args": ["--extensionDevelopmentPath=${workspaceRoot}/editor/client"],
           "outFiles": ["${workspaceRoot}/editor/client/out/**/*.js"]
+        },
+        {
+            "name": "Debug rust app",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/sapi_rust_app.exe",
+            "args": [], //"release"],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "rust: cargo build"
+            // "preLaunchTask": "rust: cargo test"
         },
     ]
 }

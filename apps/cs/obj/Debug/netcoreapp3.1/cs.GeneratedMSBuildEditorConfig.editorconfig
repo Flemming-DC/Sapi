@@ -1,6 +1,6 @@
 is_global = true
 build_property.RootNamespace = cs
-build_property.ProjectDir = C:\Mine\Rust\sapi\apps\cs\
+build_property.ProjectDir = c:\Mine\Rust\sapi\apps\cs\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.CsWinRTUseWindowsUIXamlProjections = false
