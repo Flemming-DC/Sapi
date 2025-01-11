@@ -19,15 +19,16 @@ use super::token_tree::*;
 // }
 
 
-pub fn parse<'a>(sapi_str: String, _model: &DataModel) -> String {
+pub fn compile<'a>(sapi_str: &str, model_id: usize) -> String {
     let bump = Bump::new();
-    // data_model.set_current(model)
+    let model = DataModel::get_model_copy(&bump, model_id);
+
     let statements: Vec<&str> = sapi_str.split(';').map(|s| s.trim()).collect();
     let mut sql_tok_trees_str: bVec<&str> = bVec::with_capacity_in(statements.len(), &bump);
     let mut replacements: bVec<bVec<StrReplacement>> = bVec::with_capacity_in(statements.len(), &bump);
     for stmt in statements {
-        if let Some(sapi_tok_tree) = tokenizer::tokenize(&bump, stmt) {
-            let (sql, str_replacements) = parse_token_tree(&bump, stmt, sapi_tok_tree);
+        if let Some(sapi_tok_tree) = tokenizer::tokenize(&bump, model.dialect(), stmt) {
+            let (sql, str_replacements) = parse_token_tree(&bump, model, stmt, sapi_tok_tree);
             sql_tok_trees_str.push(sql);
             replacements.push(str_replacements); // unused for all but one return type
         }
@@ -39,12 +40,12 @@ pub fn parse<'a>(sapi_str: String, _model: &DataModel) -> String {
 
 
 
-fn parse_token_tree<'a>(bump: &'a Bump, sapi_stmt: &'a str, token_tree: &'a TokenTree<'a>) -> (&'a str, bVec<'a, StrReplacement<'a>>) {
+fn parse_token_tree<'a>(bump: &'a Bump, model: &DataModel, sapi_stmt: &'a str, token_tree: &'a TokenTree<'a>) -> (&'a str, bVec<'a, StrReplacement<'a>>) {
     // Parse sapi TokenTree to sql TokenTree.
     // parse sub_trees
     for tok in &token_tree.tokens {
         if let TokNode::Tree(tt) = tok { 
-            parse_token_tree(&bump, sapi_stmt, tt);
+            parse_token_tree(&bump, &model, sapi_stmt, tt);
         }
     }
     // parse leaves
@@ -54,7 +55,7 @@ fn parse_token_tree<'a>(bump: &'a Bump, sapi_stmt: &'a str, token_tree: &'a Toke
         if let TokNode::Leaf(Token::Word(word)) = tok { 
             match word.keyword {
                 Keyword::SELECT => {
-                    replacements = select::parse_select(bump, &token_tree); // this only changes the leaf tokens
+                    replacements = select::parse_select(bump, model, &token_tree); // this only changes the leaf tokens
                     // sql = generate_sql_str::make_str(sapi_stmt, replacements);
                     break;
                 }

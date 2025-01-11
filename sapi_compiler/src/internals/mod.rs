@@ -11,9 +11,10 @@
 // from sapi import _editor # only for use by Sapi Editor
 // from sapi import _test # only for use by Sapi AutoTests
 
-pub mod parser;
+pub mod ffi;
+pub mod compiler;
 pub use db_contact::DataModel;
-pub use db_contact::deployment::Dialect;
+pub use db_contact::data_model::{Table, Tree}; // temp
 
 mod tokenizer;
 mod token_tree;

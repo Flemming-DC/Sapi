@@ -4,12 +4,14 @@
 use bumpalo::Bump;
 use bumpalo::collections::{Vec as bVec, String as bString};
 use crate::internals::token_tree::{TokenTree, StrReplacement, tok_text};
+use crate::DataModel;
 use super::tree_join::{TreeJoin, Resolvent};
 use super::analyzer_loop::AnalyzerLoop;
 use super::*;
 
-pub fn parse_select<'a>(bump: &'a Bump, token_tree: &'a TokenTree<'a>) -> bVec<'a, StrReplacement<'a>> {
-    let (tree_joins, resolvents) = select_analyzer::find_tree_joins(bump, AnalyzerLoop::new(token_tree));
+pub fn parse_select<'a>(bump: &'a Bump, model: &DataModel, token_tree: &'a TokenTree<'a>) -> bVec<'a, StrReplacement<'a>> {
+    let (tree_joins, resolvents) = select_analyzer::find_tree_joins(
+        bump, model, AnalyzerLoop::new(token_tree));
 
     join_generator::resolve_trees_to_tabs(token_tree, &resolvents);
     for tree_join in tree_joins {

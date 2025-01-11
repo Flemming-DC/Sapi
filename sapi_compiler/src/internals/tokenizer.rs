@@ -2,15 +2,16 @@ use bumpalo::collections::Vec as bVec;
 use bumpalo::Bump;
 use sqlparser::keywords::Keyword;
 use sqlparser::tokenizer::{Token, TokenWithSpan, Tokenizer, TokenizerError, Whitespace};
-use sqlparser::dialect::PostgreSqlDialect;
+use sqlparser::dialect::{dialect_from_str, PostgreSqlDialect};
 use super::token_tree::{TokenTree, TokNode};
 
 // Result<Vec<TokenWithSpan>, TokenizerError>
-pub fn tokenize<'a>(bump: &'a Bump, sapi_stmt: &str) -> Option<&'a TokenTree<'a>> {
+pub fn tokenize<'a>(bump: &'a Bump, dialect_name: &str, sapi_stmt: &str) -> Option<&'a TokenTree<'a>> {
     // glot_tokens: list[glotToken] = data_model.dialect().sqlglot_dialect().tokenize(sapi_stmt) 
-    let dialect = PostgreSqlDialect {}; // temp
+    // let dialect = PostgreSqlDialect {}; // temp
+    let dialect = dialect_from_str(dialect_name).unwrap(); // fixme
     // evt use tokenize_with_location_into_buf or tokenize_with_location
-    let tokens = Tokenizer::new(&dialect, sapi_stmt).tokenize().unwrap(); // fix unwrap
+    let tokens = Tokenizer::new(&*dialect, sapi_stmt).tokenize().unwrap(); // fix unwrap
     // if necesary format tokens
 
     cut_leading_junk(&bump, &tokens);

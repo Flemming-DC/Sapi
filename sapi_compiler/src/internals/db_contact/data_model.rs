@@ -1,15 +1,23 @@
+use bumpalo::Bump;
+use sqlparser::dialect;
 // from dataclasses import dataclass
 // from anytree import Node
 // from . import deployment
 // from .dialect import Dialect
 // from .pep249_database_api_spec_v2 import Cursor
 // from sapi._internals.error import CompilerError, DataModelError
-use bumpalo::collections::Vec as bVec;
-use bumpalo::collections::String as bString;
-use bumpalo::Bump;
+// use bumpalo::collections::Vec as bVec;
+// use bumpalo::collections::String as bString;
+// use bumpalo::Bump;
+use sqlparser::dialect::Dialect;
+use serde::Deserialize;
+use serde::Serialize;
 use super::deployment;
-use super::deployment::{Dialect, Cursor};
+use super::deployment::Cursor;
 use std::cell::Cell;
+use std::cell::RefCell;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::{any::Any, collections::HashMap};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -18,72 +26,94 @@ pub struct Node<'m> {name: &'m str, parent: Option<&'m Node<'m>>} // stub
 impl Cursor { fn execute(&self, query: &str) -> &[&[&str]] {&[]} } // str is temp // stub
 
 
+// #[derive(Debug, Serialize, Deserialize)]
+// pub struct Tab<'m> {
+//     name: &'m str,
+//     parent: Option<&'m str>,
+//     columns: Vec<&'m str>,
+//     primary_key: &'m str,
+//     join_clause: Option<&'m str>, // None iff Parent is None
+//     // foreign_keys: str // a comma seperated list of foreign_keys
+// }
+
+
+#[derive(Debug, Deserialize)]
 pub struct Table<'m> {
-    name: &'m str,
-    parent: Option<&'m str>,
-    columns: bVec<'m, &'m str>,
-    primary_key: &'m str,
-    join_clause: Option<&'m str>, // None iff Parent is None
+    pub name: &'m str,
+    pub parent: Option<&'m str>,
+    pub columns: Vec<&'m str>,
+    pub primary_key: &'m str,
+    pub join_clause: Option<&'m str>, // None iff Parent is None
     // foreign_keys: str // a comma seperated list of foreign_keys
 }
+#[derive(Debug, Deserialize)]
 pub struct Tree<'m> { // evt. call it TableTree 
-    tables: bVec<'m, Table<'m>>,
-    name: &'m str,
-    schema: &'m str,
+    pub tables: Vec<Table<'m>>,
+    pub name: &'m str,
+    pub schema: &'m str,
     // insertable: bool = True
     // deletable: bool = True
 }
 
+// static mut MODELS: Vec<DataModel> = Vec::new();
 
+// does not support removal of DataModel. To that end you would need a HashMap and a lazy_static / once_cell
+static MODELS: Mutex<Vec<DataModel>> = Mutex::new(Vec::new());
+// pub struct DM {idx: usize}
 
+#[derive(Clone)]
 pub struct DataModel<'m> {
     // _current: Option<DataModel>,
-    _table_tree_names: bVec<'m, &'m str>,
-    _trees_by_table: HashMap<&'m str, bVec<'m, &'m str>>, // HashMap uses global alloc
-    _primary_key_by_tab: HashMap<&'m str, &'m str>,
-    _tables_by_var: HashMap<&'m str, bVec<'m, &'m str>>,
-    _tabs_by_var_and_tree: HashMap<(&'m str, &'m str), bVec<'m, &'m str>>,
+    // id: usize,
+    table_tree_names: Vec<&'m str>,
+    trees_by_table: HashMap<&'m str, Vec<&'m str>>, // HashMap uses global alloc
+    primary_key_by_tab: HashMap<&'m str, &'m str>,
+    tables_by_var: HashMap<&'m str, Vec<&'m str>>,
+    tabs_by_var_and_tree: HashMap<(&'m str, &'m str), Vec<&'m str>>,
     // _node_by_tab_and_tree: HashMap<(&'m str, &'m str), Node<'m>>,
-    _join_clause_by_tab: HashMap<(&'m str, bool), Option<String>>,
-    _all_tables: bVec<'m, &'m str>,
-    _dialect: &'m Dialect // used due to get sqlglot_dialect and black_from_clause
+    join_clause_by_tab: HashMap<(&'m str, bool), Option<String>>,
+    all_tables: Vec<&'m str>,
+    // dialect: Mutex<Box<dyn Dialect>> // used due to get sqlglot_dialect
+    dialect: String,
 }
 
 impl<'m> DataModel<'m> {
 
-    pub fn new(bump: &'m Bump, dialect: &'m Dialect, trees: &'m [Tree]) -> Self {
+    pub fn new(dialect: &'m str, trees: Vec<Tree<'static>>) -> usize {
         // defaults
         let mut dm = DataModel {
-            // _current: None,
-            _table_tree_names: bVec::with_capacity_in(trees.len(), bump),
-            _trees_by_table: HashMap::with_capacity(trees.len() * 6), // 6 = guess-tab-per-tree
-            _primary_key_by_tab: HashMap::with_capacity(trees.len() * 6),
-            _tables_by_var: HashMap::with_capacity(trees.len() * 6 * 4), // 4 = guess-col-per-tab
-            _tabs_by_var_and_tree: HashMap::with_capacity(trees.len() * 6 * 4),
+            // id: 0,
+            table_tree_names: Vec::with_capacity(trees.len()),
+            trees_by_table: HashMap::with_capacity(trees.len() * 6), // 6 = guess-tab-per-tree
+            primary_key_by_tab: HashMap::with_capacity(trees.len() * 6),
+            tables_by_var: HashMap::with_capacity(trees.len() * 6 * 4), // 4 = guess-col-per-tab
+            tabs_by_var_and_tree: HashMap::with_capacity(trees.len() * 6 * 4),
             // _node_by_tab_and_tree: HashMap::with_capacity(trees.len() * 6),
-            _join_clause_by_tab: HashMap::with_capacity(trees.len() * 6),
-            _all_tables: bVec::with_capacity_in(trees.len() * 6, bump),
-            _dialect: dialect, // used due to get sqlglot_dialect and black_from_clause
+            join_clause_by_tab: HashMap::with_capacity(trees.len() * 6),
+            all_tables: Vec::with_capacity(trees.len() * 6),
+            // fix errorhandling
+            // dialect: Mutex::new(dialect::dialect_from_str(dialect).unwrap()), // used due to get sqlglot_dialect and black_from_clause
+            dialect: dialect.to_string(),
         };
     
 
-        for tree in trees {
-            if dm._table_tree_names.contains(&tree.name) {
+        for tree in &trees {
+            if dm.table_tree_names.contains(&tree.name) {
                 // raise DataModelError(r"You cannot have two trees with the same name in the same instance "
                 //                      r"of the DataModel class. name = {}", tree.name)
                 }
-            dm._table_tree_names.push(tree.name);
+            dm.table_tree_names.push(tree.name);
             for tab in &tree.tables {
-                if !dm._all_tables.contains(&tab.name) {
-                    dm._all_tables.push(tab.name);}
+                if !dm.all_tables.contains(&tab.name) {
+                    dm.all_tables.push(tab.name);}
                 
-                let trs = dm._trees_by_table.entry(tab.name).or_insert(bVec::new_in(bump));
+                let trs = dm.trees_by_table.entry(tab.name).or_insert(Vec::new());
                 if !trs.contains(&tree.name) {trs.push(tree.name);}
 
-                dm._primary_key_by_tab.entry(tab.name).or_insert(tab.primary_key);
+                dm.primary_key_by_tab.entry(tab.name).or_insert(tab.primary_key);
 
                 if true { // dm._join_clause_by_tab.keys().contains(tab.name) // ??? why this check ? 
-                    dm._join_clause_by_tab.insert((tab.name, true), tab.join_clause.map(|jc|jc.into())); // from child join parent
+                    dm.join_clause_by_tab.insert((tab.name, true), tab.join_clause.map(|jc|jc.into())); // from child join parent
                     if let Some(parent) = tab.parent { match tab.join_clause {
                         None => { // raise CompilerError(
                         //     "Table should not have parent without having a rule for how to on join the parent")
@@ -91,7 +121,7 @@ impl<'m> DataModel<'m> {
                         Some(jc) => {
                             // let reverse_join: bString<'m> = bString::from_str_in(&jc.replacen(parent, tab.name, 1), bump); 
                             let reverse_join = jc.replacen(parent, tab.name, 1);
-                            dm._join_clause_by_tab.insert((tab.name, false), Some(reverse_join)); // from parent join child
+                            dm.join_clause_by_tab.insert((tab.name, false), Some(reverse_join)); // from parent join child
                         }
                     }};
                 };
@@ -99,10 +129,10 @@ impl<'m> DataModel<'m> {
                 // dm._node_by_tab_and_tree.insert((tab.name, tree.name), Node {name: tab.name, parent: None}); // parent is set later
 
                 for col in &tab.columns {
-                    let ts = dm._tables_by_var.entry(col).or_insert(bVec::new_in(bump));
+                    let ts = dm.tables_by_var.entry(col).or_insert(Vec::new());
                     if !ts.contains(&tab.name) {ts.push(tab.name);}
 
-                    let ts = dm._tabs_by_var_and_tree.entry((col, tree.name)).or_insert(bVec::new_in(bump));
+                    let ts = dm.tabs_by_var_and_tree.entry((col, tree.name)).or_insert(Vec::new());
                     if !ts.contains(&tab.name) {ts.push(tab.name);}
                 }
             }
@@ -119,10 +149,20 @@ impl<'m> DataModel<'m> {
         //         }
         //     }
         // }
-        return dm;
+        // let ms = MODELS.borrow_mut();
+        // let i = MODELS.with_borrow(|v| v.push(value));
+        let mut lock = MODELS.lock().unwrap(); // fixme
+        (*lock).push(dm); // .clone() would be required to return a dm, since they cannot be numerically identical.
+        let idx = lock.len() - 1;
+        drop(lock);
+
+        // unsafe { MODELS.push(dm); }
+
+        // let idx = MODELS.lock().unwrap().push(dm);
+        return idx;
     }
     
-    pub fn from_database(bumb: &'m Bump, dialect: &'m Dialect, cur: &Cursor, sys_schema: &str) -> Self {
+    pub fn from_database(dialect: &'m str, cur: &'m Cursor, sys_schema: &'m str) -> usize {
         cur.execute("savepoint DataModel_from_database");
         if !deployment::is_deployed(cur, dialect, sys_schema) {
             // raise DataModelError("You must call deployment.setup, before calling this function.")
@@ -131,11 +171,11 @@ impl<'m> DataModel<'m> {
         let trees = Self::make_trees(dialect, cur, sys_schema);
         cur.execute("rollback to savepoint DataModel_from_database");
         
-        return DataModel::new(bumb, dialect, trees);
+        return DataModel::new(dialect, trees);
     }
 
-    fn make_trees(dialect: &Dialect, cur: &Cursor, sys_schema: &str) -> &'m [Tree<'m>] {
-    &[]
+    fn make_trees(dialect: &str, cur: &Cursor, sys_schema: &str) -> Vec<Tree<'static>> {
+    Vec::new()
 //     cur.execute(r"""
 //         WITH columns as ({dialect.columns_query})
 //         SELECT 
@@ -246,26 +286,24 @@ impl<'m> DataModel<'m> {
 
 //     return trees;
     }
-}
 
 
 // pub fn set_current(dataModel: DataModel) { DataModel._current = dataModel; } 
+    pub fn get_model_copy(bump: &Bump, idx: usize) -> &Self { // prevent or handle incorrect index error
+        let lock = MODELS.lock().unwrap(); // fixme
+        let dm = bump.alloc((*lock)[idx].clone()); 
+        return dm
+    } 
 
+    pub fn dialect(&self)                               -> &str    { &self.dialect }
+    pub fn is_var(&self, tok_text: &str)                -> bool    { self.tables_by_var.contains_key(tok_text) }
+    pub fn is_tree(&self, tok_text: &str)               -> bool    { self.table_tree_names.contains(&tok_text) }
+    pub fn is_table(&self, tok_text: &str)              -> bool    { self.all_tables.contains(&tok_text) }
+    pub fn tables_by_var(&self, var: &str)              -> &[&str] { &self.tables_by_var[var] }
+    pub fn trees_by_table(&self, table_name: &str)      -> &[&str] { &self.trees_by_table[table_name] }
+    pub fn primary_key_by_tab(&self, table_name: &str)  -> &str    { &self.primary_key_by_tab[table_name] }
+    pub fn tables_by_var_and_tree(&'m self, var: &'m str, tree: &'m str)     -> &'m Vec<&'m str> {&self.tabs_by_var_and_tree[&(var, tree)] }
+    pub fn join_clause_by_tab(&'m self, table_name: &'m str, going_up: bool) -> &'m Option<String> { &self.join_clause_by_tab[&(table_name, going_up)] }
 
-
-
-
-pub fn is_var(tok_text: &str)                                   -> bool { false }
-pub fn is_tree(tok_text: &str)                                  -> bool { false }
-pub fn is_table(tok_text: &str)                                 -> bool { false }
-pub fn tables_by_var(var: &str)                                 -> &[&str] { &[] }
-pub fn trees_by_table(table_name: &str)                         -> &[&str] { &[] }
-pub fn tables_by_var_and_tree<'a>(var: &'a str, tree: &'a str)  -> &'a [&'a str] { &[] }
-pub fn primary_key_by_tab(table_name: &str)                     -> &str { "" }
-pub fn join_clause_by_tab(table_name: &str, going_up: bool)     -> &str { "" }
-pub fn dialect()                                                -> Dialect { Dialect{} }
+}
 // pub fn node_by_tab_and_tree<'a>(tab: &str, tree: &str)          -> Node<'a> { Node{parent: None} }
-
-
-
-

@@ -3,11 +3,10 @@
 // from .dialect import Dialect
 // from sapi._internals.error import DataModelError
 
-pub struct Dialect; // stub
 pub struct Cursor; // stub
 
 
-pub fn setup_sapi(dialect: Dialect, cur: Cursor, sys_schema: &str) {
+pub fn setup_sapi(dialect: &str, cur: Cursor, sys_schema: &str) {
 //     if is_deployed(cur, dialect, sys_schema):
 //         return
     
@@ -18,7 +17,7 @@ pub fn setup_sapi(dialect: Dialect, cur: Cursor, sys_schema: &str) {
 //             cur.execute(f.read().replace('sapi_sys', sys_schema))
 }
 
-pub fn is_deployed(cur: &Cursor, dialect: &Dialect, sys_schema: &str) -> bool {
+pub fn is_deployed(cur: &Cursor, dialect: &str, sys_schema: &str) -> bool {
     true
 //     expected_sapi_sys_tables = {'sapi_trees', 'sapi_tables'}
 //     cur.execute("savepoint is_deployed")

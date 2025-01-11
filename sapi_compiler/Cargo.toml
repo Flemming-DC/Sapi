@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 # sqlx = { version = "0.8.2", features = [ "postgres", "runtime-tokio-rustls" ] }
-sqlparser = "0.53.0"
-bumpalo = { version = "3.16.0", features = [ "collections", "boxed" ] } # evt. cut the box feature
+sqlparser = { version = "0.53.0", features = [ "serde" ] } # aren't using serde anyhow
+bumpalo = { version = "3.16.0", features = [ "collections", "boxed", "serde" ] } # evt. cut the box feature and serde
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 # [patch.crates-io]
 # my-crate = { path = "../sqlparser" } // make sqlparser compatible with bumpalo
 
