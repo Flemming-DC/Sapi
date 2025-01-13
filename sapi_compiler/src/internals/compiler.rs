@@ -4,6 +4,7 @@ use bumpalo::collections::Vec as bVec;
 use sqlparser::keywords::Keyword;
 use sqlparser::tokenizer::Token;
 use crate::internals::db_contact::DataModel;
+use super::token::TokData;
 use super::{tokenizer, select, db_contact};
 use super::token_tree::*;
 
@@ -28,7 +29,7 @@ pub fn compile<'a>(sapi_str: &str, model_id: usize) -> String {
     let mut replacements: bVec<bVec<StrReplacement>> = bVec::with_capacity_in(statements.len(), &bump);
     for stmt in statements {
         if let Some(sapi_tok_tree) = tokenizer::tokenize(&bump, model.dialect(), stmt) {
-            let (sql, str_replacements) = parse_token_tree(&bump, model, stmt, sapi_tok_tree);
+            let (sql, str_replacements) = compile_token_tree(&bump, model, stmt, sapi_tok_tree);
             sql_tok_trees_str.push(sql);
             replacements.push(str_replacements); // unused for all but one return type
         }
@@ -40,22 +41,22 @@ pub fn compile<'a>(sapi_str: &str, model_id: usize) -> String {
 
 
 
-fn parse_token_tree<'a>(bump: &'a Bump, model: &DataModel, sapi_stmt: &'a str, token_tree: &'a TokenTree<'a>) -> (&'a str, bVec<'a, StrReplacement<'a>>) {
+fn compile_token_tree<'a>(bump: &'a Bump, model: &DataModel, sapi_stmt: &'a str, token_tree: &'a TokenTree<'a>) -> (&'a str, bVec<'a, StrReplacement<'a>>) {
     // Parse sapi TokenTree to sql TokenTree.
     // parse sub_trees
     for tok in &token_tree.tokens {
-        if let TokNode::Tree(tt) = tok { 
-            parse_token_tree(&bump, &model, sapi_stmt, tt);
+        if let TokData::Tree(tt) = tok.data { 
+            compile_token_tree(&bump, &model, sapi_stmt, tt);
         }
     }
     // parse leaves
     let sql: &str = sapi_stmt; // copy ??
     let mut replacements = bVec::new_in(&bump);
     for tok in &token_tree.tokens {
-        if let TokNode::Leaf(Token::Word(word)) = tok { 
-            match word.keyword {
+        if let Some(keyword) = tok.keyword() { 
+            match keyword {
                 Keyword::SELECT => {
-                    replacements = select::parse_select(bump, model, &token_tree); // this only changes the leaf tokens
+                    replacements = select::compile_select(bump, model, &token_tree, &sapi_stmt); // this only changes the leaf tokens
                     // sql = generate_sql_str::make_str(sapi_stmt, replacements);
                     break;
                 }
@@ -66,7 +67,7 @@ fn parse_token_tree<'a>(bump: &'a Bump, model: &DataModel, sapi_stmt: &'a str, t
                 }
                 Keyword::UPDATE | Keyword::DELETE | Keyword::CREATE | Keyword::ALTER | Keyword::DROP => {
                     eprint!(r"WARNING: {:?} is not yet implemented.
-                        Sapi will ignore such inputs and pass them to sql unchanged.", word.keyword);
+                        Sapi will ignore such inputs and pass them to sql unchanged.", keyword);
                     break;
                 } 
                 _ => { }

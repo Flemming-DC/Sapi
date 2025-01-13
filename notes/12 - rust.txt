@@ -25,3 +25,6 @@ sqlparser:
 
 use 
     set_allocation_limit during mem consumption test
+
+put out of bounds assert in all the index loops
+consider temp alloc

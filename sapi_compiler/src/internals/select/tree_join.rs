@@ -1,10 +1,9 @@
 use bumpalo::collections::Vec as bVec;
-use crate::internals::token_tree::TokenTree;
-use sqlparser::tokenizer::Token;
+use crate::internals::{token::Tok, token_tree::TokenTree};
 
 #[derive(Debug, Clone)]
 pub struct TreeJoin<'a> {
-    pub tree_tok: Token, // this is not a TokenTree, but an identifier for a table_tree
+    pub tree_tok: Tok<'a>, // this is not a TokenTree, but an identifier for a table_tree
     pub tree_tok_index: usize,
     pub on_clause_end_index: usize,
     pub first_table: Option<&'a str>, // = None // the unique element of on_clause_tables except prior_tables

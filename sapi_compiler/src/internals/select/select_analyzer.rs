@@ -1,16 +1,20 @@
+use std::cell::RefCell;
+
 use bumpalo::Bump;
 use bumpalo::collections::Vec as bVec;
+use bumpalo::collections::String as bString;
 use sqlparser::keywords::Keyword;
-use sqlparser::tokenizer::Token;
 use crate::internals::error::SapiError::QueryError; //, CompilerError
 use crate::internals::db_contact::data_model::DataModel;
-use crate::internals::token_tree::{tok_text, TokNode, TokenTree};
-use crate::Q; // , Token, TokenType
+use crate::internals::token::{Tok, TokData, TokTy::*};
+use crate::internals::token_tree::TokenTree;
+use crate::P; 
 use super::analyzer_loop::AnalyzerLoop;
 use super::tree_join::{TreeJoin, Resolvent};
 
 
-pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, mut lup: AnalyzerLoop<'a>) -> (bVec<'a, TreeJoin<'a>>, bVec<'a, Resolvent<'a>>) {
+pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoop<'a>) 
+    -> (bVec<'a, TreeJoin<'a>>, bVec<'a, Resolvent<'a>>) {
     // (bVec::new_in(&bump), bVec::new_in(&bump))
     let mut tabs_in_on_clauses: bVec<bVec<&str>> = bVec::new_in(bump); // on_clause_tables_across_joins
     let mut tree_joins: bVec<TreeJoin> = bVec::new_in(bump);
@@ -18,21 +22,21 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, mut lup: Analyz
     let mut resolvents: bVec<Resolvent> = bVec::new_in(bump);
 
     while lup.next() {
-        if let TokNode::Tree(_) = lup.tok() { 
+        if lup.tok().typ == Tree { 
             continue; }
         check_for_select_all(model, &lup);
         // analyze from clause
         
         let prior_j = bVec::from_iter_in(tree_joins.iter().map(|j| j.tree_tok.clone()), bump);
         let (tree_join, on_clause_tables_in_join, resolved_tabs_in_join) = make_tree_join(
-            bump, model, &mut lup, prior_j);
+            bump, model, &lup, prior_j);
         resolvents.extend(resolved_tabs_in_join.into_iter());
         if let Some(tree_join) = tree_join {
             if let Some(on_clause_tables_in_join) = on_clause_tables_in_join {
                 tree_joins.push(tree_join);
                 tabs_in_on_clauses.push(on_clause_tables_in_join.clone());
                 continue 
-            } else { panic!("INTERNAL COMPILER ERROR: Inkonsistent None case."); }
+            } else { unreachable!("INTERNAL COMPILER ERROR: Inkonsistent None case."); }
         }
         
         // find referenced tables and resolve trees outside the from clause
@@ -50,17 +54,17 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, mut lup: Analyz
 }
 
 
-fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLoop, prior_join_objs: bVec<'a, Token>) 
+fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoop<'a>, prior_join_objs: bVec<'a, Tok>) 
     -> (Option<TreeJoin<'a>>, Option<bVec<'a, &'a str>>, bVec<'a, Resolvent<'a>>) {
     // (None, None, bVec::new_in(bump))
     if !lup.found_kw(&[Keyword::FROM, Keyword::JOIN], 0) {
         return (None, None, bVec::new_in(bump)); }
     if !lup.next() {return (None, None, bVec::new_in(bump));}
-    // if not lup.found([Token::VAR, Token::IDENTIFIER], 0) {
+    // if not lup.found([IDENTIFIER], 0) {
     //     raise QueryError("expected identifier or variable after from / join."); }
     
     // pass through join_obj prefix
-    while lup.found(&[Token::Period], 1) {
+    while lup.found(&[Period], 1) {
         if !lup.next() {return (None, None, bVec::new_in(bump));}
         if !lup.next() {return (None, None, bVec::new_in(bump));}
     }
@@ -68,13 +72,22 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLo
     //     raise QueryError("Encountered end of query while parsing prefix (such as schem.tree.table). "
     //                      "Expected an object to join with instead."); }
 
+    // let join_obj = Tok { 
+    //     typ: Identifier, 
+    //     // text: bump.alloc(lup.tok().text.clone()), 
+    //     text: &bString::from_str_in(lup.tok().text, bump),
+    //     start: lup.tok().start.clone(), 
+    //     end: lup.tok().end.clone(), 
+    //     data: &TokData::None,// &(lup.tok().data.clone()),
+    // };
+
     let join_obj = lup.tok().clone(); // join_obj at end of join_obj prefixes
-    // if let TokNode::Tree(_) = join_obj_ { return QueryError; }} // temp make an error instead
-    let TokNode::Leaf(join_obj) = join_obj else { unreachable!("temp uncommented check") };
+    // if let Tok::Tree(_) = join_obj_ { return QueryError; }} // temp make an error instead
+    // let Tok::Leaf(join_obj) = join_obj else { unreachable!("temp uncommented check") };
     let join_obj_index = lup.index();
-    if prior_join_objs.contains(&&join_obj) {
+    if prior_join_objs.contains(&join_obj) {
         return (None, None, bVec::new_in(bump)); } // don't dublicate join_data (is that actually correct behaviour??)
-    let is_tree = model.is_tree(tok_text(&join_obj));
+    let is_tree = model.is_tree(&join_obj.text);
 
     fn on_clause_done(lup: &AnalyzerLoop) -> bool { 
         return lup.next_at_end() || lup.found_kw(&[ // join or clause-after-from
@@ -92,18 +105,19 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLo
         if !lup.next() {return (None, None, bVec::new_in(bump));}
         let resolved_tab = None;
         // resolve tree prefixes
-        if model.is_tree(lup.tok().text()) {
-            // if not lup.found([Token::VAR, Token::IDENTIFIER], 2) { // peek(2) should be column
+        if model.is_tree(lup.tok().text) {
+            // if not lup.found([VAR, IDENTIFIER], 2) { // peek(2) should be column
             //     raise QueryError("Expected column after tree, as in tree.column"); } // why not table?
-            let var = lup.peek(2).expect("temp uncommented check").text();
-            let tree = lup.tok().text();
+            let var = lup.peek(2).expect("temp uncommented check").text;
+            let tree = lup.tok().text;
             let resolved_tab = get_table_from_var_and_tree(model, var, tree);
             resolvents.push(Resolvent {index: lup.index() as usize, tab_name: resolved_tab});
         }
         // record table prefixes
-        if resolved_tab != None || model.is_table(lup.tok().text()) {
-            on_clause_tables.push(if resolved_tab != None {resolved_tab.expect("checked")} else {lup.tok().text()}); } // register table in on clause
+        if resolved_tab != None || model.is_table(lup.tok().text) {
+            on_clause_tables.push(if resolved_tab != None {resolved_tab.expect("checked")} else {lup.tok().text}); } // register table in on clause
     }
+    P!(is_tree);
     if !is_tree {
         return (None, None, resolvents); }
     let tree_join = TreeJoin {tree_tok: join_obj, tree_tok_index: join_obj_index as usize, 
@@ -112,19 +126,20 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &mut AnalyzerLo
     return (Some(tree_join), Some(on_clause_tables), resolvents);
 }
 
-fn table_ref_and_resolvent<'a>(bump: &'a Bump, model: &'a DataModel, lup: &AnalyzerLoop) -> (Option<&'a str>, Option<Resolvent<'a>>) {
+fn table_ref_and_resolvent<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoop<'a>) 
+    -> (Option<&'a str>, Option<Resolvent<'a>>) {
     // Returns true if we are handling the prefix and therefore shouldn't try to get table from column.
     // Each call to _table_from_prefix will update the prefix and 
     // If tree.var is encountered, then the tree is resolved into a variable, if table is unique.
     
-    if !lup.tok().is_identifier() {
+    if lup.tok().typ != Identifier {
         return (None, None); }
 
-    if lup.found(&[Token::Period], -1) {
+    if lup.found(&[Period], -1) {
         // get ref_tab, resolvent from a prefix (e.g. tree.tab, tree.col or tab.col)
-        let prefix: &str = lup.peek(-2).expect("impossible").text(); // This includes views and cte's as tables. Is that okay?
+        let prefix: &str = lup.peek(-2).expect("impossible").text; // This includes views and cte's as tables. Is that okay?
         if model.is_tree(&prefix) {
-            let (var, tree) = (lup.tok().text(), lup.peek(-2).expect("impossible").text());
+            let (var, tree) = (lup.tok().text, lup.peek(-2).expect("impossible").text);
             let ref_tab = get_table_from_var_and_tree(model, var, tree);
             return (Some(ref_tab), Some(Resolvent {index: lup.index() as usize - 2, tab_name: ref_tab})); }
         else if model.is_table(&prefix) {
@@ -132,8 +147,8 @@ fn table_ref_and_resolvent<'a>(bump: &'a Bump, model: &'a DataModel, lup: &Analy
         else {
             return (None, None); } 
         }
-    else if model.is_var(lup.tok().text()) {
-        return (table_containing_variable(model, lup.tok().text()).into(), None); }
+    else if model.is_var(lup.tok().text) {
+        return (table_containing_variable(model, lup.tok().text).into(), None); }
     else {
         return (None, None); }
 }
@@ -194,7 +209,7 @@ fn plug_ref_table_into_tree_join<'a>(model: &'a DataModel, table_name: &'a str, 
     let trees_of_tab = model.trees_by_table(table_name);
     let already_found = false;
     for j in tree_joins {
-        if !trees_of_tab.contains(&tok_text(&j.tree_tok)) {
+        if !trees_of_tab.contains(&j.tree_tok.text) {
             continue; }
         if already_found { }
             // raise QueryError(
@@ -208,14 +223,15 @@ fn plug_ref_table_into_tree_join<'a>(model: &'a DataModel, table_name: &'a str, 
     }
 }
 
-fn check_for_select_all<'a>(model: &'a DataModel, lup: &AnalyzerLoop) {
-    if !matches!(lup.tok(), TokNode::Leaf(Token::Mul)) { return }
-    if matches!(lup.peek(-1), Some(TokNode::Leaf(Token::Period))) 
-        && !model.is_tree(lup.peek(-2).expect("impossible").text()) 
+fn check_for_select_all<'a>(model: &'a DataModel, lup: &'a AnalyzerLoop<'a>) {
+    if lup.tok().typ != Mul { return }
+    if lup.index() >= 2
+        && matches!(lup.peek(-1).expect("lup.index() >= 2").typ, Period) 
+        && !model.is_tree(lup.peek(-2).expect("lup.index() >= 2").text) 
         {return}
     
     if let Some(next) = lup.peek(1) {
-        if matches!(next, TokNode::Leaf(Token::Comma)) || next.is_kw(Keyword::FROM) {} 
+        if next.typ == Comma || next.keyword() == Some(Keyword::FROM) {} 
             // raise QueryError("The wildcard '*' cannot be used, when selecting from a tree, "
             //                  "unless you restrict the wildcard by an expression on the form 'object.*', "
             //                  "where 'object' is not a tree.")

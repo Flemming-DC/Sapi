@@ -63,13 +63,15 @@
         },
         {
             "name": "Debug rust app",
-            "type": "cppvsdbg",
+            "type": "cppvsdbg", // "cppvsdbg", cppdbg
             "request": "launch",
             "program": "${workspaceRoot}/target/debug/sapi_rust_app.exe",
             "args": [], //"release"],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "rust: cargo build"
-            // "preLaunchTask": "rust: cargo test"
+            "preLaunchTask": "rust: cargo build",
+            "console": "integratedTerminal",
+            // "preLaunchTask": "rust: cargo test",
+            // "env": {"RUST_BACKTRACE": "1"},
         },
     ]
 }

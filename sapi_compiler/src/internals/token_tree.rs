@@ -1,7 +1,9 @@
 
 use bumpalo::Bump;
-use sqlparser::{keywords::Keyword, tokenizer::{Token, TokenWithSpan}}; // sqlglot.tokens import TokenType
+// use sqlparser::{keywords::Keyword, tokenizer::{Token, TokenWithSpan}}; // sqlglot.tokens import TokenType
 use bumpalo::collections::Vec as bVec;
+
+use super::token::{Tok, TokData, TokTy};
 // use error::CompilerError;
 
 // #[derive(Debug)]
@@ -32,38 +34,38 @@ pub struct StrReplacement<'a> {
     pub is_new_clause: bool,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum TokNode<'a> { Leaf(Token), Tree(&'a TokenTree<'a>) } // size_of Token and TokenWithSpan are 56, 88 Bytes. Unnecesarily large.
 
-impl<'a> TokNode<'a> {
-    pub fn text(&self) -> &'static str { "" } // where to put this?
-    pub fn start(&self) -> usize { 0 } // where to put this?
-    pub fn end(&self) -> usize { 0 } // where to put this?
-    pub fn is_identifier(&self) -> bool { 
-        if let TokNode::Leaf(Token::Word(word)) = self { 
-            word.keyword == Keyword::NoKeyword // check if word.keyword is empty (whatever that means)
-        } else {false} 
-    }
-    pub fn is_kw(&self, keyword: Keyword) -> bool { 
-        if let TokNode::Leaf(Token::Word(word)) = self { 
-            word.keyword == keyword // check if word.keyword is empty (whatever that means)
-        } else {false} 
-    }
-    
-}
+// #[derive(Debug, Clone, PartialEq)]
+// pub enum TokNode<'a> { Leaf(Token), Tree(&'a TokenTree<'a>) } // size_of Token and TokenWithSpan are 56, 88 Bytes. Unnecesarily large.
+
+// impl<'a> TokNode<'a> {
+//     pub fn text(&self) -> &'static str { "temp TokNode.text" } // where to put this?
+//     pub fn start(&self) -> usize { 0 } // where to put this?
+//     pub fn end(&self) -> usize { 0 } // where to put this?
+//     pub fn is_identifier(&self) -> bool { 
+//         if let TokNode::Leaf(Token::Word(word)) = self { 
+//             word.keyword == Keyword::NoKeyword // check if word.keyword is empty (whatever that means)
+//         } else {false} 
+//     }
+//     pub fn is_kw(&self, keyword: Keyword) -> bool { 
+//         if let TokNode::Leaf(Token::Word(word)) = self { 
+//             word.keyword == keyword // check if word.keyword is empty (whatever that means)
+//         } else {false} 
+//     }
+
+// }
 
 #[derive(Debug, PartialEq)]
 pub struct TokenTree<'a> {
-    pub tokens: bVec<'a, TokNode<'a>>,
+    pub tokens: bVec<'a, Tok<'a>>,
     len_sapi_str: usize, // (evt. only store at the root tree) // contains sapi code for one statement
-    next_token: Option<Token>, // Token or TokNode ?
+    next_token: Option<Tok<'a>>, // Token or TokNode ?
     str_replacements: Vec<StrReplacement<'a>>, 
 }
 
-pub fn tok_text(tok: &Token) -> &'static str { "" } // where to put this?
 
 impl<'a> TokenTree<'a> {
-    pub fn new(tokens: bVec<'a, TokNode<'a>>, len_sapi_str: usize, next_token: Option<Token>) -> Self {
+    pub fn new(tokens: bVec<'a, Tok<'a>>, len_sapi_str: usize, next_token: Option<Tok<'a>>) -> Self {
         TokenTree { tokens, len_sapi_str, next_token, str_replacements: [].into() }
     }
 
@@ -88,12 +90,12 @@ impl<'a> TokenTree<'a> {
         if to < from_ { panic!("to < from_ is an error."); }
 
         // save str data
-        let next = self.next_token.as_ref().map(|n|TokNode::Leaf(n.clone())); // also = from_tok and to_tok
+        let next = self.next_token.clone();//.as_ref().map(|n|TokNode::Leaf(n.clone())); // also = from_tok and to_tok
         let from_tok = if from_ < count {Some(self.tokens[from_].clone())} else {next.clone()};
-        let str_from = if from_tok != None {from_tok.expect("checked").start()} else {self.len_sapi_str};
+        let str_from = if from_tok != None {from_tok.expect("checked").start.idx} else {self.len_sapi_str};
 
         let before_to_tok = if to > 0 && to - 1 < count {Some(self.tokens[to - 1].clone())} else if to > 0 {next} else {None};
-        let str_to = if to == from_ {str_from} else if before_to_tok != None {before_to_tok.expect("checked").end() + 1} else {self.len_sapi_str}; // traditional
+        let str_to = if to == from_ {str_from} else if before_to_tok != None {before_to_tok.expect("checked").end.idx + 1} else {self.len_sapi_str}; // traditional
         
         self.str_replacements.push(StrReplacement {str_from, str_to, text: new_text, is_new_clause });
     }
@@ -104,8 +106,8 @@ impl<'a> TokenTree<'a> {
         // used by editor, but not by other parts of parser.
         let mut str_replacements = bVec::from_iter_in(self.str_replacements.iter().cloned(), bump);
         for tok in &self.tokens {
-            if let TokNode::Tree(tok) = tok {
-                str_replacements.extend_from_slice(&tok.recursive_str_replacements(bump)); }}
+            if let TokData::Tree(tt) = tok.data {
+                str_replacements.extend_from_slice(&tt.recursive_str_replacements(bump)); }}
         return str_replacements;
     }
 }

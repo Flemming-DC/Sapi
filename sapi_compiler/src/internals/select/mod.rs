@@ -4,6 +4,6 @@ mod analyzer_loop;
 mod select_analyzer;
 mod path_finder;
 mod join_generator;
-mod select_parser;
+mod select_compiler;
 
-pub use select_parser::parse_select;
+pub use select_compiler::compile_select;

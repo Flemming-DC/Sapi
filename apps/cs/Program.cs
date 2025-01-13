@@ -11,7 +11,7 @@ namespace cs
         {
             Console.WriteLine(Sapi.sapi_add(5, 10));
             Console.WriteLine(Sapi.ib_nt("Hello, World!"));
-            // Console.WriteLine(Sapi.make_data_model("postgres", "[]")); // panic
+            Console.WriteLine(Sapi.make_data_model("postgres", "[]")); // panic
         }
 
         public struct Sapi {

@@ -32,17 +32,18 @@ fn main() {
     let model_id = DataModel::new("postgres", vec![tree]);
 
     let sapi_query = r"
-        WITH cte AS (
-            SELECT col0_1, col0_2, col00_2 FROM tree
-        )
-        SELECT 
-            cte.col00_2,
-            col10_2,
-            (SELECT count(col20_2) FROM tree)
-        -- here we have a select query. sapi parsed to sql
-        FROM cte 
-        join tree ON tree.col_1 = cte.col0_1
+WITH cte AS (
+    SELECT col0_1, col0_2, col00_2 FROM tree
+)
+SELECT 
+    cte.col00_2,
+    col10_2,
+    (SELECT count(col20_2) FROM tree)
+-- here we have a select query. sapi parsed to sql
+FROM cte 
+join tree ON tree.col_1 = cte.col0_1
         ";
+    println!("{}", sapi_query);
     let sql = compiler::compile(sapi_query.into(), model_id);
     // dbg!(&sql);
     
