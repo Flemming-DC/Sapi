@@ -8,7 +8,7 @@ use sqlparser::keywords;
 use TokTy::*;
 use super::token_tree::TokenTree;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TokTy {
     Tree, // sapi specific token
     Generated, // sapi specific token
@@ -107,6 +107,9 @@ impl<'a> Tok<'a> {
         return out;
     }
 }
+
+
+
 
 impl TokTy { 
     pub fn new(token: Token) -> TokTy {

@@ -1,7 +1,7 @@
 use bumpalo::collections::Vec as bVec;
 use crate::internals::{token::Tok, token_tree::TokenTree};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TreeJoin<'a> {
     pub tree_tok: Tok<'a>, // this is not a TokenTree, but an identifier for a table_tree
     pub tree_tok_index: usize,

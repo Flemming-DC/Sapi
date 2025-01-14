@@ -1,12 +1,10 @@
-use std::cell::RefCell;
-
 use bumpalo::Bump;
 use bumpalo::collections::Vec as bVec;
 use bumpalo::collections::String as bString;
 use sqlparser::keywords::Keyword;
 use crate::internals::error::SapiError::QueryError; //, CompilerError
 use crate::internals::db_contact::data_model::DataModel;
-use crate::internals::token::{Tok, TokData, TokTy::*};
+use crate::internals::token::{Tok, TokTy::*};
 use crate::internals::token_tree::TokenTree;
 use crate::P; 
 use super::analyzer_loop::AnalyzerLoop;
@@ -117,7 +115,7 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoo
         if resolved_tab != None || model.is_table(lup.tok().text) {
             on_clause_tables.push(if resolved_tab != None {resolved_tab.expect("checked")} else {lup.tok().text}); } // register table in on clause
     }
-    P!(is_tree);
+    
     if !is_tree {
         return (None, None, resolvents); }
     let tree_join = TreeJoin {tree_tok: join_obj, tree_tok_index: join_obj_index as usize, 

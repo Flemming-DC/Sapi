@@ -79,7 +79,7 @@ fn format_tokens<'a>(bump: &'a Bump, tokens: Vec<TokenWithSpan>, sapi_stmt: &'a 
         let line = lines[line_nr - 1];
         while line_nr > last_tok_line_nr {
             let last_line = lines[last_tok_line_nr - 1];
-            line_start_idx += last_line.len() + 1; // +1 for newline (what about \r\n?) 
+            line_start_idx += last_line.len() + 1; // +1 for \n (what about \r\n?) 
             last_tok_line_nr += 1;
         } 
         // The end can be lines.len() even if 0 indexed (i.e. outside the boundary)
@@ -87,8 +87,9 @@ fn format_tokens<'a>(bump: &'a Bump, tokens: Vec<TokenWithSpan>, sapi_stmt: &'a 
         dbg_assert!(line_nr > 0 && line_nr - 1 <= lines.len()); 
         dbg_assert!(col_nr - 1 <= line.len(), [col_nr, line.len()]);
         dbg_assert!(line_nr == last_tok_line_nr, "last_tok_line_nr has been updated");
+        dbg_assert!(!line.contains('\r'), "\r\n probably forces some +1 to become +2, so that the code must be edited.");
         if_dbg!( // this check may be a little overkill as it is O(n^2)
-            let preceding_chars: usize = lines[..line_nr - 1].iter().map(|line| line.len() + 1).sum();
+            let preceding_chars: usize = lines[..line_nr - 1].iter().map(|line| line.len() + 1).sum();  // + 1 for \n
             dbg_assert!(preceding_chars == line_start_idx, [preceding_chars, line_start_idx]);
         );
         return line_start_idx + col_nr - 1;
@@ -126,12 +127,24 @@ fn format_tokens<'a>(bump: &'a Bump, tokens: Vec<TokenWithSpan>, sapi_stmt: &'a 
             }, 
             data: bump.alloc(TokData::new(tok.token)),
         };
-        dbg_assert!((out_tok.typ == TokTy::Keyword) == matches!(out_tok.data, TokData::Keyword(_)));
+        dbg_assert!(match out_tok.data {
+            TokData::Tree(..)                 => {out_tok.typ == TokTy::Tree},
+            TokData::Keyword(..)              => {out_tok.typ == TokTy::Keyword},
+            TokData::Text(..)                 => {true}, // too many options to check
+            TokData::Placeholder(..)          => {out_tok.typ == TokTy::Placeholder},
+            TokData::CustomBinaryOperator(..) => {out_tok.typ == TokTy::CustomBinaryOperator},
+            TokData::MultiLineComment(..)     => {out_tok.typ == TokTy::MultiLineComment},
+            TokData::Char(..)                 => {out_tok.typ == TokTy::Char},
+            TokData::Number(..)               => {out_tok.typ == TokTy::Number},
+            TokData::Identifier {..}          => {out_tok.typ == TokTy::Identifier},
+            TokData::DollarQuotedString {..}  => {out_tok.typ == TokTy::DollarQuotedString},
+            TokData::SingleLineComment {..}   => {out_tok.typ == TokTy::SingleLineComment},
+            TokData::None                     => {true}, // too many options to check
+        });
         dbg_assert!(out_tok.end.idx > out_tok.start.idx);
         out_tokens.push(out_tok);
     }
 
-    Tok::print_toks(&out_tokens);
     return out_tokens;
 }
 
