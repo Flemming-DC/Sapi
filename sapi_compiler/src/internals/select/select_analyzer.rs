@@ -19,9 +19,10 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a Analyz
     let mut ref_tables: bVec<&str> = bVec::new_in(bump);
     let mut resolvents: bVec<Resolvent> = bVec::new_in(bump);
 
+    // lup.set_breakpoint_index(6);
     while lup.next() {
-        if lup.tok().typ == Tree { 
-            continue; }
+        P!(lup.tok().text);
+        if lup.tok().typ == Tree { continue; }
         check_for_select_all(model, &lup);
         // analyze from clause
         
@@ -30,6 +31,7 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a Analyz
             bump, model, &lup, prior_j);
         resolvents.extend(resolved_tabs_in_join.into_iter());
         if let Some(tree_join) = tree_join {
+            P!(&tree_join);
             if let Some(on_clause_tables_in_join) = on_clause_tables_in_join {
                 tree_joins.push(tree_join);
                 tabs_in_on_clauses.push(on_clause_tables_in_join.clone());
@@ -54,15 +56,14 @@ pub fn find_tree_joins<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a Analyz
 
 fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoop<'a>, prior_join_objs: bVec<'a, Tok>) 
     -> (Option<TreeJoin<'a>>, Option<bVec<'a, &'a str>>, bVec<'a, Resolvent<'a>>) {
-    // (None, None, bVec::new_in(bump))
-    if !lup.found_kw(&[Keyword::FROM, Keyword::JOIN], 0) {
+    if !lup.found_kw(&[Keyword::FROM, Keyword::JOIN], 0) { // tree join start with from or join
         return (None, None, bVec::new_in(bump)); }
-    if !lup.next() {return (None, None, bVec::new_in(bump));}
+    if !lup.next() {return (None, None, bVec::new_in(bump));} // next comes the tree evt. with schema prefix
     // if not lup.found([IDENTIFIER], 0) {
     //     raise QueryError("expected identifier or variable after from / join."); }
     
     // pass through join_obj prefix
-    while lup.found(&[Period], 1) {
+    while lup.found_typ(Period, 1) {
         if !lup.next() {return (None, None, bVec::new_in(bump));}
         if !lup.next() {return (None, None, bVec::new_in(bump));}
     }
@@ -70,14 +71,6 @@ fn make_tree_join<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a AnalyzerLoo
     //     raise QueryError("Encountered end of query while parsing prefix (such as schem.tree.table). "
     //                      "Expected an object to join with instead."); }
 
-    // let join_obj = Tok { 
-    //     typ: Identifier, 
-    //     // text: bump.alloc(lup.tok().text.clone()), 
-    //     text: &bString::from_str_in(lup.tok().text, bump),
-    //     start: lup.tok().start.clone(), 
-    //     end: lup.tok().end.clone(), 
-    //     data: &TokData::None,// &(lup.tok().data.clone()),
-    // };
 
     let join_obj = lup.tok().clone(); // join_obj at end of join_obj prefixes
     // if let Tok::Tree(_) = join_obj_ { return QueryError; }} // temp make an error instead
@@ -133,11 +126,12 @@ fn table_ref_and_resolvent<'a>(bump: &'a Bump, model: &'a DataModel, lup: &'a An
     if lup.tok().typ != Identifier {
         return (None, None); }
 
-    if lup.found(&[Period], -1) {
+    if lup.found_typ(Period, -1) {
         // get ref_tab, resolvent from a prefix (e.g. tree.tab, tree.col or tab.col)
-        let prefix: &str = lup.peek(-2).expect("impossible").text; // This includes views and cte's as tables. Is that okay?
+        let prior_tok = lup.peek(-2).expect("Cannot start a query with a period"); // fix me (err handle)
+        let prefix: &str = prior_tok.text; // This includes views and cte's as tables. Is that okay?
         if model.is_tree(&prefix) {
-            let (var, tree) = (lup.tok().text, lup.peek(-2).expect("impossible").text);
+            let (var, tree) = (lup.tok().text, prefix);
             let ref_tab = get_table_from_var_and_tree(model, var, tree);
             return (Some(ref_tab), Some(Resolvent {index: lup.index() as usize - 2, tab_name: ref_tab})); }
         else if model.is_table(&prefix) {
@@ -224,7 +218,7 @@ fn plug_ref_table_into_tree_join<'a>(model: &'a DataModel, table_name: &'a str, 
 fn check_for_select_all<'a>(model: &'a DataModel, lup: &'a AnalyzerLoop<'a>) {
     if lup.tok().typ != Mul { return }
     if lup.index() >= 2
-        && matches!(lup.peek(-1).expect("lup.index() >= 2").typ, Period) 
+        && lup.peek(-1).expect("lup.index() >= 2").typ == Period 
         && !model.is_tree(lup.peek(-2).expect("lup.index() >= 2").text) 
         {return}
     

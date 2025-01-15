@@ -15,6 +15,6 @@ serde_json = "1.0"
 [lib]
 name = "sapi_compiler"
 path = "src/lib.rs"
-crate-type = ["rlib", "staticlib", "cdylib"]
-
+# crate-type = ["rlib", "staticlib", "cdylib"]
+crate-type = ["rlib"]
 

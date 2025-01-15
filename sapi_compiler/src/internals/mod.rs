@@ -25,4 +25,9 @@ mod generate_sql_str;
 mod select;
 mod db_contact;
 mod token;
+mod test_tokenizer;
 
+pub mod test {
+    pub use super::select::test::*;
+    pub use super::test_tokenizer::*;
+}

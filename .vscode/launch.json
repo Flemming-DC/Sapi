@@ -68,10 +68,18 @@
             "program": "${workspaceRoot}/target/debug/sapi_rust_app.exe",
             "args": [], //"release"],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "rust: cargo build",
             "console": "integratedTerminal",
+            "preLaunchTask": "rust: cargo build",
             // "preLaunchTask": "rust: cargo test",
             // "env": {"RUST_BACKTRACE": "1"},
+        },
+        {
+          "type": "PowerShell",
+          "request": "launch",
+          "name": "test",
+          "script": "${workspaceFolder}/scripts/test.ps1",
+          "args": [],
+          "cwd": "${workspaceFolder}"
         },
     ]
 }

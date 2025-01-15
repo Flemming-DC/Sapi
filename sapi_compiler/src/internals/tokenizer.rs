@@ -5,7 +5,7 @@ use sqlparser::dialect::{dialect_from_str, PostgreSqlDialect};
 use sqlparser::keywords::Keyword;
 use super::token_tree::TokenTree;
 use super::token::*;
-use crate::{brk_if, dbg_assert, if_dbg, Pvec, P};
+use crate::{brk_if, dbg_assert, if_dbg, Piter, P};
 
 // Result<Vec<TokenWithSpan>, TokenizerError>
 pub fn tokenize<'a>(bump: &'a Bump, dialect_name: &'a str, sapi_stmt: &'a str) -> Option<&'a TokenTree<'a>> {
@@ -41,15 +41,13 @@ fn make_nested_tok_tree<'a>(bump: &'a Bump, all_tokens: &[Tok<'a>], mut i: usize
             TokTy::LParen => { depth += 1; } // evt. check if next token if a sub query start
             TokTy::RParen => { depth -= 1; }
             TokTy::Keyword => {
-                let Some(kw) = &all_tokens[i].keyword() else {
-                    unreachable!()
-                };
+                let Some(kw) = &all_tokens[i].keyword() else { unreachable!() };
                 if depth > 0 && matches!(kw, Keyword::SELECT | Keyword::INSERT | Keyword::UPDATE | Keyword::DELETE) {
                     // we don't want to recursively parse the outermost select, ergo depth > 0 check
-                    let (sub_tree, i) = make_nested_tok_tree(bump, all_tokens, i, sapi_str);
+                    let (sub_tree, j) = make_nested_tok_tree(bump, all_tokens, i, sapi_str);
+                    i = j;
                     tok.typ = TokTy::Tree;
                     tok.data = bump.alloc(TokData::Tree(sub_tree));
-            
                 }
             }
             _ => {}
@@ -65,6 +63,7 @@ fn make_nested_tok_tree<'a>(bump: &'a Bump, all_tokens: &[Tok<'a>], mut i: usize
     // if next_token is not None and next_token.line > all_tokens[i].line:
     //     next_token.line = all_tokens[i].line
     // make single layer of token_tree
+
     let token_tree = bump.alloc(TokenTree::new(tokens_at_this_level, sapi_str.len(), next_token));
     return (token_tree, i);
 }
@@ -144,12 +143,13 @@ fn format_tokens<'a>(bump: &'a Bump, tokens: Vec<TokenWithSpan>, sapi_stmt: &'a 
         dbg_assert!(out_tok.end.idx > out_tok.start.idx);
         out_tokens.push(out_tok);
     }
-
     return out_tokens;
 }
 
 
-    
+
+
+
 // tokenizer::ALL_KEYWORDS
 //      use crate::keywords::{Keyword, ALL_KEYWORDS, ALL_KEYWORDS_INDEX};
 

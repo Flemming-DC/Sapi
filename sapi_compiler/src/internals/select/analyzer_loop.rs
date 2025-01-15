@@ -1,7 +1,7 @@
 use std::{cell::Cell, hint::black_box};
 
 use sqlparser::{keywords::Keyword, tokenizer::Token};
-use crate::{brk, brk_if, internals::{token::{Tok, TokTy}, token_tree::TokenTree}, P}; // , Token, TokenType
+use crate::{brk, brk_if, dbg_assert, internals::{token::{Tok, TokTy}, token_tree::TokenTree}, P}; // , Token, TokenType
 
 pub struct AnalyzerLoop<'a> {
     token_tree: &'a TokenTree<'a>,
@@ -12,6 +12,7 @@ pub struct AnalyzerLoop<'a> {
 
 impl<'a> AnalyzerLoop<'a> {
     pub fn new(token_tree: &'a TokenTree<'a>) -> Self {
+        P!(token_tree.tokens[0].text);
         AnalyzerLoop {
             token_tree: token_tree,
             // tokens: token_tree.tokens // could be eliminated in favor of self._token_tree.tokens
@@ -21,6 +22,7 @@ impl<'a> AnalyzerLoop<'a> {
         }
     }
     pub fn tok(&self) -> &Tok { 
+        dbg_assert!((self.i.get() as usize) < self.token_tree.tokens.len());
         &self.token_tree.tokens[self.i.get() as usize] }
         
     
@@ -34,6 +36,7 @@ impl<'a> AnalyzerLoop<'a> {
     pub fn next(&self) -> bool {
         // Step to next element and return true, if a next element was found
         self.i.set(self.i.get() + 1);
+        // if (self.i.get() as usize) < self.count {P!(self.tok());}
         if self.i.get() as usize >= self.count {
             return false; 
         }
@@ -43,12 +46,9 @@ impl<'a> AnalyzerLoop<'a> {
         return true;
     }
     
-    pub fn found(&self, token_types: &[TokTy], after_steps: isize) -> bool {
+    pub fn found_typ(&self, tok_ty: TokTy, after_steps: isize) -> bool {
         // Checks for tokenType after presicely the specified number of steps.
-        let index = self.i.get() + after_steps;
-        if index < 0 || index as usize >= self.count {
-            return false; }
-        return matches!(&self.token_tree.tokens[index as usize], token_types);
+        self.peek(after_steps).map_or(false, |t|t.typ == tok_ty)
     }
     pub fn found_kw(&self, keywords: &[Keyword], after_steps: isize) -> bool {
         // Checks for tokenType after presicely the specified number of steps.
@@ -56,7 +56,10 @@ impl<'a> AnalyzerLoop<'a> {
         if index < 0 || index as usize >= self.count {
             return false; 
         }
-        return matches!(self.tok().keyword(), Some(keywords));
+        return match self.tok().keyword() {
+            None => false,
+            Some(kw) => keywords.contains(&kw),
+        };
     }
 
     // if let Tok::Leaf(Token::Word(word)) = tok { 
@@ -66,6 +69,8 @@ impl<'a> AnalyzerLoop<'a> {
     pub fn at_end(&self) -> bool { self.i.get() as usize >= self.count }
     pub fn next_at_end(&self) -> bool { self.i.get() as usize + 1 >= self.count }
 
+
+    #[cfg(debug_assertions)] pub fn set_breakpoint_index(&self, idx: usize) { self.breakpoint_index.set(Some(idx)); }
     #[cfg(debug_assertions)] pub fn has_passed(&self, stopping_obj: &str) -> bool {
         // Meant for debugging
         return self.at_end() || self.view_abs(0, self.i.get() as usize).contains(stopping_obj) // self._token_tree.has_passed(stopping_obj, self.tok().start)

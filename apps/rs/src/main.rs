@@ -1,6 +1,7 @@
 #![allow(dead_code, unused_imports, unused_variables, unused_parens)]
 // use bumpalo::Bump;
 use sapi_compiler::*;
+// use sapi_compiler::te
 
 #[cfg(test)]
 mod tests {
@@ -13,9 +14,12 @@ mod tests {
 }
 
 
+fn test () {
+    test::test_get_expected_tree_joins();
+}
 
-
-fn main() {
+fn demo () {
+    
     let join_clause = Some("JOIN __parent__ USING (__keys__)");
     let tree = Tree { name: "tree", schema: "sapi_demo", tables: vec![
         Table {name: "tab",   primary_key: "tab_id",   parent: None,         join_clause: join_clause, columns: vec!["col_1", "col_2", "tab_id"]}, 
@@ -71,4 +75,10 @@ join tree ON tree.col_1 = cte.col0_1
 
     // assert!(&sql == expected_sql);
 
+}
+
+
+fn main() {
+    // demo();
+    test();
 }

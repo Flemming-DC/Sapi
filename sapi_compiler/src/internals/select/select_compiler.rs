@@ -17,7 +17,7 @@ pub fn compile_select<'a>(bump: &'a Bump, model: &DataModel, token_tree: &'a Tok
     let (tree_joins, resolvents) = select_analyzer::find_tree_joins(
         bump, model, &lup);
 
-    P!(&tree_joins);
+    // P!(&tree_joins);
     join_generator::resolve_trees_to_tabs(token_tree, &resolvents);
     for tree_join in tree_joins {
         let (path, eldest) = path_finder::join_path(
